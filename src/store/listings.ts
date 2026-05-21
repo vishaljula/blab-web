@@ -39,6 +39,7 @@ interface ListingsState {
   setListingType: (type: "sale" | "rent") => void;
   setViewportBounds: (bounds: [number, number, number, number]) => void;
   setBoundary: (boundary: Boundary | null) => void;
+  updateBoundary: (boundary: Boundary) => void; // sets boundary WITHOUT resetting drawActive
   toggleDraw: () => void;
   clearBoundary: () => void;
   setIsLoading: (loading: boolean) => void;
@@ -58,6 +59,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   setListingType: (type) => set({ listingType: type }),
   setViewportBounds: (bounds) => set({ viewportBounds: bounds }),
   setBoundary: (boundary) => set({ boundary, drawActive: false }),
+  updateBoundary: (boundary) => set({ boundary }), // keeps drawActive unchanged
   toggleDraw: () =>
     set((state) => ({
       drawActive: !state.drawActive,

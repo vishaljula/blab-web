@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, X, ChevronDown, SlidersHorizontal } from "lucide-react";
+import { Pencil, X, ChevronDown, SlidersHorizontal, Check } from "lucide-react";
 import { useListingsStore } from "@/store/listings";
 
 interface ControlBarProps {
@@ -16,7 +16,7 @@ export default function ControlBar({
   onToggleDraw,
   onClearBoundary,
 }: ControlBarProps) {
-  const { listingType, setListingType, boundary } = useListingsStore();
+  const { listingType, setListingType } = useListingsStore();
 
   return (
     <div className="control-bar" id="control-bar">
@@ -32,17 +32,18 @@ export default function ControlBar({
         <ChevronDown size={14} />
       </button>
 
-      {/* Draw on Map */}
+      {/* Draw on Map — morphs into "Done Drawing" button when active */}
       <button
         className={`btn-chip ${drawActive ? "btn-chip--active" : ""}`}
         id="draw-boundary-btn"
         onClick={onToggleDraw}
+        title={drawActive ? "Exit draw mode" : "Draw an area to search within"}
       >
-        <Pencil size={14} />
-        {drawActive ? "Drawing..." : "Draw"}
+        {drawActive ? <Check size={14} /> : <Pencil size={14} />}
+        {drawActive ? "Done" : "Draw"}
       </button>
 
-      {/* Remove Boundary (shown when boundary is active) */}
+      {/* Clear Boundary (shown when boundary is active) */}
       {hasBoundary && (
         <button
           className="btn-chip btn-chip--danger"
@@ -50,7 +51,7 @@ export default function ControlBar({
           onClick={onClearBoundary}
         >
           <X size={14} />
-          {boundary?.label ? `Remove ${boundary.label}` : "Remove Boundary"}
+          Clear
         </button>
       )}
 

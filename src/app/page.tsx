@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Header from "@/components/Header";
 import ControlBar from "@/components/ControlBar";
-import MapView from "@/components/MapView";
 import ListView from "@/components/ListView";
 import ViewToggleFab from "@/components/ViewToggleFab";
+
+// MapView uses Mapbox GL JS which injects browser-only attributes into the DOM.
+// Importing with ssr:false prevents server rendering and eliminates hydration mismatches.
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 import { useListingsStore } from "@/store/listings";
 import { SEED_LISTINGS } from "@/lib/seed-data";
 

@@ -474,6 +474,7 @@ ul, ol {
   background: var(--color-error-bg);
 }
 
+
 /* FAB — Floating Action Button */
 .fab {
   position: fixed;
