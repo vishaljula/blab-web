@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect, useState, useMemo } from "react";
+import { useTheme } from "next-themes";
 import Map, {
   NavigationControl,
   GeolocateControl,
@@ -12,11 +13,14 @@ import type { MapMouseEvent, GeoJSONSource } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useDebouncedCallback } from "use-debounce";
 import { useListingsStore } from "@/store/listings";
+import { DRAW_COLOR, MAP_STYLES, DARK_MAP_CONFIG } from "@/lib/theme";
 import PriceMarkers from "./PriceMarkers";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 const DRAW_SOURCE_ID = "freehand-draw-source";
 const EMPTY_FC: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+
+// Theme constants (DRAW_COLOR, MAP_STYLES, DARK_MAP_CONFIG) imported from @/lib/theme
 
 const INITIAL_VIEW = {
   latitude: 17.385,
@@ -60,6 +64,34 @@ function buildDrawGeoJSON(pts: number[][]): GeoJSON.FeatureCollection {
 export default function MapView() {
   const mapRef = useRef<MapRef>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const mapStyle = useMemo(
+    () => MAP_STYLES[isDark ? "dark" : "light"],
+    [isDark]
+  );
+
+  // When switching to Standard (dark), imperatively set the dusk lightPreset
+  // after the new style finishes loading. The config prop only works on mount.
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map || !mapLoaded) return;
+
+    const applyPreset = () => {
+      if (isDark) {
+        map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
+        map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
+        map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
+      }
+    };
+
+    // Style may already be loaded, or we need to wait
+    if (map.isStyleLoaded()) {
+      applyPreset();
+    }
+    map.on("style.load", applyPreset);
+    return () => { map.off("style.load", applyPreset); };
+  }, [isDark, mapLoaded]);
 
   // Whether the user is actively dragging to draw right now
   const [isDrawingSession, setIsDrawingSession] = useState(false);
@@ -297,7 +329,7 @@ export default function MapView() {
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={INITIAL_VIEW}
         style={{ width: "100%", height: "100%" }}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
+        mapStyle={mapStyle}
         onMoveEnd={handleMoveEnd}
         onLoad={handleLoad}
         onMouseDown={handleMouseDown}
@@ -328,7 +360,7 @@ export default function MapView() {
               id="draw-fill"
               type="fill"
               filter={["==", "$type", "Polygon"]}
-              paint={{ "fill-color": "#8B2500", "fill-opacity": 0.12 }}
+              paint={{ "fill-color": DRAW_COLOR, "fill-opacity": 0.12 }}
             />
             {/* Stroke — always solid */}
             <Layer
@@ -336,7 +368,7 @@ export default function MapView() {
               type="line"
               filter={["any", ["==", "$type", "LineString"], ["==", "$type", "Polygon"]]}
               paint={{
-                "line-color": "#8B2500",
+                "line-color": DRAW_COLOR,
                 "line-width": 2.5,
               }}
             />
@@ -348,7 +380,7 @@ export default function MapView() {
                 filter={["==", "$type", "Point"]}
                 paint={{
                   "circle-radius": 6,
-                  "circle-color": "#8B2500",
+                  "circle-color": DRAW_COLOR,
                   "circle-stroke-color": "#fff",
                   "circle-stroke-width": 2,
                 }}

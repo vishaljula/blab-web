@@ -55,12 +55,9 @@ export default function PriceMarkers({ listings, onSelect }: PriceMarkersProps) 
 
   const handleClusterClick = useCallback(
     (clusterId: number) => {
-      try {
-        const zoom = clusterIndex.getClusterExpansionZoom(clusterId);
-        // Could trigger map zoom here via a callback
-      } catch {
-        // ignore
-      }
+      // TODO: zoom into cluster via map ref callback
+      // const zoom = clusterIndex.getClusterExpansionZoom(clusterId);
+      void clusterId;
     },
     [clusterIndex]
   );

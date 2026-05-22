@@ -35,7 +35,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="app-shell">
+    <div className="flex flex-col h-screen overflow-hidden bg-background">
       <Header />
       <ControlBar
         drawActive={drawActive}
@@ -43,7 +43,7 @@ export default function HomePage() {
         onToggleDraw={toggleDraw}
         onClearBoundary={clearBoundary}
       />
-      <main className="main-content">
+      <main className="flex-1 relative overflow-hidden">
         {viewMode === "map" ? <MapView /> : <ListView />}
       </main>
       <ViewToggleFab currentView={viewMode} onToggle={handleToggleView} />

@@ -16,10 +16,12 @@ export default function ViewToggleFab({
     <AnimatePresence mode="wait">
       <motion.button
         key={currentView}
-        className="fab"
+        className="fixed bottom-6 right-4 flex items-center gap-2 px-5 py-3 bg-foreground text-background rounded-full text-sm font-semibold shadow-lg z-50 cursor-pointer transition-shadow hover:shadow-xl md:bottom-8 md:right-6"
         onClick={onToggle}
         id="view-toggle-fab"
-        aria-label={currentView === "map" ? "Switch to list view" : "Switch to map view"}
+        aria-label={
+          currentView === "map" ? "Switch to list view" : "Switch to map view"
+        }
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
