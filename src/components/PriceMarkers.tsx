@@ -14,8 +14,8 @@ interface PriceMarkersProps {
 // Create supercluster index
 function createClusterIndex(listings: Listing[]) {
   const index = new Supercluster({
-    radius: 60,
-    maxZoom: 16,
+    radius: 10,   // px — minimal: only overlapping markers merge
+    maxZoom: 20,
     minZoom: 0,
   });
 
@@ -70,7 +70,6 @@ export default function PriceMarkers({ listings, onSelect }: PriceMarkersProps) 
         const isCluster = cluster.properties.cluster;
 
         if (isCluster) {
-          const count = cluster.properties.point_count;
           const clusterId = cluster.properties.cluster_id ?? 0;
           return (
             <Marker
@@ -83,7 +82,7 @@ export default function PriceMarkers({ listings, onSelect }: PriceMarkersProps) 
                 handleClusterClick(clusterId);
               }}
             >
-              <div className="cluster-marker">{count}</div>
+              <div className="cluster-marker" />
             </Marker>
           );
         }
