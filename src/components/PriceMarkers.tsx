@@ -14,7 +14,7 @@ interface PriceMarkersProps {
 // Create supercluster index
 function createClusterIndex(listings: Listing[]) {
   const index = new Supercluster({
-    radius: 10,   // px — minimal: only overlapping markers merge
+    radius: 40,   // px — minimal: only overlapping markers merge
     maxZoom: 20,
     minZoom: 0,
   });
