@@ -21,6 +21,7 @@ export default function HomePage() {
     clearBoundary,
     toggleDraw,
     setListings,
+    addListings,
     setIsLoading,
     listingType,
   } = useListingsStore();
@@ -40,9 +41,10 @@ export default function HomePage() {
       try {
         let url: string;
         let options: RequestInit = { signal: controller.signal };
+        let useAddListings = false; // merge instead of replace for drawn polygons
 
         if (boundary?.type === "polygon" && boundary.coordinates) {
-          // Polygon search — POST with drawn coordinates
+          // Drawn polygon — POST with drawn coordinates, accumulate results
           url = "/api/listings/polygon";
           options = {
             ...options,
@@ -53,19 +55,41 @@ export default function HomePage() {
               listingType,
             }),
           };
-        } else if (viewportBounds) {
-          // Viewport search — GET with bounding box
+          useAddListings = true; // merge with existing listings
+        } else if (boundary?.type === "city" && boundary.geometry) {
+          // City boundary with actual polygon geometry from OSM
+          url = "/api/listings/polygon";
+          options = {
+            ...options,
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              geometry: boundary.geometry,
+              listingType,
+            }),
+          };
+        } else if (boundary) {
+          // Boundary exists but geometry not loaded yet (async OSM fetch in progress)
+          // Don't fall through to viewport — wait for geometry
+          return;
+        } else if (viewportBounds && !drawActive) {
+          // No boundary and not in draw mode — viewport search with bounding box
           const [swLng, swLat, neLng, neLat] = viewportBounds;
           url = `/api/listings/viewport?sw_lng=${swLng}&sw_lat=${swLat}&ne_lng=${neLng}&ne_lat=${neLat}&type=${listingType}`;
         } else {
-          // No bounds yet (initial load before map fires moveend)
+          // No bounds yet, or in draw mode waiting for first polygon
           return;
         }
 
         const res = await fetch(url, options);
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         const data = await res.json();
-        setListings(data);
+
+        if (useAddListings) {
+          addListings(data); // merge with existing — preserves previous polygon results
+        } else {
+          setListings(data); // replace — city search or viewport
+        }
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") return; // expected
         console.error("Failed to fetch listings:", err);
@@ -77,7 +101,7 @@ export default function HomePage() {
     fetchListings();
 
     return () => controller.abort();
-  }, [viewportBounds, boundary, listingType, setListings, setIsLoading]);
+  }, [viewportBounds, boundary, drawActive, listingType, setListings, addListings, setIsLoading]);
 
   const handleToggleView = useCallback(() => {
     setViewMode((prev) => (prev === "map" ? "list" : "map"));

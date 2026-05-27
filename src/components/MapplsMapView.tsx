@@ -101,6 +101,7 @@ export default function MapplsMapView() {
     boundary,
     drawActive,
     updateBoundary,
+    updateBoundaryGeometry,
     setViewportBounds,
     listings,
     selectedListing,
@@ -454,6 +455,7 @@ export default function MapplsMapView() {
   }, [mapLoaded, drawActive, updateDrawSource, completeDraw]);
 
   // ── Draw: touch events ─────────────────────────────────────────────
+  // Standard map-drawing pattern: single finger = draw, second finger = cancel draw + zoom
   useEffect(() => {
     if (!mapLoaded || !drawActive) return;
     const map = mapRef.current;
@@ -467,8 +469,22 @@ export default function MapplsMapView() {
       return map.unproject([x, y]);
     };
 
+    // Cancel an in-progress draw and clear the partial visual
+    const cancelDraw = () => {
+      isDrawingRef.current = false;
+      dragPointsRef.current = [];
+      updateDrawSource(); // remove partial line/polygon from the map
+      // Temporarily re-enable map gestures so pinch-zoom works
+      try { map.dragPan?.enable?.(); } catch {}
+    };
+
     const onTouchStart = (e: TouchEvent) => {
       if (!drawActive) return;
+      // Only start drawing with a single finger
+      if (e.touches.length !== 1) {
+        // Multi-touch detected at start — don't draw, let browser handle
+        return;
+      }
       e.preventDefault();
       const lngLat = getCoords(e.touches[0]);
       isDrawingRef.current = true;
@@ -476,7 +492,13 @@ export default function MapplsMapView() {
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!drawActive || !isDrawingRef.current) return;
+      if (!drawActive) return;
+      // Second finger appeared mid-stroke — cancel the draw, let pinch-zoom work
+      if (e.touches.length > 1) {
+        if (isDrawingRef.current) cancelDraw();
+        return; // don't preventDefault — let browser handle pinch
+      }
+      if (!isDrawingRef.current) return;
       e.preventDefault();
       const lngLat = getCoords(e.touches[0]);
       const [lng, lat] = [lngLat.lng, lngLat.lat];
@@ -494,8 +516,13 @@ export default function MapplsMapView() {
 
     const onTouchEnd = (e: TouchEvent) => {
       if (!drawActive) return;
-      e.preventDefault();
-      completeDraw();
+      // Only complete if we were actually drawing (not canceled by pinch)
+      if (isDrawingRef.current) {
+        e.preventDefault();
+        completeDraw();
+      }
+      // Always re-disable dragPan in draw mode (may have been enabled by cancelDraw during pinch)
+      try { map.dragPan?.disable?.(); } catch {}
     };
 
     canvas.addEventListener("touchstart", onTouchStart, { passive: false });
@@ -514,15 +541,19 @@ export default function MapplsMapView() {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
 
-    if (boundary?.type === "city" && boundary.bbox) {
+    if (boundary?.type === "city" && boundary.bbox && !boundary.geometry) {
       // Initial fly — use synthetic bbox as a rough first position
-      map.fitBounds(
-        [
-          [boundary.bbox[0], boundary.bbox[1]],
-          [boundary.bbox[2], boundary.bbox[3]],
-        ],
-        { padding: 40, duration: 600 }
-      );
+      // Wrapped in try/catch: the SDK's fitBounds internally calls getZoom()
+      // on its MapLibre instance, which can be undefined intermittently.
+      try {
+        map.fitBounds(
+          [
+            [boundary.bbox[0], boundary.bbox[1]],
+            [boundary.bbox[2], boundary.bbox[3]],
+          ],
+          { padding: 40, duration: 600 }
+        );
+      } catch {}
 
       // Remove previous boundary overlay
       try {
@@ -568,6 +599,12 @@ export default function MapplsMapView() {
             geometry = makeCircle(lat, lng, radiusKm);
           }
 
+          // Store the actual polygon geometry back to Zustand so page.tsx
+          // can use it for listing queries instead of viewport bounds.
+          // Note: this updates boundary which re-triggers this effect, but
+          // the !boundary.geometry guard above prevents re-execution.
+          updateBoundaryGeometry(geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
+
           try {
             map.addSource(BOUNDARY_SOURCE, {
               type: "geojson",
@@ -587,18 +624,20 @@ export default function MapplsMapView() {
 
           // Re-fit to the actual boundary bbox so the entire polygon is visible
           if (realBbox) {
-            map.fitBounds(
-              [
-                [realBbox[0], realBbox[1]],
-                [realBbox[2], realBbox[3]],
-              ],
-              { padding: 60, duration: 800 }
-            );
+            try {
+              map.fitBounds(
+                [
+                  [realBbox[0], realBbox[1]],
+                  [realBbox[2], realBbox[3]],
+                ],
+                { padding: 60, duration: 800 }
+              );
+            } catch {}
           }
         })();
       }
     }
-  }, [boundary, mapLoaded]);
+  }, [boundary, mapLoaded, updateBoundaryGeometry]);
 
   // ── Render ─────────────────────────────────────────────────────────
   return (

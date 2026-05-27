@@ -11,27 +11,33 @@ import { neon } from "@neondatabase/serverless";
  * an array of [lng, lat] pairs, with the last point == first point (closed).
  */
 export async function POST(request: NextRequest) {
-  let body: { coordinates?: number[][]; listingType?: string };
+  let body: { coordinates?: number[][]; listingType?: string; geometry?: GeoJSON.Polygon | GeoJSON.MultiPolygon };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { coordinates, listingType = "sale" } = body;
+  const { coordinates, listingType = "sale", geometry } = body;
 
-  if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 4) {
+  // Accept either raw GeoJSON geometry (city boundaries) or coordinates (drawn polygons)
+  let geoJSON: string;
+
+  if (geometry && (geometry.type === "Polygon" || geometry.type === "MultiPolygon")) {
+    // Raw GeoJSON from OSM boundary — use directly
+    geoJSON = JSON.stringify(geometry);
+  } else if (coordinates && Array.isArray(coordinates) && coordinates.length >= 4) {
+    // Drawn polygon — wrap in GeoJSON Polygon
+    geoJSON = JSON.stringify({
+      type: "Polygon",
+      coordinates: [coordinates],
+    });
+  } else {
     return NextResponse.json(
-      { error: "coordinates must be an array of at least 4 [lng, lat] pairs (closed polygon)" },
+      { error: "Either 'geometry' (GeoJSON Polygon/MultiPolygon) or 'coordinates' (array of at least 4 [lng, lat] pairs) required" },
       { status: 400 }
     );
   }
-
-  // Build GeoJSON polygon string for PostGIS
-  const geoJSON = JSON.stringify({
-    type: "Polygon",
-    coordinates: [coordinates],
-  });
 
   const sql = neon(process.env.DATABASE_URL!);
 
