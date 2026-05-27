@@ -23,6 +23,8 @@ export interface Boundary {
   coordinates?: number[][];
   bbox?: [number, number, number, number]; // [sw_lng, sw_lat, ne_lng, ne_lat]
   label?: string;
+  center?: { lat: number; lng: number }; // For search result boundaries
+  placeType?: string; // e.g. "CITY", "LOCALITY", "SUB_LOCALITY"
 }
 
 interface ListingsState {

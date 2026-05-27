@@ -7,12 +7,11 @@ import ControlBar from "@/components/ControlBar";
 import ListView from "@/components/ListView";
 import ViewToggleFab from "@/components/ViewToggleFab";
 
-// MapView uses Mappls SDK which requires browser APIs.
-// Importing with ssr:false prevents server rendering and eliminates hydration mismatches.
-const MapView = dynamic(() => import("@/components/MapplsMapView"), { ssr: false });
+// Legacy page — uses Mapbox MapView (original implementation)
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 import { useListingsStore } from "@/store/listings";
 
-export default function HomePage() {
+export default function LegacyHomePage() {
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const {
     drawActive,
