@@ -182,7 +182,7 @@ export default function MapplsMapView() {
               waitForMapReady(map, () => {
                 if (!mounted) return;
                 try {
-                  map.addControl(new mapplsClass.NavigationControl(), "top-right");
+                  map.addControl(new (mapplsClass as any).NavigationControl(), "top-right");
                 } catch {}
                 setMapLoaded(true);
                 const bounds = safeGetBounds(map);
