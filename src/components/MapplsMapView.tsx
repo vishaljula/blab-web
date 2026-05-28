@@ -12,6 +12,11 @@ const INITIAL_CENTER: [number, number] = [17.385, 78.4867];
 const INITIAL_ZOOM = 12;
 const MIN_POINT_DISTANCE = 0.0005;
 
+// Background color matching the Mappls tile palette — shown while tiles load
+// instead of white flash. Eliminates perceived loading lag during fast panning.
+const MAP_BG_LIGHT = "#f0ede5";
+const MAP_BG_DARK = "#1a1a1a";
+
 // Safely extract viewport bounds from a Mappls map object
 function safeGetBounds(map: any): [number, number, number, number] | null {
   try {
@@ -171,6 +176,8 @@ export default function MapplsMapView() {
                 zoom: INITIAL_ZOOM,
                 zoomControl: false,
                 location: false,
+                backgroundColor: MAP_BG_LIGHT,
+                maxTileCacheSize: 200,
               },
             });
 
@@ -644,7 +651,12 @@ export default function MapplsMapView() {
     <div className="map-container" id="map-container" style={{ position: "relative", width: "100%", height: "100%" }}>
       <div
         id="mappls-main-map"
-        style={{ width: "100%", height: "100%", transition: "filter 0.3s" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          transition: "filter 0.3s",
+          backgroundColor: isDark ? MAP_BG_DARK : MAP_BG_LIGHT,
+        }}
       />
 
       {mapError && (
