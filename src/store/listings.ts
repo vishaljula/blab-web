@@ -83,6 +83,6 @@ export const useListingsStore = create<ListingsState>((set) => ({
       // persist and merge with polygon-only results via addListings
       listings: state.drawActive ? state.listings : [],
     })),
-  clearBoundary: () => set({ boundary: null, drawActive: false }),
+  clearBoundary: () => set({ boundary: null, drawActive: false, listings: [] }),
   setIsLoading: (loading) => set({ isLoading: loading }),
 }));

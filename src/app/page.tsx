@@ -28,9 +28,36 @@ export default function HomePage() {
 
   // Abort controller ref to cancel in-flight requests
   const abortRef = useRef<AbortController | null>(null);
+  // Track what we last fetched to avoid redundant re-fetches when only viewport pans
+  const lastFetchKeyRef = useRef<string>("");
 
   // Fetch listings from API whenever viewport, boundary, or listingType changes
   useEffect(() => {
+    // Build a key representing what we're about to fetch.
+    // Boundary-based fetches use the boundary identity; viewport fetches use bounds.
+    let fetchKey: string;
+    let isViewportFetch = false;
+
+    if (boundary?.type === "polygon" && boundary.coordinates) {
+      fetchKey = `polygon:${JSON.stringify(boundary.coordinates)}:${listingType}`;
+    } else if (boundary?.type === "city" && boundary.geometry) {
+      fetchKey = `city:${boundary.label}:${listingType}`;
+    } else if (boundary) {
+      // Boundary exists but geometry not loaded yet — don't fetch
+      return;
+    } else if (viewportBounds && !drawActive) {
+      fetchKey = `viewport:${viewportBounds.join(",")}:${listingType}`;
+      isViewportFetch = true;
+    } else {
+      return;
+    }
+
+    // For boundary-based fetches, skip if we already fetched this exact boundary+type.
+    // This prevents re-POSTing the same city/polygon geometry on every viewport pan.
+    // Viewport fetches always proceed (each pan produces a unique key anyway).
+    if (!isViewportFetch && fetchKey === lastFetchKeyRef.current) return;
+    lastFetchKeyRef.current = fetchKey;
+
     // Cancel previous in-flight request
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -41,10 +68,9 @@ export default function HomePage() {
       try {
         let url: string;
         let options: RequestInit = { signal: controller.signal };
-        let useAddListings = false; // merge instead of replace for drawn polygons
+        let useAddListings = false;
 
         if (boundary?.type === "polygon" && boundary.coordinates) {
-          // Drawn polygon — POST with drawn coordinates, accumulate results
           url = "/api/listings/polygon";
           options = {
             ...options,
@@ -55,9 +81,8 @@ export default function HomePage() {
               listingType,
             }),
           };
-          useAddListings = true; // merge with existing listings
+          useAddListings = true;
         } else if (boundary?.type === "city" && boundary.geometry) {
-          // City boundary with actual polygon geometry from OSM
           url = "/api/listings/polygon";
           options = {
             ...options,
@@ -68,16 +93,11 @@ export default function HomePage() {
               listingType,
             }),
           };
-        } else if (boundary) {
-          // Boundary exists but geometry not loaded yet (async OSM fetch in progress)
-          // Don't fall through to viewport — wait for geometry
-          return;
-        } else if (viewportBounds && !drawActive) {
-          // No boundary and not in draw mode — viewport search with bounding box
+        } else if (isViewportFetch && viewportBounds) {
           const [swLng, swLat, neLng, neLat] = viewportBounds;
           url = `/api/listings/viewport?sw_lng=${swLng}&sw_lat=${swLat}&ne_lng=${neLng}&ne_lat=${neLat}&type=${listingType}`;
+          useAddListings = true; // accumulate — old markers persist as you pan
         } else {
-          // No bounds yet, or in draw mode waiting for first polygon
           return;
         }
 
@@ -86,12 +106,12 @@ export default function HomePage() {
         const data = await res.json();
 
         if (useAddListings) {
-          addListings(data); // merge with existing — preserves previous polygon results
+          addListings(data);
         } else {
-          setListings(data); // replace — city search or viewport
+          setListings(data);
         }
       } catch (err: unknown) {
-        if (err instanceof Error && err.name === "AbortError") return; // expected
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("Failed to fetch listings:", err);
       } finally {
         setIsLoading(false);
