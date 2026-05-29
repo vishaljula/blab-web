@@ -1,25 +1,40 @@
 "use client";
 
+import { useMemo } from "react";
 import { useListingsStore } from "@/store/listings";
 import PropertyCard from "./PropertyCard";
 
 export default function ListView() {
-  const { listings, setSelectedListing } = useListingsStore();
+  const { listings, setSelectedListing, viewportBounds, boundary } = useListingsStore();
+
+  const visibleListings = useMemo(() => {
+    // When a boundary search is active, the API already scoped the results —
+    // don't double-filter by viewport or zooming out hides valid results.
+    if (!viewportBounds || boundary) return listings;
+    const [swLng, swLat, neLng, neLat] = viewportBounds;
+    return listings.filter(
+      (l) =>
+        l.longitude >= swLng &&
+        l.longitude <= neLng &&
+        l.latitude >= swLat &&
+        l.latitude <= neLat
+    );
+  }, [listings, viewportBounds, boundary]);
 
   return (
     <div
-      className="absolute inset-0 overflow-y-auto p-3 bg-muted/40 flex flex-col gap-3"
+      className="h-full overflow-y-auto p-3 bg-muted/40"
       id="list-view"
     >
       {/* Count header */}
-      <div className="flex items-center justify-between py-1">
+      <div className="flex items-center justify-between py-1 mb-3">
         <span className="text-[0.8125rem] text-muted-foreground">
-          {listings.length} {listings.length === 1 ? "property" : "properties"} found
+          {visibleListings.length} {visibleListings.length === 1 ? "property" : "properties"} found
         </span>
       </div>
 
-      {listings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center p-8">
+      {visibleListings.length === 0 ? (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-center p-8">
           <span className="text-4xl">🏠</span>
           <p className="text-[0.9375rem] text-muted-foreground">
             No properties found in this area
@@ -29,13 +44,15 @@ export default function ListView() {
           </p>
         </div>
       ) : (
-        listings.map((listing) => (
-          <PropertyCard
-            key={listing.id}
-            listing={listing}
-            onClick={() => setSelectedListing(listing)}
-          />
-        ))
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {visibleListings.map((listing) => (
+            <PropertyCard
+              key={listing.id}
+              listing={listing}
+              onClick={() => setSelectedListing(listing)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

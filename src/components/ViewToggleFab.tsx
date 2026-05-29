@@ -16,7 +16,7 @@ export default function ViewToggleFab({
     <AnimatePresence mode="wait">
       <motion.button
         key={currentView}
-        className="fixed bottom-6 right-4 flex items-center gap-2 px-5 py-3 bg-foreground text-background rounded-full text-sm font-semibold shadow-lg z-50 cursor-pointer transition-shadow hover:shadow-xl md:bottom-8 md:right-6"
+        className="fixed bottom-6 right-4 flex items-center gap-2 px-5 py-3 bg-foreground text-background rounded-full text-sm font-semibold shadow-lg z-50 cursor-pointer transition-shadow hover:shadow-xl md:hidden"
         onClick={onToggle}
         id="view-toggle-fab"
         aria-label={

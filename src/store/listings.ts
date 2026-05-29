@@ -36,10 +36,12 @@ interface ListingsState {
   boundary: Boundary | null;
   drawActive: boolean;
   isLoading: boolean;
+  hoveredListingId: string | null;
 
   setListings: (listings: Listing[]) => void;
   addListings: (newListings: Listing[]) => void; // merge + dedup by id
   setSelectedListing: (listing: Listing | null) => void;
+  setHoveredListingId: (id: string | null) => void;
   setListingType: (type: "sale" | "rent") => void;
   setViewportBounds: (bounds: [number, number, number, number]) => void;
   setBoundary: (boundary: Boundary | null) => void;
@@ -58,6 +60,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   boundary: null,
   drawActive: false,
   isLoading: false,
+  hoveredListingId: null,
 
   setListings: (listings) => set({ listings }),
   addListings: (newListings) =>
@@ -67,6 +70,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
       return { listings: [...state.listings, ...unique] };
     }),
   setSelectedListing: (listing) => set({ selectedListing: listing }),
+  setHoveredListingId: (id) => set({ hoveredListingId: id }),
   setListingType: (type) => set({ listingType: type }),
   setViewportBounds: (bounds) => set({ viewportBounds: bounds }),
   setBoundary: (boundary) => set({ boundary, drawActive: false }),

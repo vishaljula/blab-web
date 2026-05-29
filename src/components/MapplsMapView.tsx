@@ -88,6 +88,19 @@ function makeCircle(lat: number, lng: number, radiusKm: number): GeoJSON.Polygon
   return { type: "Polygon", coordinates: [coords] };
 }
 
+// ── Module-level singletons ─────────────────────────────────────────
+// The Mappls SDK and map instance must be created exactly once.
+// React Strict Mode (enabled by Next.js in dev) double-invokes useEffect:
+//   mount → cleanup → remount. If we create the map inside useEffect,
+//   cleanup destroys it and remount tries to reinitialize on a corrupted
+//   DOM, causing the SDK's internal MapLibre wiring to break (getZoom/
+//   getBounds/getBearing called on undefined). Module-level singletons
+//   survive strict mode remounts.
+let _mapplsClass: any = null;
+let _mapInstance: any = null;
+let _initPromise: Promise<void> | null = null;
+let _initDone = false;
+
 export default function MapplsMapView() {
   const mapRef = useRef<any>(null);
   const mapplsRef = useRef<any>(null);
@@ -111,101 +124,164 @@ export default function MapplsMapView() {
     listings,
     selectedListing,
     viewportBounds,
+    hoveredListingId,
   } = useListingsStore();
 
   // ── Initialize Mappls map ──────────────────────────────────────────
   useEffect(() => {
     let mounted = true;
 
-    // Polls until the Mappls map's internal MapLibre instance is fully wired.
-    // The SDK fires "load" before methods like getZoom/getBounds are available.
-    function waitForMapReady(
-      map: any,
-      onReady: () => void,
-      maxAttempts = 50 // 50 × 100ms = 5s max
-    ) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        if (!mounted) { clearInterval(interval); return; }
-        attempts++;
-        try {
-          // These calls throw if the internal MapLibre map isn't wired yet
-          const zoom = map.getZoom();
-          const bounds = map.getBounds();
-          if (typeof zoom === "number" && bounds) {
-            clearInterval(interval);
-            onReady();
-          }
-        } catch {
-          // Not ready yet — keep polling
-        }
-        if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          console.error("Mappls map failed to become ready after 5s");
-        }
-      }, 100);
-    }
-
-    async function loadMap() {
-      try {
-        const tokenRes = await fetch("/api/mappls/token");
-        if (!tokenRes.ok) {
-          setMapError("Failed to get Mappls token");
-          return;
-        }
-        const { token } = await tokenRes.json();
-
-        const { mappls } = await import("mappls-web-maps");
-        const mapplsClass = new mappls();
-
-        mapplsClass.initialize(
-          token,
-          {
-            map: true,
-            layer: "vector",
-            version: "3.0",
-            auth: "legacy",
-          },
-          () => {
-            if (!mounted) return;
-
-            const map = mapplsClass.Map({
-              id: "mappls-main-map",
-              properties: {
-                center: INITIAL_CENTER,
-                zoom: INITIAL_ZOOM,
-                zoomControl: false,
-                location: false,
-                backgroundColor: MAP_BG_LIGHT,
-                maxTileCacheSize: 200,
-              },
-            });
-
-            map.on("load", () => {
-              if (!mounted) return;
-              mapRef.current = map;
-              mapplsRef.current = mapplsClass;
-
-              // Poll until the map's internal state is truly ready
-              waitForMapReady(map, () => {
-                if (!mounted) return;
-                try {
-                  map.addControl(new (mapplsClass as any).NavigationControl(), "top-right");
-                } catch {}
-                setMapLoaded(true);
-                const bounds = safeGetBounds(map);
-                if (bounds) setViewportBounds(bounds);
-              });
-            });
-          }
-        );
-      } catch (err) {
-        setMapError(`Map init failed: ${err}`);
+    // Suppress the SDK's internal race-condition TypeErrors from the
+    // console. With the singleton pattern these rarely occur, but they
+    // can still appear during the brief window before MapLibre wires up.
+    function suppressSdkError(e: ErrorEvent) {
+      const msg = e.message || "";
+      if (
+        msg.includes("reading 'getZoom'") ||
+        msg.includes("reading 'getBounds'") ||
+        msg.includes("reading 'getBearing'")
+      ) {
+        e.preventDefault();
       }
     }
+    window.addEventListener("error", suppressSdkError);
 
-    loadMap();
-    return () => { mounted = false; };
+    async function initMap() {
+      // If already initialized, just wire up the refs and state
+      if (_initDone && _mapInstance && _mapplsClass) {
+        mapRef.current = _mapInstance;
+        mapplsRef.current = _mapplsClass;
+        if (mounted) {
+          setMapLoaded(true);
+          const bounds = safeGetBounds(_mapInstance);
+          if (bounds) setViewportBounds(bounds);
+        }
+        return;
+      }
+
+      // If initialization is already in progress (strict mode first
+      // mount started it), wait for it to finish then wire up refs.
+      if (_initPromise) {
+        await _initPromise;
+        if (_initDone && _mapInstance && _mapplsClass && mounted) {
+          mapRef.current = _mapInstance;
+          mapplsRef.current = _mapplsClass;
+          setMapLoaded(true);
+          const bounds = safeGetBounds(_mapInstance);
+          if (bounds) setViewportBounds(bounds);
+        }
+        return;
+      }
+
+      // First-ever initialization
+      _initPromise = (async () => {
+        try {
+          const tokenRes = await fetch("/api/mappls/token");
+          if (!tokenRes.ok) {
+            if (mounted) setMapError("Failed to get Mappls token");
+            return;
+          }
+          const { token } = await tokenRes.json();
+
+          const { mappls } = await import("mappls-web-maps");
+          _mapplsClass = new mappls();
+
+          await new Promise<void>((resolve) => {
+            _mapplsClass.initialize(
+              token,
+              {
+                map: true,
+                layer: "vector",
+                version: "3.0",
+                auth: "legacy",
+              },
+              () => {
+                const map = _mapplsClass.Map({
+                  id: "mappls-main-map",
+                  properties: {
+                    center: INITIAL_CENTER,
+                    zoom: INITIAL_ZOOM,
+                    zoomControl: false,
+                    location: false,
+                    backgroundColor: MAP_BG_LIGHT,
+                    maxTileCacheSize: 200,
+                  },
+                });
+
+                _mapInstance = map;
+
+                map.on("load", () => {
+                  _initDone = true;
+                  if (mounted) {
+                    mapRef.current = map;
+                    mapplsRef.current = _mapplsClass;
+                    try {
+                      map.addControl(
+                        new (_mapplsClass as any).NavigationControl(),
+                        "top-right"
+                      );
+                    } catch {}
+                    setMapLoaded(true);
+                    const bounds = safeGetBounds(map);
+                    if (bounds) {
+                      setViewportBounds(bounds);
+                    } else {
+                      const fallback: [number, number, number, number] = [
+                        INITIAL_CENTER[1] - 0.1,
+                        INITIAL_CENTER[0] - 0.05,
+                        INITIAL_CENTER[1] + 0.1,
+                        INITIAL_CENTER[0] + 0.05,
+                      ];
+                      setViewportBounds(fallback);
+                    }
+                  }
+                  resolve();
+                });
+
+                // Safety net: if "load" doesn't fire within 10s, force
+                // init so listings still load.
+                setTimeout(() => {
+                  if (!_initDone) {
+                    _initDone = true;
+                    if (mounted) {
+                      mapRef.current = map;
+                      mapplsRef.current = _mapplsClass;
+                      setMapLoaded(true);
+                      const bounds = safeGetBounds(map);
+                      if (bounds) {
+                        setViewportBounds(bounds);
+                      } else {
+                        setViewportBounds([
+                          INITIAL_CENTER[1] - 0.1,
+                          INITIAL_CENTER[0] - 0.05,
+                          INITIAL_CENTER[1] + 0.1,
+                          INITIAL_CENTER[0] + 0.05,
+                        ]);
+                      }
+                    }
+                    resolve();
+                  }
+                }, 10_000);
+              }
+            );
+          });
+        } catch (err) {
+          if (mounted) setMapError(`Map init failed: ${err}`);
+        }
+      })();
+
+      await _initPromise;
+    }
+
+    initMap();
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("error", suppressSdkError);
+      // Do NOT call map.remove() — the map singleton persists across
+      // strict mode remounts and is never truly unmounted (page.tsx
+      // uses visibility:hidden instead of unmounting).
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Dark mode: CSS filter approach ─────────────────────────────────
@@ -297,17 +373,20 @@ export default function MapplsMapView() {
             map,
             position: { lat, lng },
             fitbounds: false,
-            html: `<div style="
-              background:${isActive ? "#fff" : "#5a1a00"};
-              color:${isActive ? "#5a1a00" : "#fff"};
-              padding:3px 8px;border-radius:6px;
-              font-size:12px;font-weight:600;
-              font-family:system-ui,sans-serif;
-              white-space:nowrap;cursor:pointer;
-              box-shadow:0 1px 3px rgba(0,0,0,0.4);
-              border:${isActive ? "2px solid #5a1a00" : "none"};
-              transform:translateY(${isActive ? "-4px" : "0"});
-            ">${formatPrice(listing.price)}</div>`,
+            html: `<div
+              data-listing-id="${listing.id}"
+              style="
+                background:${isActive ? "#fff" : "#5a1a00"};
+                color:${isActive ? "#5a1a00" : "#fff"};
+                padding:3px 8px;border-radius:6px;
+                font-size:12px;font-weight:600;
+                font-family:system-ui,sans-serif;
+                white-space:nowrap;cursor:pointer;
+                box-shadow:0 1px 3px rgba(0,0,0,0.4);
+                border:${isActive ? "2px solid #5a1a00" : "none"};
+                transform:${isActive ? "translateY(-4px)" : "translateY(0)"};
+                transition:transform 150ms cubic-bezier(0.34,1.56,0.64,1);
+              ">${formatPrice(listing.price)}</div>`,
             width: 60,
             height: 24,
           });
@@ -316,6 +395,27 @@ export default function MapplsMapView() {
       }
     });
   }, [clusters, mapLoaded, selectedListing]);
+
+  // ── Hover highlight: DOM-only, no marker teardown ───────────────────
+  // Runs only when hoveredListingId/selectedListing change — finds the
+  // relevant marker element by data-listing-id and mutates its transform
+  // directly, avoiding the expensive full marker redraw.
+  useEffect(() => {
+    if (!mapLoaded) return;
+    // Reset all price marker transforms to their base state
+    document.querySelectorAll<HTMLElement>("[data-listing-id]").forEach((el) => {
+      const id = el.dataset.listingId!;
+      const isActive = id === selectedListing?.id;
+      el.style.transform = isActive ? "translateY(-4px)" : "translateY(0)";
+    });
+    // Scale up the hovered marker
+    if (hoveredListingId) {
+      const el = document.querySelector<HTMLElement>(
+        `[data-listing-id="${hoveredListingId}"]`
+      );
+      if (el) el.style.transform = "scale(1.25) translateY(-6px)";
+    }
+  }, [hoveredListingId, selectedListing, mapLoaded]);
 
   // ── Draw mode: toggle map interactions ──────────────────────────────
   useEffect(() => {

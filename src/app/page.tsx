@@ -14,6 +14,7 @@ import { useListingsStore } from "@/store/listings";
 
 export default function HomePage() {
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const [isDesktop, setIsDesktop] = useState(false);
   const {
     drawActive,
     boundary,
@@ -25,6 +26,15 @@ export default function HomePage() {
     setIsLoading,
     listingType,
   } = useListingsStore();
+
+  // Handle client-side media query for desktop split pane
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const listener = () => setIsDesktop(media.matches);
+    setIsDesktop(media.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
 
   // Abort controller ref to cancel in-flight requests
   const abortRef = useRef<AbortController | null>(null);
@@ -136,9 +146,35 @@ export default function HomePage() {
         onToggleDraw={toggleDraw}
         onClearBoundary={clearBoundary}
       />
-      <main className="flex-1 relative overflow-hidden">
-        {viewMode === "map" ? <MapView /> : <ListView />}
+
+      {/*
+        Desktop: side-by-side flex split.
+        Mobile: single flex child (preserves the exact container dimensions from the
+        staged baseline); inside, both panels are always mounted using visibility:hidden
+        so MapView never unmounts — the SDK stays alive and getZoom() always works.
+      */}
+      <main className="flex-1 flex overflow-hidden relative">
+        {isDesktop ? (
+          <>
+            <div className="flex-[3] relative overflow-hidden h-full">
+              <MapView />
+            </div>
+            <div className="flex-[2] overflow-hidden h-full border-l border-border">
+              <ListView />
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 relative overflow-hidden h-full">
+            <div className={`absolute inset-0${viewMode !== "map" ? " invisible" : ""}`}>
+              <MapView />
+            </div>
+            <div className={`absolute inset-0 overflow-hidden${viewMode !== "list" ? " invisible" : ""}`}>
+              <ListView />
+            </div>
+          </div>
+        )}
       </main>
+
       <ViewToggleFab currentView={viewMode} onToggle={handleToggleView} />
     </div>
   );

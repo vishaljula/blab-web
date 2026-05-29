@@ -1,8 +1,7 @@
 "use client";
 
 import { formatPrice, formatSpecs } from "@/lib/format";
-import type { Listing } from "@/store/listings";
-import { Badge } from "@/components/ui/badge";
+import { useListingsStore, type Listing } from "@/store/listings";
 
 interface PropertyCardProps {
   listing: Listing;
@@ -16,54 +15,64 @@ const listerColors: Record<string, string> = {
 };
 
 export default function PropertyCard({ listing, onClick }: PropertyCardProps) {
+  const { setHoveredListingId } = useListingsStore();
+
   return (
     <article
-      className="flex gap-3 p-3 bg-card rounded-xl border border-border cursor-pointer transition-all duration-200 hover:border-border/60 hover:shadow-sm active:scale-[0.99]"
+      className="flex flex-col bg-card rounded-xl border border-border cursor-pointer transition-all duration-200 hover:border-border/60 hover:shadow-md active:scale-[0.99] overflow-hidden"
       onClick={onClick}
+      onMouseEnter={() => setHoveredListingId(listing.id)}
+      onMouseLeave={() => setHoveredListingId(null)}
       id={`property-card-${listing.id}`}
     >
-      {/* Thumbnail */}
+      {/* Hero image — full-width, 16:10 aspect ratio */}
       <div
-        className="w-[120px] h-[90px] rounded-lg shrink-0 bg-muted flex items-center justify-center text-muted-foreground text-xs overflow-hidden"
-        style={
-          listing.imageUrl
-            ? { backgroundImage: `url(${listing.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }
-            : undefined
-        }
+        className="relative w-full bg-muted overflow-hidden"
+        style={{ aspectRatio: "16 / 8" }}
       >
-        {!listing.imageUrl && "No Image"}
+        {listing.imageUrl ? (
+          <img
+            src={listing.imageUrl}
+            alt={`${listing.address}, ${listing.city}`}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <span className="text-3xl">🏠</span>
+            <span className="text-xs font-medium">No Image</span>
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col justify-between flex-1 min-w-0">
-        <div className="flex flex-col gap-1">
-          {/* Price + badge */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-display text-[1.0625rem] font-bold text-foreground tracking-tight">
-              {formatPrice(listing.price)}
-            </span>
-            <span
-              className={`inline-flex items-center px-1.5 py-0.5 rounded text-[0.6875rem] font-semibold border ${
-                listerColors[listing.listerType] ?? listerColors.broker
-              }`}
-            >
-              {listing.listerType}
-            </span>
-          </div>
+      {/* Property info — stacked below image */}
+      <div className="flex flex-col gap-1 p-3.5">
+        {/* Price + lister badge */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-display text-lg font-bold text-foreground tracking-tight leading-tight">
+            {formatPrice(listing.price)}
+          </span>
+          <span
+            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[0.6875rem] font-semibold border ${
+              listerColors[listing.listerType] ?? listerColors.broker
+            }`}
+          >
+            {listing.listerType}
+          </span>
+        </div>
 
-          {/* Specs */}
-          <div className="flex items-center gap-1 text-[0.8125rem] text-muted-foreground">
-            {formatSpecs(listing)
-              .split(" · ")
-              .map((spec, i, arr) => (
-                <span key={i} className="flex items-center gap-1">
-                  {spec}
-                  {i < arr.length - 1 && (
-                    <span className="text-border">·</span>
-                  )}
-                </span>
-              ))}
-          </div>
+        {/* Specs */}
+        <div className="flex items-center gap-1 text-[0.8125rem] text-muted-foreground">
+          {formatSpecs(listing)
+            .split(" · ")
+            .map((spec, i, arr) => (
+              <span key={i} className="flex items-center gap-1">
+                {spec}
+                {i < arr.length - 1 && (
+                  <span className="text-border">·</span>
+                )}
+              </span>
+            ))}
         </div>
 
         {/* Address */}
