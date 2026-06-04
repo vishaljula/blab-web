@@ -6,7 +6,43 @@ import {
   text,
   timestamp,
   index,
+  pgEnum,
+  varchar,
 } from "drizzle-orm/pg-core";
+
+// Define user roles: buyer, owner, broker, developer
+export const userRoleEnum = pgEnum("user_role", ["buyer", "owner", "broker", "developer"]);
+
+/**
+ * Users table — stores user authentication sessions, roles, and encrypted PII.
+ */
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    role: userRoleEnum("role").default("buyer").notNull(),
+    
+    // PII - Cryptographically hashed for quick index lookup
+    phoneHash: varchar("phone_hash", { length: 64 }).unique(),
+    emailHash: varchar("email_hash", { length: 64 }),
+    
+    // PII - Encrypted at application level (AES-256-GCM)
+    encryptedName: text("encrypted_name"),
+    encryptedPhone: text("encrypted_phone"),
+    encryptedEmail: text("encrypted_email"),
+    
+    // Realtor/Developer Fields
+    reraNumber: varchar("rera_number", { length: 50 }),
+    companyName: varchar("company_name", { length: 100 }),
+    projectCount: varchar("project_count", { length: 20 }),
+    
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_users_role").on(table.role),
+  ]
+);
 
 /**
  * Listings table — stores all property listings.
@@ -19,6 +55,7 @@ export const listings = pgTable(
   "listings",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    listerId: uuid("lister_id").references(() => users.id), // Link listing to creator
     latitude: doublePrecision("latitude").notNull(),
     longitude: doublePrecision("longitude").notNull(),
     price: integer("price").notNull(),
@@ -42,9 +79,12 @@ export const listings = pgTable(
     // B-tree index on lat/lng for basic range queries (fallback)
     index("idx_listings_lat").on(table.latitude),
     index("idx_listings_lng").on(table.longitude),
+    index("idx_listings_lister").on(table.listerId),
   ]
 );
 
-// TypeScript type inferred from schema — used in API responses
+// TypeScript types inferred from schema
+export type UserRow = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 export type ListingRow = typeof listings.$inferSelect;
 export type NewListing = typeof listings.$inferInsert;

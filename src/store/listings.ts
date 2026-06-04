@@ -37,6 +37,7 @@ interface ListingsState {
   drawActive: boolean;
   isLoading: boolean;
   hoveredListingId: string | null;
+  authModalOpen: boolean;
 
   setListings: (listings: Listing[]) => void;
   addListings: (newListings: Listing[]) => void; // merge + dedup by id
@@ -50,6 +51,7 @@ interface ListingsState {
   toggleDraw: () => void;
   clearBoundary: () => void;
   setIsLoading: (loading: boolean) => void;
+  setAuthModalOpen: (open: boolean) => void;
 }
 
 export const useListingsStore = create<ListingsState>((set) => ({
@@ -61,6 +63,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   drawActive: false,
   isLoading: false,
   hoveredListingId: null,
+  authModalOpen: false,
 
   setListings: (listings) => set({ listings }),
   addListings: (newListings) =>
@@ -89,4 +92,5 @@ export const useListingsStore = create<ListingsState>((set) => ({
     })),
   clearBoundary: () => set({ boundary: null, drawActive: false, listings: [] }),
   setIsLoading: (loading) => set({ isLoading: loading }),
+  setAuthModalOpen: (open) => set({ authModalOpen: open }),
 }));

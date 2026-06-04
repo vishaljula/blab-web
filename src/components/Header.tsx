@@ -1,11 +1,13 @@
 "use client";
 
-import { Search, Plus, Moon, Sun, Menu, MapPin, X } from "lucide-react";
+import { Search, Plus, Moon, Sun, Menu, MapPin, X, LogOut, User as UserIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { cn } from "@/lib/utils";
 import { useListingsStore } from "@/store/listings";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface SearchResult {
   name: string;
@@ -19,6 +21,8 @@ interface SearchResult {
 export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   // Search state
   const [query, setQuery] = useState("");
@@ -29,15 +33,22 @@ export default function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { setBoundary, viewportBounds } = useListingsStore();
+  // User menu state
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const { setBoundary, viewportBounds, setAuthModalOpen } = useListingsStore();
 
   useEffect(() => setMounted(true), []);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setSearchOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -225,7 +236,7 @@ export default function Header() {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         {/* Dark mode toggle */}
         {mounted && (
           <button
@@ -240,14 +251,72 @@ export default function Header() {
           </button>
         )}
 
-        {/* Post property — always shows text */}
+        {/* Post property — checks login & role */}
         <button
           className="flex items-center gap-1.5 h-9 pl-2.5 pr-3.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0 hover:opacity-90 transition-opacity"
           id="post-property-btn"
+          onClick={() => {
+            if (status !== "authenticated") {
+              setAuthModalOpen(true);
+              return;
+            }
+            const userRole = (session?.user as any)?.role;
+            if (userRole === "buyer") {
+              alert("Buyers cannot create listings. Please edit your role in your profile to Owner, Broker, or Developer.");
+              return;
+            }
+            // Logic to open Listing wizard
+            alert("Listing wizard opening...");
+          }}
         >
           <Plus size={15} strokeWidth={2.5} />
           Post
         </button>
+
+        {/* Authentication buttons */}
+        {mounted && (
+          status === "authenticated" ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-secondary hover:bg-muted text-foreground transition-colors border border-border cursor-pointer"
+                aria-label="User Menu"
+              >
+                <span className="text-xs font-bold font-display uppercase">
+                  {session.user?.name ? session.user.name.slice(0, 2) : "US"}
+                </span>
+              </button>
+              {/* Dropdown menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 top-11 w-48 bg-card border border-border rounded-lg shadow-lg py-1.5 z-50">
+                  <div className="px-4 py-2 border-b border-border/80">
+                    <div className="text-sm font-bold text-foreground truncate">{session.user?.name}</div>
+                    <div className="text-[10px] text-muted-foreground capitalize font-semibold tracking-wider mt-0.5">
+                      Role: {(session.user as any)?.role || "buyer"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      signOut({ callbackUrl: "/login" });
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                  >
+                    <LogOut size={14} />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              className="h-9 px-4 rounded-full border border-border text-sm font-semibold text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            >
+              Sign In
+            </button>
+          )
+        )}
 
         {/* Mobile menu */}
         <button

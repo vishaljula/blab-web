@@ -1,18 +1,24 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import ControlBar from "@/components/ControlBar";
 import ListView from "@/components/ListView";
 import ViewToggleFab from "@/components/ViewToggleFab";
+import AuthModal from "@/components/AuthModal";
 
 // MapView uses Mappls SDK which requires browser APIs.
 // Importing with ssr:false prevents server rendering and eliminates hydration mismatches.
 const MapView = dynamic(() => import("@/components/MapplsMapView"), { ssr: false });
 import { useListingsStore } from "@/store/listings";
 
-export default function HomePage() {
+function HomeDashboard() {
+  const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const [isDesktop, setIsDesktop] = useState(false);
   const {
@@ -25,6 +31,8 @@ export default function HomePage() {
     addListings,
     setIsLoading,
     listingType,
+    authModalOpen,
+    setAuthModalOpen,
   } = useListingsStore();
 
   // Handle client-side media query for desktop split pane
@@ -133,6 +141,29 @@ export default function HomePage() {
     return () => controller.abort();
   }, [viewportBounds, boundary, drawActive, listingType, setListings, addListings, setIsLoading]);
 
+  // Automatically open AuthModal if user is authenticated but has not completed onboarding
+  useEffect(() => {
+    if (status === "authenticated" && !session?.user?.name) {
+      setAuthModalOpen(true);
+    }
+  }, [status, session, setAuthModalOpen]);
+
+  const showLogin = searchParams.get("login") === "true";
+
+  // Automatically open AuthModal if ?login=true query parameter is present
+  useEffect(() => {
+    if (showLogin) {
+      setAuthModalOpen(true);
+    }
+  }, [showLogin, setAuthModalOpen]);
+
+  const handleCloseModal = () => {
+    setAuthModalOpen(false);
+    if (searchParams.get("login") === "true") {
+      router.replace("/");
+    }
+  };
+
   const handleToggleView = useCallback(() => {
     setViewMode((prev) => (prev === "map" ? "list" : "map"));
   }, []);
@@ -176,6 +207,15 @@ export default function HomePage() {
       </main>
 
       <ViewToggleFab currentView={viewMode} onToggle={handleToggleView} />
+      <AuthModal isOpen={authModalOpen} onClose={handleCloseModal} />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="h-screen w-screen bg-background" />}>
+      <HomeDashboard />
+    </Suspense>
   );
 }

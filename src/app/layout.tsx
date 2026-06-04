@@ -3,6 +3,7 @@ import { Inter, DM_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { SessionProvider } from "@/components/SessionProvider";
 
 // Next.js generates CSS vars --font-inter and --font-dm-sans on <html>
 // consumed by @theme in globals.css → font-sans / font-display utilities
@@ -67,17 +68,19 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
-          <Toaster
-            position="bottom-center"
-            toastOptions={{
-              style: {
-                fontFamily: "var(--font-sans)",
-                fontSize: "0.875rem",
-                borderRadius: "var(--radius)",
-              },
-            }}
-          />
+          <SessionProvider>
+            {children}
+            <Toaster
+              position="bottom-center"
+              toastOptions={{
+                style: {
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.875rem",
+                  borderRadius: "var(--radius)",
+                },
+              }}
+            />
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
