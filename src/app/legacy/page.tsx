@@ -8,7 +8,7 @@ import ListView from "@/components/ListView";
 import ViewToggleFab from "@/components/ViewToggleFab";
 
 // Legacy page — uses Mapbox MapView (original implementation)
-const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
+const MapView = dynamic(() => import("@/components/MapplsMapView"), { ssr: false });
 import { useListingsStore } from "@/store/listings";
 
 export default function LegacyHomePage() {

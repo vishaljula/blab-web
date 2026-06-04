@@ -73,24 +73,46 @@ export default function MapView() {
 
   // When switching to Standard (dark), imperatively set the dusk lightPreset
   // after the new style finishes loading. The config prop only works on mount.
+  // When switching styles (light/dark) or loading, imperatively set presets and force English labels
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
 
-    const applyPreset = () => {
+    const applyStyleSettings = () => {
       if (isDark) {
-        map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
-        map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
-        map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
+        try {
+          map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
+          map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
+          map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
+        } catch {}
+      }
+
+      // Force English labels (name_en) dynamically across all text-field layers
+      try {
+        const style = map.getStyle();
+        if (style && style.layers) {
+          let count = 0;
+          style.layers.forEach((layer: any) => {
+            if (layer.layout && layer.layout["text-field"]) {
+              map.setLayoutProperty(layer.id, "text-field", ["get", "name"]);
+              count++;
+            }
+          });
+          console.log(`Successfully applied name_en overrides to ${count} layers`);
+        }
+      } catch (err) {
+        console.warn("Failed to apply language overrides:", err);
       }
     };
 
     // Style may already be loaded, or we need to wait
     if (map.isStyleLoaded()) {
-      applyPreset();
+      applyStyleSettings();
     }
-    map.on("style.load", applyPreset);
-    return () => { map.off("style.load", applyPreset); };
+    map.on("style.load", applyStyleSettings);
+    return () => {
+      map.off("style.load", applyStyleSettings);
+    };
   }, [isDark, mapLoaded]);
 
   // Whether the user is actively dragging to draw right now
@@ -173,6 +195,7 @@ export default function MapView() {
     setMapLoaded(true);
     const map = mapRef.current;
     if (!map) return;
+    (window as any).map = map.getMap();
     const bounds = map.getMap().getBounds();
     if (bounds) {
       setViewportBounds([

@@ -12,9 +12,9 @@ import AuthModal from "@/components/AuthModal";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileModal from "@/components/ProfileModal";
 
-// MapView uses Mappls SDK which requires browser APIs.
+// MapView uses Mapbox SDK which requires browser APIs.
 // Importing with ssr:false prevents server rendering and eliminates hydration mismatches.
-const MapView = dynamic(() => import("@/components/MapplsMapView"), { ssr: false });
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 import { useListingsStore } from "@/store/listings";
 
 function HomeDashboard() {
