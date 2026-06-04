@@ -37,7 +37,7 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const { setBoundary, viewportBounds, setAuthModalOpen } = useListingsStore();
+  const { setBoundary, viewportBounds, setAuthModalOpen, setProfileModalOpen } = useListingsStore();
 
   useEffect(() => setMounted(true), []);
 
@@ -276,7 +276,7 @@ export default function Header() {
         {/* Authentication buttons */}
         {mounted && (
           status === "authenticated" ? (
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative hidden md:block" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center justify-center w-9 h-9 rounded-full bg-secondary hover:bg-muted text-foreground transition-colors border border-border cursor-pointer"
@@ -298,6 +298,16 @@ export default function Header() {
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
+                      setProfileModalOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm text-foreground hover:bg-secondary transition-colors cursor-pointer border-b border-border/50"
+                  >
+                    <UserIcon size={14} />
+                    Profile Settings
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
                       signOut({ callbackUrl: "/login" });
                     }}
                     className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
@@ -311,16 +321,16 @@ export default function Header() {
           ) : (
             <button
               onClick={() => setAuthModalOpen(true)}
-              className="h-9 px-4 rounded-full border border-border text-sm font-semibold text-foreground hover:bg-secondary transition-colors cursor-pointer"
+              className="h-9 px-4 rounded-full border border-border text-sm font-semibold text-foreground hover:bg-secondary transition-colors cursor-pointer hidden md:block"
             >
               Sign In
             </button>
           )
         )}
 
-        {/* Mobile menu */}
+        {/* Mobile menu - hidden completely or visible only on desktop if needed */}
         <button
-          className="flex items-center justify-center w-9 h-9 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors hidden md:flex"
           id="menu-btn"
           aria-label="Menu"
         >

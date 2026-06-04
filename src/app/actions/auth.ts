@@ -19,7 +19,7 @@ export async function sendOtpAction(phone: string) {
 
 interface OnboardingInput {
   name: string;
-  email: string;
+  email?: string;
   role: "buyer" | "owner" | "broker" | "developer";
   reraNumber?: string;
   companyName?: string;
@@ -42,8 +42,8 @@ export async function completeOnboardingAction(data: OnboardingInput) {
     
     // Encrypt the fields at application level
     const encryptedName = encrypt(data.name);
-    const encryptedEmail = encrypt(data.email);
-    const emailHash = hashString(data.email);
+    const encryptedEmail = data.email ? encrypt(data.email) : null;
+    const emailHash = data.email ? hashString(data.email) : null;
 
     // Update the user record
     await db

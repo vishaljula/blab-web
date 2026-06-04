@@ -53,18 +53,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   // Onboarding profile states
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [role, setRole] = useState<"buyer" | "owner" | "broker" | "developer">("owner");
   const [reraNumber, setReraNumber] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [projectCount, setProjectCount] = useState("1-5");
-
-  // Email verification states
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [emailOtpCode, setEmailOtpCode] = useState<string[]>(Array(6).fill(""));
-  const [sendingEmailOtp, setSendingEmailOtp] = useState(false);
-  const [verifyingEmailOtp, setVerifyingEmailOtp] = useState(false);
 
   // Feedback/Support states
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -74,7 +66,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   // OTP input refs
   const inputRefs = useRef<HTMLInputElement[]>([]);
-  const emailInputRefs = useRef<HTMLInputElement[]>([]);
 
   const isForcedOnboarding = status === "authenticated" && !session?.user?.name;
 
@@ -104,7 +95,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   }, [step, timer]);
 
-  if (!isOpen) return null;
+
 
   // Handle SMS OTP Sending
   const handleSendSMS = async () => {
@@ -170,71 +161,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
-  // Handle Email OTP Sending
-  const handleSendEmailOtp = async () => {
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!email || !isValidEmail) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
-    setSendingEmailOtp(true);
-    try {
-      const res = await sendEmailOtpAction(email);
-      if (res.success) {
-        toast.success("Verification code sent to email!");
-        setEmailOtpSent(true);
-        setTimeout(() => emailInputRefs.current[0]?.focus(), 100);
-      } else {
-        setLastErrorMsg(res.error || "Failed to send email verification code");
-        toast.error(res.error || "Failed to send verification code");
-      }
-    } catch (err: any) {
-      setLastErrorMsg(err.message || "Error sending email verification code");
-      toast.error(err.message || "Error sending email verification code");
-    } finally {
-      setSendingEmailOtp(false);
-    }
-  };
-
-  // Handle Email OTP Verification
-  const handleVerifyEmailOtp = async (codeString?: string) => {
-    const code = codeString || emailOtpCode.join("");
-    if (code.length !== 6) {
-      toast.error("Please enter all 6 digits");
-      return;
-    }
-
-    setVerifyingEmailOtp(true);
-    try {
-      const res = await verifyEmailOtpAction(email, code);
-      if (res.success) {
-        toast.success("Email verified successfully!");
-        setEmailVerified(true);
-      } else {
-        setLastErrorMsg(res.error || "Invalid email verification code");
-        toast.error(res.error || "Invalid verification code");
-        setEmailOtpCode(Array(6).fill(""));
-        emailInputRefs.current[0]?.focus();
-      }
-    } catch (err: any) {
-      setLastErrorMsg(err.message || "Error verifying email code");
-      toast.error(err.message || "Error verifying email code");
-    } finally {
-      setVerifyingEmailOtp(false);
-    }
-  };
-
   // Onboarding submission
   const handleOnboardingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) {
-      toast.error("Name and Email are required");
-      return;
-    }
-
-    if (!emailVerified) {
-      toast.error("Please verify your email address before completing registration");
+    if (!name.trim()) {
+      toast.error("Full Name is required");
       return;
     }
 
@@ -242,7 +173,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       const res = await completeOnboardingAction({
         name,
-        email,
         role,
         reraNumber: role === "broker" || role === "developer" ? reraNumber : undefined,
         companyName: role === "broker" || role === "developer" ? companyName : undefined,
@@ -252,7 +182,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (res.success) {
         toast.success("Welcome to Blab!");
         // Update Session to sync JWT/Cookie values
-        await updateSession({ name, email, role, reraNumber, companyName, projectCount });
+        await updateSession({ name, role, reraNumber, companyName, projectCount });
         onClose();
       } else {
         toast.error(res.error || "Failed to complete onboarding");
@@ -272,7 +202,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     setSubmittingFeedback(true);
-    const identifier = step === "onboarding" ? email : `${countryCode}${phoneNumber}`;
+    const identifier = `${countryCode}${phoneNumber}` || session?.user?.email || "onboarding-user";
     try {
       const res = await createJiraTicketAction(identifier, lastErrorMsg, feedbackText);
       if (res.success) {
@@ -286,6 +216,25 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       toast.error("Error connecting to support system");
     } finally {
       setSubmittingFeedback(false);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pastedData) return;
+
+    const digits = pastedData.split("");
+    const newOtp = Array(6).fill("");
+    for (let i = 0; i < 6; i++) {
+      newOtp[i] = digits[i] || "";
+    }
+
+    setOtpCode(newOtp);
+    const targetIndex = Math.min(pastedData.length - 1, 5);
+    inputRefs.current[targetIndex]?.focus();
+    if (pastedData.length === 6) {
+      handleVerifyOtp(pastedData);
     }
   };
 
@@ -329,44 +278,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
-  const handleEmailOtpChange = (value: string, index: number) => {
-    if (!/^\d*$/.test(value)) return;
 
-    const newOtp = [...emailOtpCode];
-    if (value.length > 1) {
-      const digits = value.slice(0, 6).split("");
-      for (let i = 0; i < 6; i++) {
-        newOtp[i] = digits[i] || "";
-      }
-      setEmailOtpCode(newOtp);
-      const lastIndex = Math.min(digits.length - 1, 5);
-      emailInputRefs.current[lastIndex]?.focus();
-      if (digits.length === 6) {
-        handleVerifyEmailOtp(digits.join(""));
-      }
-      return;
-    }
-
-    newOtp[index] = value;
-    setEmailOtpCode(newOtp);
-
-    if (value !== "" && index < 5) {
-      emailInputRefs.current[index + 1]?.focus();
-    }
-
-    if (newOtp.every((digit) => digit !== "")) {
-      handleVerifyEmailOtp(newOtp.join(""));
-    }
-  };
-
-  const handleEmailOtpKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === "Backspace" && emailOtpCode[index] === "" && index > 0) {
-      const newOtp = [...emailOtpCode];
-      newOtp[index - 1] = "";
-      setEmailOtpCode(newOtp);
-      emailInputRefs.current[index - 1]?.focus();
-    }
-  };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isForcedOnboarding) {
@@ -375,16 +287,23 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   return (
-    <div
-      onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md px-4 py-12"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-[480px] bg-card border border-border rounded-xl shadow-lg p-8 relative z-10 dark:bg-card"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          onClick={handleBackdropClick}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md px-4 py-12"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="w-full max-w-[480px] bg-card border border-border rounded-xl shadow-lg p-8 relative z-10 dark:bg-card"
+          >
         {/* Close Button */}
         {!isForcedOnboarding && (
           <button
@@ -505,6 +424,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       value={digit}
                       onChange={(e) => handleOtpChange(e.target.value, i)}
                       onKeyDown={(e) => handleOtpKeyDown(e, i)}
+                      onPaste={handlePaste}
                       className="w-11 h-12 text-center text-lg font-bold bg-secondary border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   ))}
@@ -570,102 +490,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   />
                 </div>
 
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Email Address
-                    </label>
-                    <div className="relative flex items-center">
-                      <input
-                        type="email"
-                        required
-                        disabled={emailVerified || emailOtpSent}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="E.g. rajesh@example.com"
-                        className={`w-full px-4 py-2 bg-secondary border border-border text-foreground rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm pr-10 ${
-                          emailVerified
-                            ? "border-emerald-500/45 bg-emerald-500/5 text-emerald-950 dark:text-emerald-300"
-                            : ""
-                        }`}
-                      />
-                      {emailVerified && (
-                        <div className="absolute right-3 text-emerald-500 flex items-center gap-1 text-xs font-bold">
-                          <CheckCircle2 size={16} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {!emailVerified && !emailOtpSent && (
-                    <button
-                      type="button"
-                      onClick={handleSendEmailOtp}
-                      disabled={sendingEmailOtp || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
-                      className={`w-full flex items-center justify-center gap-2 py-2.5 font-bold rounded-lg text-xs transition-all cursor-pointer ${
-                        email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-                          ? "bg-primary text-primary-foreground hover:opacity-90 border border-transparent shadow-sm"
-                          : "bg-secondary text-muted-foreground/60 border border-border disabled:opacity-50 disabled:cursor-not-allowed"
-                      }`}
-                    >
-                      <Mail size={14} />
-                      {sendingEmailOtp ? "Sending Code..." : "Send Verification Code"}
-                    </button>
-                  )}
-
-                  {emailOtpSent && !emailVerified && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="space-y-3 p-3 bg-secondary/50 border border-border rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-                          <Clock size={12} /> Enter Email OTP
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEmailOtpSent(false);
-                            setEmailOtpCode(Array(6).fill(""));
-                          }}
-                          className="text-[10px] text-primary hover:underline bg-transparent border-none p-0 cursor-pointer"
-                        >
-                          Change Email
-                        </button>
-                      </div>
-
-                      <div className="flex justify-between gap-1 max-w-[280px] mx-auto py-1">
-                        {emailOtpCode.map((digit, i) => (
-                          <input
-                            key={i}
-                            ref={(el) => {
-                              if (el) emailInputRefs.current[i] = el;
-                            }}
-                            type="text"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => handleEmailOtpChange(e.target.value, i)}
-                            onKeyDown={(e) => handleEmailOtpKeyDown(e, i)}
-                            className="w-9 h-10 text-center text-md font-bold bg-card border border-border text-foreground rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
-                          />
-                        ))}
-                      </div>
-
-                      <div className="text-center text-[10px] text-muted-foreground">
-                        Didn't receive the email?{" "}
-                        <button
-                          type="button"
-                          onClick={handleSendEmailOtp}
-                          disabled={sendingEmailOtp}
-                          className="text-primary font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
-                        >
-                          Resend Code
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -751,7 +575,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <button
                   type="submit"
-                  disabled={loading || !emailVerified}
+                  disabled={loading}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-lg text-sm transition-opacity cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Complete Registration & Login
@@ -840,6 +664,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </div>
         )}
       </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

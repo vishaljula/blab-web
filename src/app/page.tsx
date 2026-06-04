@@ -9,6 +9,8 @@ import ControlBar from "@/components/ControlBar";
 import ListView from "@/components/ListView";
 import ViewToggleFab from "@/components/ViewToggleFab";
 import AuthModal from "@/components/AuthModal";
+import BottomNavigation from "@/components/BottomNavigation";
+import ProfileModal from "@/components/ProfileModal";
 
 // MapView uses Mappls SDK which requires browser APIs.
 // Importing with ssr:false prevents server rendering and eliminates hydration mismatches.
@@ -33,6 +35,8 @@ function HomeDashboard() {
     listingType,
     authModalOpen,
     setAuthModalOpen,
+    profileModalOpen,
+    setProfileModalOpen,
   } = useListingsStore();
 
   // Handle client-side media query for desktop split pane
@@ -164,9 +168,30 @@ function HomeDashboard() {
     }
   };
 
-  const handleToggleView = useCallback(() => {
-    setViewMode((prev) => (prev === "map" ? "list" : "map"));
-  }, []);
+  const handleCloseProfileModal = () => {
+    setProfileModalOpen(false);
+  };
+
+  const handlePostClick = () => {
+    if (status !== "authenticated") {
+      setAuthModalOpen(true);
+      return;
+    }
+    const userRole = (session?.user as any)?.role;
+    if (userRole === "buyer") {
+      alert("Buyers cannot create listings. Please edit your role in your profile to Owner, Broker, or Developer.");
+      return;
+    }
+    alert("Listing wizard opening...");
+  };
+
+  const handleProfileClick = () => {
+    if (status !== "authenticated") {
+      setAuthModalOpen(true);
+    } else {
+      setProfileModalOpen(true);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
@@ -196,18 +221,26 @@ function HomeDashboard() {
           </>
         ) : (
           <div className="flex-1 relative overflow-hidden h-full">
-            <div className={`absolute inset-0${viewMode !== "map" ? " invisible" : ""}`}>
+            <div className={`absolute inset-x-0 top-0 bottom-16${viewMode !== "map" ? " invisible" : ""}`}>
               <MapView />
             </div>
-            <div className={`absolute inset-0 overflow-hidden${viewMode !== "list" ? " invisible" : ""}`}>
+            <div className={`absolute inset-x-0 top-0 bottom-16 overflow-hidden${viewMode !== "list" ? " invisible" : ""}`}>
               <ListView />
             </div>
           </div>
         )}
       </main>
 
-      <ViewToggleFab currentView={viewMode} onToggle={handleToggleView} />
+      <ViewToggleFab
+        currentView={viewMode}
+        onToggle={() => setViewMode((prev) => (prev === "map" ? "list" : "map"))}
+      />
+      <BottomNavigation
+        onPostClick={handlePostClick}
+        onProfileClick={handleProfileClick}
+      />
       <AuthModal isOpen={authModalOpen} onClose={handleCloseModal} />
+      <ProfileModal isOpen={profileModalOpen} onClose={handleCloseProfileModal} />
     </div>
   );
 }
@@ -219,3 +252,4 @@ export default function HomePage() {
     </Suspense>
   );
 }
+

@@ -38,6 +38,7 @@ interface ListingsState {
   isLoading: boolean;
   hoveredListingId: string | null;
   authModalOpen: boolean;
+  profileModalOpen: boolean;
 
   setListings: (listings: Listing[]) => void;
   addListings: (newListings: Listing[]) => void; // merge + dedup by id
@@ -52,6 +53,7 @@ interface ListingsState {
   clearBoundary: () => void;
   setIsLoading: (loading: boolean) => void;
   setAuthModalOpen: (open: boolean) => void;
+  setProfileModalOpen: (open: boolean) => void;
 }
 
 export const useListingsStore = create<ListingsState>((set) => ({
@@ -64,6 +66,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   isLoading: false,
   hoveredListingId: null,
   authModalOpen: false,
+  profileModalOpen: false,
 
   setListings: (listings) => set({ listings }),
   addListings: (newListings) =>
@@ -93,4 +96,5 @@ export const useListingsStore = create<ListingsState>((set) => ({
   clearBoundary: () => set({ boundary: null, drawActive: false, listings: [] }),
   setIsLoading: (loading) => set({ isLoading: loading }),
   setAuthModalOpen: (open) => set({ authModalOpen: open }),
+  setProfileModalOpen: (open) => set({ profileModalOpen: open }),
 }));
