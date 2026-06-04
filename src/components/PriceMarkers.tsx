@@ -9,6 +9,7 @@ import { formatPrice } from "@/lib/format";
 interface PriceMarkersProps {
   listings: Listing[];
   onSelect: (listing: Listing | null) => void;
+  onClusterClick: (coords: [number, number][]) => void;
 }
 
 // Create supercluster index
@@ -33,7 +34,7 @@ function createClusterIndex(listings: Listing[]) {
   return index;
 }
 
-export default function PriceMarkers({ listings, onSelect }: PriceMarkersProps) {
+export default function PriceMarkers({ listings, onSelect, onClusterClick }: PriceMarkersProps) {
   const { viewportBounds, selectedListing } = useListingsStore();
 
   const clusterIndex = useMemo(() => createClusterIndex(listings), [listings]);
@@ -55,11 +56,17 @@ export default function PriceMarkers({ listings, onSelect }: PriceMarkersProps) 
 
   const handleClusterClick = useCallback(
     (clusterId: number) => {
-      // TODO: zoom into cluster via map ref callback
-      // const zoom = clusterIndex.getClusterExpansionZoom(clusterId);
-      void clusterId;
+      try {
+        const leaves = (clusterIndex as any).getLeaves(clusterId, 100);
+        const coords = leaves.map(
+          (leaf: any) => leaf.geometry.coordinates as [number, number]
+        );
+        onClusterClick(coords);
+      } catch (err) {
+        console.error("Failed to get cluster leaves:", err);
+      }
     },
-    [clusterIndex]
+    [clusterIndex, onClusterClick]
   );
 
   return (

@@ -1,11 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useListingsStore } from "@/store/listings";
 import PropertyCard from "./PropertyCard";
 
 export default function ListView() {
-  const { listings, setSelectedListing, viewportBounds, boundary } = useListingsStore();
+  const { listings, setSelectedListing, viewportBounds, boundary, selectedListing } = useListingsStore();
+
+  useEffect(() => {
+    if (selectedListing) {
+      const el = document.getElementById(`property-card-${selectedListing.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+  }, [selectedListing]);
 
   const visibleListings = useMemo(() => {
     // When a boundary search is active, the API already scoped the results —

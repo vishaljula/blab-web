@@ -207,6 +207,38 @@ export default function MapView() {
     }
   }, [setViewportBounds]);
 
+  const handleClusterClick = useCallback((coords: [number, number][]) => {
+    if (coords.length === 0) return;
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    if (coords.length === 1) {
+      map.flyTo({
+        center: coords[0],
+        zoom: 16,
+        duration: 800,
+      });
+      return;
+    }
+
+    let minLng = coords[0][0];
+    let minLat = coords[0][1];
+    let maxLng = coords[0][0];
+    let maxLat = coords[0][1];
+
+    for (const [lng, lat] of coords) {
+      if (lng < minLng) minLng = lng;
+      if (lat < minLat) minLat = lat;
+      if (lng > maxLng) maxLng = lng;
+      if (lat > maxLat) maxLat = lat;
+    }
+
+    map.fitBounds(
+      [[minLng, minLat], [maxLng, maxLat]],
+      { padding: 80, maxZoom: 16, duration: 800 }
+    );
+  }, []);
+
   // ── Freehand drawing event handlers ──────────────────────────────────────
 
   // Update the map source directly — merges committed polygons + live stroke
@@ -358,6 +390,7 @@ export default function MapView() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onClick={() => setSelectedListing(null)}
         attributionControl={false}
         reuseMaps
       >
@@ -413,7 +446,11 @@ export default function MapView() {
         )}
 
         {mapLoaded && (
-          <PriceMarkers listings={listings} onSelect={setSelectedListing} />
+          <PriceMarkers
+            listings={listings}
+            onSelect={setSelectedListing}
+            onClusterClick={handleClusterClick}
+          />
         )}
       </Map>
     </div>

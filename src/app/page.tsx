@@ -11,6 +11,7 @@ import ViewToggleFab from "@/components/ViewToggleFab";
 import AuthModal from "@/components/AuthModal";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileModal from "@/components/ProfileModal";
+import PropertyCard from "@/components/PropertyCard";
 
 // MapView uses Mapbox SDK which requires browser APIs.
 // Importing with ssr:false prevents server rendering and eliminates hydration mismatches.
@@ -37,6 +38,8 @@ function HomeDashboard() {
     setAuthModalOpen,
     profileModalOpen,
     setProfileModalOpen,
+    selectedListing,
+    setSelectedListing,
   } = useListingsStore();
 
   // Handle client-side media query for desktop split pane
@@ -231,10 +234,20 @@ function HomeDashboard() {
         )}
       </main>
 
-      <ViewToggleFab
-        currentView={viewMode}
-        onToggle={() => setViewMode((prev) => (prev === "map" ? "list" : "map"))}
-      />
+      {!(viewMode === "map" && selectedListing && !isDesktop) && (
+        <ViewToggleFab
+          currentView={viewMode}
+          onToggle={() => setViewMode((prev) => (prev === "map" ? "list" : "map"))}
+        />
+      )}
+      {!isDesktop && viewMode === "map" && selectedListing && (
+        <div className="fixed bottom-[70px] left-2 right-2 z-40 max-w-md mx-auto animate-in slide-in-from-bottom duration-300">
+          <PropertyCard
+            listing={selectedListing}
+            onClose={() => setSelectedListing(null)}
+          />
+        </div>
+      )}
       <BottomNavigation
         onPostClick={handlePostClick}
         onProfileClick={handleProfileClick}
