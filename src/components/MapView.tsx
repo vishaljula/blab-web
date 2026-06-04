@@ -84,6 +84,7 @@ export default function MapView() {
           map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
           map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
           map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
+          map.setConfigProperty("basemap", "language", "local");
         } catch {}
       }
 
@@ -98,7 +99,7 @@ export default function MapView() {
               count++;
             }
           });
-          console.log(`Successfully applied name_en overrides to ${count} layers`);
+          console.log(`Successfully applied name overrides to ${count} layers`);
         }
       } catch (err) {
         console.warn("Failed to apply language overrides:", err);
