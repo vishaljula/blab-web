@@ -83,6 +83,12 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
       <div
         className="relative w-full bg-muted overflow-hidden group"
         style={{ aspectRatio: "16 / 10" }}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseMove={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
       >
         {/* Scrollable image track */}
         <div
