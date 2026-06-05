@@ -56,11 +56,14 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
   const { setHoveredListingId, selectedListing } = useListingsStore();
   const [activeIdx, setActiveIdx] = useState(0);
   const cardRef = useRef<HTMLElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const isSelected = selectedListing?.id === listing.id;
   const photos = getListingPhotos(listing);
 
-  // Block native touch and drag gestures from reaching Mapbox GL JS on mobile
+  // Block touch/pointer gestures from reaching the map canvas underneath,
+  // but let them propagate normally WITHIN the card so the image carousel
+  // can be swiped via native overflow-x scroll.
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
@@ -81,13 +84,17 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
       "pointerup",
     ];
 
+    // Use bubble phase (not capture) so child elements (the scrollable
+    // carousel) receive and handle events first. stopPropagation in
+    // bubble phase still prevents the event from reaching the map's
+    // listeners which are on ancestors above this card.
     targetEvents.forEach((evtName) => {
-      el.addEventListener(evtName, stopNativeEvent, { capture: true, passive: true });
+      el.addEventListener(evtName, stopNativeEvent, { passive: true });
     });
 
     return () => {
       targetEvents.forEach((evtName) => {
-        el.removeEventListener(evtName, stopNativeEvent, { capture: true });
+        el.removeEventListener(evtName, stopNativeEvent);
       });
     };
   }, []);
@@ -105,7 +112,7 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
   return (
     <article
       ref={cardRef}
-      className={`flex flex-col bg-card rounded-xl border cursor-pointer transition-all duration-200 hover:border-border/60 hover:shadow-md active:scale-[0.99] overflow-hidden ${
+      className={`flex flex-col bg-card rounded-xl border cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-border/60 hover:shadow-md overflow-hidden ${
         isSelected ? "border-primary ring-2 ring-primary ring-offset-1 dark:ring-offset-background" : "border-border"
       }`}
       onClick={onClick}
@@ -117,26 +124,31 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
       <div
         className="relative w-full bg-muted overflow-hidden group"
         style={{ aspectRatio: "16 / 10" }}
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onMouseMove={(e) => e.stopPropagation()}
-        onMouseUp={(e) => e.stopPropagation()}
       >
         {/* Scrollable image track */}
+        {/* touch-action: pan-x tells the browser to handle horizontal
+            swipes natively on this element instead of delegating to JS */}
         <div
+          ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none w-full h-full"
           onScroll={handleScroll}
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            touchAction: "pan-x",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehaviorX: "contain",
+          }}
         >
           {photos.map((url, i) => (
-            <div key={i} className="w-full h-full shrink-0 snap-start relative">
+            <div key={i} className="w-full h-full shrink-0 snap-start relative" style={{ touchAction: "pan-x" }}>
               <img
                 src={url}
                 alt={`${listing.address}, ${listing.city} - Photo ${i + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover select-none"
                 loading={i === 0 ? "eager" : "lazy"}
+                draggable={false}
+                style={{ touchAction: "pan-x", pointerEvents: "none" }}
               />
             </div>
           ))}
