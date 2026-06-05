@@ -126,8 +126,9 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
         style={{ aspectRatio: "16 / 8" }}
       >
         {/* Scrollable image track */}
-        {/* touch-action: pan-x tells the browser to handle horizontal
-            swipes natively on this element instead of delegating to JS */}
+        {/* touch-action: pan-x pan-y lets the browser handle both horizontal
+            swipes (carousel) and vertical swipes (list scroll) natively.
+            The browser direction-locks based on the initial gesture. */}
         <div
           ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none w-full h-full"
@@ -135,20 +136,20 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
-            touchAction: "pan-x",
+            touchAction: "pan-x pan-y",
             WebkitOverflowScrolling: "touch",
             overscrollBehaviorX: "contain",
           }}
         >
           {photos.map((url, i) => (
-            <div key={i} className="w-full h-full shrink-0 snap-start relative" style={{ touchAction: "pan-x" }}>
+            <div key={i} className="w-full h-full shrink-0 snap-start relative" style={{ touchAction: "pan-x pan-y" }}>
               <img
                 src={url}
                 alt={`${listing.address}, ${listing.city} - Photo ${i + 1}`}
                 className="w-full h-full object-cover select-none"
                 loading={i === 0 ? "eager" : "lazy"}
                 draggable={false}
-                style={{ touchAction: "pan-x", pointerEvents: "none" }}
+                style={{ touchAction: "pan-x pan-y", pointerEvents: "none" }}
               />
             </div>
           ))}
