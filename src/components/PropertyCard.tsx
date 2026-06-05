@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Heart, X } from "lucide-react";
 import { formatPrice, formatSpecs } from "@/lib/format";
 import { useListingsStore, type Listing } from "@/store/listings";
@@ -55,9 +55,42 @@ function getListingPhotos(listing: Listing): string[] {
 export default function PropertyCard({ listing, onClick, onClose }: PropertyCardProps) {
   const { setHoveredListingId, selectedListing } = useListingsStore();
   const [activeIdx, setActiveIdx] = useState(0);
+  const cardRef = useRef<HTMLElement>(null);
 
   const isSelected = selectedListing?.id === listing.id;
   const photos = getListingPhotos(listing);
+
+  // Block native touch and drag gestures from reaching Mapbox GL JS on mobile
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const stopNativeEvent = (e: Event) => {
+      e.stopPropagation();
+    };
+
+    const targetEvents = [
+      "touchstart",
+      "touchmove",
+      "touchend",
+      "mousedown",
+      "mousemove",
+      "mouseup",
+      "pointerdown",
+      "pointermove",
+      "pointerup",
+    ];
+
+    targetEvents.forEach((evtName) => {
+      el.addEventListener(evtName, stopNativeEvent, { capture: true, passive: true });
+    });
+
+    return () => {
+      targetEvents.forEach((evtName) => {
+        el.removeEventListener(evtName, stopNativeEvent, { capture: true });
+      });
+    };
+  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
@@ -71,6 +104,7 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
 
   return (
     <article
+      ref={cardRef}
       className={`flex flex-col bg-card rounded-xl border cursor-pointer transition-all duration-200 hover:border-border/60 hover:shadow-md active:scale-[0.99] overflow-hidden ${
         isSelected ? "border-primary ring-2 ring-primary ring-offset-1 dark:ring-offset-background" : "border-border"
       }`}
