@@ -113,7 +113,7 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
     <article
       ref={cardRef}
       className={`flex flex-col bg-card rounded-xl border cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-border/60 hover:shadow-md overflow-hidden ${
-        isSelected ? "border-primary ring-2 ring-primary ring-offset-1 dark:ring-offset-background" : "border-border"
+        isSelected ? "ring-2 ring-primary ring-offset-1 dark:ring-offset-background" : "border-border"
       }`}
       onClick={onClick}
       onMouseEnter={() => setHoveredListingId(listing.id)}
@@ -123,7 +123,7 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
       {/* Hero image carousel — full-width, 16:10 aspect ratio */}
       <div
         className="relative w-full bg-muted overflow-hidden group"
-        style={{ aspectRatio: "16 / 10" }}
+        style={{ aspectRatio: "16 / 8" }}
       >
         {/* Scrollable image track */}
         {/* touch-action: pan-x tells the browser to handle horizontal
