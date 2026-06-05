@@ -35,6 +35,7 @@ const COUNTRIES = [
   { code: "+91", name: "India", flag: "🇮🇳" },
   { code: "+1", name: "USA / Canada", flag: "🇺🇸" },
   { code: "+44", name: "United Kingdom", flag: "🇬🇧" },
+  { code: "+31", name: "Netherlands", flag: "🇳🇱" },
   { code: "+971", name: "UAE", flag: "🇦🇪" },
   { code: "+65", name: "Singapore", flag: "🇸🇬" },
 ];
