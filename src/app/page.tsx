@@ -197,7 +197,7 @@ function HomeDashboard() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex flex-col h-dvh overflow-hidden bg-background">
       <Header />
       <ControlBar
         drawActive={drawActive}
