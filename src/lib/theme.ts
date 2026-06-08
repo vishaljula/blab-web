@@ -22,6 +22,6 @@ export const MAP_STYLES = {
 // Applied imperatively via setConfigProperty after the style loads.
 export const DARK_MAP_CONFIG = {
   lightPreset: "dusk",
-  colorMotorways: "#fff04a", // bright yellow — compensates for dusk's warm tint
-  colorTrunks: "#fff04a",
+  colorMotorways: "hsl(60, 100%, 50%)",
+  colorTrunks: "hsl(60, 100%, 50%)",
 } as const;

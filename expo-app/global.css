@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global web resets ── */
+
+/* Remove ugly blue focus outlines on all inputs */
+input:focus,
+textarea:focus,
+select:focus,
+[contenteditable]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Mapbox GL overrides ── */
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
+
+.mapboxgl-ctrl-top-right {
+  top: 12px !important;
+  right: 12px !important;
+}
+
+/* ── Map Markers ── */
+.price-marker {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+  background: var(--marker-bg, #6B1A00);
+  color: var(--marker-text, #fff);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.price-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--marker-bg, #6B1A00);
+}
+
+.price-marker:hover,
+.price-marker--active {
+  transform: scale(1.12);
+  z-index: 10;
+  background: var(--marker-bg-active, #C4501A);
+}
+
+.price-marker--active::after {
+  border-top-color: var(--marker-bg-active, #C4501A);
+}
+
+.cluster-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: var(--marker-bg, #6B1A00);
+  border: 2px solid var(--marker-text, #fff);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cluster-marker:hover {
+  transform: scale(1.3);
+}

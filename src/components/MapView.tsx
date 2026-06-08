@@ -32,9 +32,18 @@ const INITIAL_VIEW = {
 // Prevents excessive point accumulation on fast drags.
 const MIN_POINT_DISTANCE = 0.0005;
 
-function buildDrawGeoJSON(pts: number[][]): GeoJSON.FeatureCollection {
+/**
+ * Constructs the GeoJSON feature collection representing the current drawing progress.
+ * While actively drawing, only a LineString (pencil stroke) and the starting Point are shown.
+ * The closed Polygon is only constructed and filled when the drawing completes.
+ * 
+ * @param pts - Array of coordinates [longitude, latitude] representing the drawn line
+ * @param closed - True if drawing is complete and the polygon should be closed/filled
+ */
+function buildDrawGeoJSON(pts: number[][], closed = false): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = [];
 
+  // 1. LineString representing the drawn path
   if (pts.length >= 2) {
     features.push({
       type: "Feature",
@@ -42,14 +51,17 @@ function buildDrawGeoJSON(pts: number[][]): GeoJSON.FeatureCollection {
       properties: {},
     });
   }
-  if (pts.length >= 3) {
+
+  // 2. Polygon representing the final closed/filled region (only once drawing is finished)
+  if (closed && pts.length >= 3) {
     features.push({
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [[...pts, pts[0]]] },
       properties: {},
     });
   }
-  // First vertex dot
+
+  // 3. Dot marker representing the starting point of the drawing
   if (pts.length >= 1) {
     features.push({
       type: "Feature",
@@ -71,9 +83,7 @@ export default function MapView() {
     [isDark]
   );
 
-  // When switching to Standard (dark), imperatively set the dusk lightPreset
-  // after the new style finishes loading. The config prop only works on mount.
-  // When switching styles (light/dark) or loading, imperatively set presets and force English labels
+  // When switching styles (light/dark), apply theme config and fix label spellings
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
@@ -84,26 +94,28 @@ export default function MapView() {
           map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
           map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
           map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
-          map.setConfigProperty("basemap", "language", "local");
         } catch {}
       }
 
-      // Force English labels (name_en) dynamically across all text-field layers
+      // Override text-field to use the raw `name` field which has correct English
+      // spellings (e.g. "Secunderabad" not "Sikandarabad").
+      // For Standard style: layer.layout is empty in getStyle(), so we use
+      // getLayoutProperty() to check the runtime text-field value.
       try {
         const style = map.getStyle();
         if (style && style.layers) {
-          let count = 0;
           style.layers.forEach((layer: any) => {
-            if (layer.layout && layer.layout["text-field"]) {
-              map.setLayoutProperty(layer.id, "text-field", ["get", "name"]);
-              count++;
-            }
+            // Skip shield layers — they use ["get", "ref"] for route numbers
+            if (layer.id && layer.id.includes("shield")) return;
+            try {
+              const tf = map.getLayoutProperty(layer.id, "text-field");
+              if (tf) {
+                map.setLayoutProperty(layer.id, "text-field", ["get", "name"]);
+              }
+            } catch {}
           });
-          console.log(`Successfully applied name overrides to ${count} layers`);
         }
-      } catch (err) {
-        console.warn("Failed to apply language overrides:", err);
-      }
+      } catch {}
     };
 
     // Style may already be loaded, or we need to wait
