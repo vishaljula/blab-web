@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { useState, useEffect } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
 
@@ -10,6 +11,7 @@ export default function TabLayout() {
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const [isDesktop, setIsDesktop] = useState(false);
+  const insets = useSafeAreaInsets();
 
   // Detect desktop on web — hide bottom tabs
   useEffect(() => {
@@ -33,9 +35,9 @@ export default function TabLayout() {
               backgroundColor: colors.card,
               borderTopColor: colors.border,
               borderTopWidth: 1,
-              height: 60,
-              paddingBottom: 8,
-              paddingTop: 4,
+              height: Platform.OS === "ios" ? (insets.bottom > 0 ? 52 + insets.bottom : 64) : 60,
+              paddingBottom: Platform.OS === "ios" ? (insets.bottom > 0 ? insets.bottom - 4 : 8) : 8,
+              paddingTop: 8,
             },
         tabBarLabelStyle: {
           fontSize: 10,

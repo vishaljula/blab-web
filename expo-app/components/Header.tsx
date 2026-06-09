@@ -15,15 +15,7 @@ import { useRouter } from "expo-router";
 import { COLORS } from "@/lib/theme";
 import { searchPlaces } from "@/lib/api";
 import { useListingsStore } from "@/store/listings";
-import { useColorScheme } from "@/components/useColorScheme";
-
-// Only import toggleColorScheme on web
-let toggleColorScheme: (() => void) | undefined;
-if (Platform.OS === "web") {
-  try {
-    toggleColorScheme = require("@/components/useColorScheme").toggleColorScheme;
-  } catch {}
-}
+import { useColorScheme, toggleColorScheme } from "@/components/useColorScheme";
 
 interface SearchResult {
   name: string;
@@ -222,8 +214,8 @@ export default function Header() {
           )}
         </View>
 
-        {/* Theme toggle (web only) */}
-        {Platform.OS === "web" && toggleColorScheme && (
+        {/* Theme toggle */}
+        {toggleColorScheme && (
           <Pressable
             onPress={toggleColorScheme}
             style={[styles.themeToggle, { borderColor: colors.border }]}
