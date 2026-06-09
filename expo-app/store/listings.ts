@@ -1,4 +1,45 @@
 import { create } from "zustand";
+import { Platform } from "react-native";
+import * as SecureStore from "expo-secure-store";
+import { API_BASE_URL } from "@/lib/theme";
+
+export const getStoredAuth = async () => {
+  try {
+    if (Platform.OS === "web") {
+      const token = localStorage.getItem("auth_token");
+      const userStr = localStorage.getItem("auth_user");
+      return { token, user: userStr ? JSON.parse(userStr) : null };
+    } else {
+      const token = await SecureStore.getItemAsync("auth_token");
+      const userStr = await SecureStore.getItemAsync("auth_user");
+      return { token, user: userStr ? JSON.parse(userStr) : null };
+    }
+  } catch {
+    return { token: null, user: null };
+  }
+};
+
+export const saveStoredAuth = async (token: string | null, user: any | null) => {
+  try {
+    if (Platform.OS === "web") {
+      if (token) {
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("auth_user", JSON.stringify(user));
+      } else {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+      }
+    } else {
+      if (token) {
+        await SecureStore.setItemAsync("auth_token", token);
+        await SecureStore.setItemAsync("auth_user", JSON.stringify(user));
+      } else {
+        await SecureStore.deleteItemAsync("auth_token");
+        await SecureStore.deleteItemAsync("auth_user");
+      }
+    }
+  } catch {}
+};
 
 export interface Listing {
   id: string;
@@ -36,7 +77,9 @@ interface ListingsState {
   drawActive: boolean;
   isLoading: boolean;
   authModalOpen: boolean;
-
+  token: string | null;
+  user: any | null;
+ 
   setListings: (listings: Listing[]) => void;
   addListings: (newListings: Listing[]) => void;
   setSelectedListing: (listing: Listing | null) => void;
@@ -47,6 +90,7 @@ interface ListingsState {
   clearBoundary: () => void;
   setIsLoading: (loading: boolean) => void;
   setAuthModalOpen: (open: boolean) => void;
+  setAuth: (token: string | null, user: any | null) => void;
 }
 
 export const useListingsStore = create<ListingsState>((set) => ({
@@ -58,7 +102,9 @@ export const useListingsStore = create<ListingsState>((set) => ({
   drawActive: false,
   isLoading: false,
   authModalOpen: false,
-
+  token: null,
+  user: null,
+ 
   setListings: (listings) => set({ listings }),
   addListings: (newListings) =>
     set((state) => {
@@ -79,4 +125,30 @@ export const useListingsStore = create<ListingsState>((set) => ({
   clearBoundary: () => set({ boundary: null, drawActive: false, listings: [] }),
   setIsLoading: (loading) => set({ isLoading: loading }),
   setAuthModalOpen: (open) => set({ authModalOpen: open }),
+  setAuth: (token, user) => set({ token, user }),
 }));
+
+// Load initial auth credentials asynchronously
+getStoredAuth().then(({ token, user }) => {
+  if (token) {
+    useListingsStore.setState({ token, user });
+  }
+
+  // On Web, check if there's an active NextAuth session via HTTP-only cookies
+  if (Platform.OS === "web") {
+    fetch(`${API_BASE_URL}/api/auth/session`, { credentials: "include" })
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then((data) => {
+        if (data && data.user) {
+          useListingsStore.setState({
+            token: "next-auth-cookie-session", // Sentinel to indicate cookie-based login
+            user: data.user,
+          });
+        }
+      })
+      .catch(() => {});
+  }
+});

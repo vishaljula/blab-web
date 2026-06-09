@@ -18,20 +18,6 @@ function getLocalIPs(): string[] {
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: getLocalIPs(),
-
-  // Allow the Expo web app (localhost:8081) to call API routes cross-origin
-  async headers() {
-    return [
-      {
-        source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
-        ],
-      },
-    ];
-  },
 };
 
 export default nextConfig;

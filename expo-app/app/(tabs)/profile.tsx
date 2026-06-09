@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { COLORS } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
+import { useListingsStore, saveStoredAuth } from "@/store/listings";
+import { API_BASE_URL } from "@/lib/theme";
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
@@ -11,9 +13,26 @@ export default function ProfileScreen() {
   const colors = isDark ? COLORS.dark : COLORS.light;
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { token, user, setAuth } = useListingsStore();
 
-  // TODO: Replace with actual auth state
-  const isAuthenticated = false;
+  const isAuthenticated = !!token;
+
+  const handleMenuPress = async (label: string) => {
+    if (label === "Sign Out") {
+      if (token === "next-auth-cookie-session") {
+        try {
+          await fetch(`${API_BASE_URL}/api/auth/signout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ csrfToken: "" })
+          });
+        } catch {}
+      }
+      await saveStoredAuth(null, null);
+      setAuth(null, null);
+      router.push("/");
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -55,10 +74,16 @@ export default function ProfileScreen() {
       {/* Profile header */}
       <View style={styles.profileHeader}>
         <View style={[styles.avatar, { backgroundColor: colors.secondary }]}>
-          <Text style={[styles.avatarText, { color: colors.foreground }]}>US</Text>
+          <Text style={[styles.avatarText, { color: colors.foreground }]}>
+            {user?.name ? user.name.slice(0, 2).toUpperCase() : "US"}
+          </Text>
         </View>
-        <Text style={[styles.profileName, { color: colors.foreground }]}>User Name</Text>
-        <Text style={[styles.profileRole, { color: colors.mutedForeground }]}>Buyer</Text>
+        <Text style={[styles.profileName, { color: colors.foreground }]}>
+          {user?.name || "User Name"}
+        </Text>
+        <Text style={[styles.profileRole, { color: colors.mutedForeground }]}>
+          {user?.role || "Buyer"}
+        </Text>
       </View>
 
       {/* Menu items */}
@@ -71,6 +96,7 @@ export default function ProfileScreen() {
       ].map((item, i) => (
         <Pressable
           key={i}
+          onPress={() => handleMenuPress(item.label)}
           style={[styles.menuItem, { borderBottomColor: colors.border }]}
         >
           <Ionicons name={item.icon as any} size={20} color={colors.foreground} />

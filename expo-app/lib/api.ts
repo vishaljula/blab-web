@@ -64,7 +64,7 @@ export async function searchPlaces(
  * Send OTP via the Next.js backend.
  */
 export async function sendOtp(phone: string): Promise<{ success: boolean; error?: string }> {
-  const url = `${API_BASE_URL}/api/auth/send-otp`;
+  const url = `${API_BASE_URL}/api/mobile-auth/send-otp`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ export async function verifyOtp(
   phone: string,
   code: string
 ): Promise<{ success: boolean; token?: string; user?: any; error?: string }> {
-  const url = `${API_BASE_URL}/api/auth/verify-otp`;
+  const url = `${API_BASE_URL}/api/mobile-auth/verify-otp`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -96,7 +96,7 @@ export async function completeOnboarding(
   token: string,
   data: { name: string; role: string; reraNumber?: string; companyName?: string; projectCount?: string }
 ): Promise<{ success: boolean; error?: string }> {
-  const url = `${API_BASE_URL}/api/auth/onboarding`;
+  const url = `${API_BASE_URL}/api/mobile-auth/onboarding`;
   const res = await fetch(url, {
     method: "POST",
     headers: {

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { COLORS } from "@/lib/theme";
 import { searchPlaces } from "@/lib/api";
 import { useListingsStore } from "@/store/listings";
@@ -38,6 +39,7 @@ export default function Header() {
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -45,7 +47,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { setBoundary, viewportBounds } = useListingsStore();
+  const { setBoundary, viewportBounds, token, user } = useListingsStore();
 
   const handleSearch = useCallback(
     (q: string) => {
@@ -238,7 +240,15 @@ export default function Header() {
         <Pressable
           style={[styles.postButton, { backgroundColor: colors.primary }]}
           onPress={() => {
-            // Will integrate with auth
+            if (!token) {
+              router.push("/login");
+              return;
+            }
+            if (user?.role === "buyer") {
+              alert("Buyers cannot create listings. Please edit your role in your profile to Owner, Broker, or Developer.");
+              return;
+            }
+            alert("Listing wizard opening...");
           }}
         >
           <Ionicons name="add" size={16} color={colors.primaryForeground} />

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +23,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { COLORS } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
+import { sendOtp, verifyOtp, completeOnboarding } from "@/lib/api";
+import { useListingsStore, saveStoredAuth } from "@/store/listings";
 
 type Step = "phone" | "otp" | "onboarding";
 
@@ -43,6 +46,7 @@ export default function LoginScreen() {
 
   const [step, setStep] = useState<Step>("phone");
   const [countryCode, setCountryCode] = useState("+91");
+  const [countryPickerVisible, setCountryPickerVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpCode, setOtpCode] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState(false);
@@ -69,14 +73,22 @@ export default function LoginScreen() {
     setLoading(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    // TODO: Call sendOtp API
-    setTimeout(() => {
+    try {
+      const fullPhone = `${countryCode}${phoneNumber}`;
+      const res = await sendOtp(fullPhone);
+      if (res.success) {
+        setTimer(60);
+        setStep("otp");
+        setTimeout(() => otpRefs.current[0]?.focus(), 200);
+      } else {
+        Alert.alert("Failed", res.error || "Failed to send verification code");
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to connect to authentication server");
+    } finally {
       setLoading(false);
-      setTimer(60);
-      setStep("otp");
-      setTimeout(() => otpRefs.current[0]?.focus(), 200);
-    }, 800);
-  }, [phoneNumber]);
+    }
+  }, [phoneNumber, countryCode]);
 
   const handleVerifyOTP = useCallback(
     async (code: string) => {
@@ -84,13 +96,29 @@ export default function LoginScreen() {
       setLoading(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      // TODO: Call verifyOtp API
-      setTimeout(() => {
+      try {
+        const fullPhone = `${countryCode}${phoneNumber}`;
+        const res = await verifyOtp(fullPhone, code);
+        if (res.success && res.token) {
+          await saveStoredAuth(res.token, res.user);
+          useListingsStore.getState().setAuth(res.token, res.user);
+          if (!res.user?.name) {
+            setStep("onboarding");
+          } else {
+            router.back();
+          }
+        } else {
+          Alert.alert("Verification Failed", res.error || "Invalid OTP code");
+          setOtpCode(Array(6).fill(""));
+          otpRefs.current[0]?.focus();
+        }
+      } catch (err: any) {
+        Alert.alert("Error", err.message || "Failed to verify code");
+      } finally {
         setLoading(false);
-        setStep("onboarding");
-      }, 800);
+      }
     },
-    []
+    [countryCode, phoneNumber, router]
   );
 
   const handleOtpChange = useCallback(
@@ -131,33 +159,71 @@ export default function LoginScreen() {
     setLoading(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    // TODO: Call completeOnboarding API
-    setTimeout(() => {
+    try {
+      const token = useListingsStore.getState().token;
+      if (!token) throw new Error("Authentication token missing");
+      const res = await completeOnboarding(token, { name, role });
+      if (res.success) {
+        const currentUser = useListingsStore.getState().user || {};
+        const updatedUser = { ...currentUser, name, role };
+        await saveStoredAuth(token, updatedUser);
+        useListingsStore.getState().setAuth(token, updatedUser);
+        router.back();
+      } else {
+        Alert.alert("Onboarding Failed", res.error || "Failed to complete onboarding");
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to save profile settings");
+    } finally {
       setLoading(false);
-      router.back();
-    }, 800);
+    }
   }, [name, role, router]);
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: Platform.OS === "web" ? (isDark ? "#0A0A0A" : "#F4F4F5") : colors.card }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        style={[styles.container, { backgroundColor: colors.card }]}
+        style={styles.container}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 },
+          Platform.select({
+            web: {
+              minHeight: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              paddingVertical: 40,
+            },
+            default: {
+              paddingTop: insets.top + 16,
+              paddingBottom: insets.bottom + 24,
+            },
+          }),
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Close button */}
-        <Pressable
-          onPress={() => router.back()}
-          style={[styles.closeButton, { backgroundColor: colors.secondary }]}
+        <View
+          style={Platform.select({
+            web: {
+              width: "100%",
+              maxWidth: 460,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+              padding: 32,
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
+            },
+          })}
         >
-          <Ionicons name="close" size={20} color={colors.foreground} />
-        </Pressable>
+          {/* Close button */}
+          <Pressable
+            onPress={() => router.back()}
+            style={[styles.closeButton, { backgroundColor: colors.secondary }]}
+          >
+            <Ionicons name="close" size={20} color={colors.foreground} />
+          </Pressable>
 
         {/* Phone Step */}
         {step === "phone" && (
@@ -175,11 +241,18 @@ export default function LoginScreen() {
             </Text>
 
             <View style={styles.phoneRow}>
-              <View style={[styles.countryPicker, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
+              <Pressable
+                onPress={() => setCountryPickerVisible(true)}
+                style={[
+                  styles.countryPicker,
+                  { backgroundColor: colors.secondary, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 6 }
+                ]}
+              >
                 <Text style={[styles.countryText, { color: colors.foreground }]}>
                   {COUNTRIES.find((c) => c.code === countryCode)?.flag} {countryCode}
                 </Text>
-              </View>
+                <Ionicons name="chevron-down" size={12} color={colors.mutedForeground} />
+              </Pressable>
               <TextInput
                 value={phoneNumber}
                 onChangeText={(v) => setPhoneNumber(v.replace(/\D/g, ""))}
@@ -346,7 +419,43 @@ export default function LoginScreen() {
             </Pressable>
           </Animated.View>
         )}
+        </View>
       </ScrollView>
+
+      {/* Country Picker Modal */}
+      <Modal
+        visible={countryPickerVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCountryPickerVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setCountryPickerVisible(false)}
+        >
+          <View style={[styles.modalCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Select Country</Text>
+            {COUNTRIES.map((c) => (
+              <Pressable
+                key={c.code}
+                onPress={() => {
+                  setCountryCode(c.code);
+                  setCountryPickerVisible(false);
+                }}
+                style={[
+                  styles.modalItem,
+                  { borderBottomColor: colors.border },
+                  countryCode === c.code && { backgroundColor: `${colors.primary}0D` }
+                ]}
+              >
+                <Text style={[styles.modalItemText, { color: colors.foreground }]}>
+                  {c.flag}   {c.name} ({c.code})
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -503,5 +612,41 @@ const styles = StyleSheet.create({
   roleDesc: {
     fontSize: 10,
     marginTop: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 320,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  modalItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+  },
+  modalItemText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
