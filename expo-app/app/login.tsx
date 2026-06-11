@@ -56,7 +56,7 @@ export default function LoginScreen() {
   const [name, setName] = useState("");
   const [role, setRole] = useState<"buyer" | "owner" | "broker" | "developer">("owner");
 
-  const otpRefs = useRef<TextInput[]>([]);
+  const otpInputRef = useRef<TextInput>(null);
 
   // OTP countdown
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function LoginScreen() {
       if (res.success) {
         setTimer(60);
         setStep("otp");
-        setTimeout(() => otpRefs.current[0]?.focus(), 200);
+        setTimeout(() => otpInputRef.current?.focus(), 200);
       } else {
         Alert.alert("Failed", res.error || "Failed to send verification code");
       }
@@ -110,7 +110,7 @@ export default function LoginScreen() {
         } else {
           Alert.alert("Verification Failed", res.error || "Invalid OTP code");
           setOtpCode(Array(6).fill(""));
-          otpRefs.current[0]?.focus();
+          otpInputRef.current?.focus();
         }
       } catch (err: any) {
         Alert.alert("Error", err.message || "Failed to verify code");
@@ -121,34 +121,19 @@ export default function LoginScreen() {
     [countryCode, phoneNumber, router]
   );
 
-  const handleOtpChange = useCallback(
-    (value: string, index: number) => {
-      if (!/^\d*$/.test(value)) return;
-      const newOtp = [...otpCode];
-      newOtp[index] = value;
+  // Single input handler — receives the full OTP string (typed, pasted, or auto-filled)
+  const handleOtpInput = useCallback(
+    (value: string) => {
+      const cleaned = value.replace(/\D/g, "").slice(0, 6);
+      const newOtp = Array(6).fill("");
+      cleaned.split("").forEach((d, i) => { newOtp[i] = d; });
       setOtpCode(newOtp);
 
-      if (value && index < 5) {
-        otpRefs.current[index + 1]?.focus();
-      }
-
-      if (newOtp.every((d) => d !== "")) {
-        handleVerifyOTP(newOtp.join(""));
+      if (cleaned.length === 6) {
+        handleVerifyOTP(cleaned);
       }
     },
-    [otpCode, handleVerifyOTP]
-  );
-
-  const handleOtpKeyPress = useCallback(
-    (key: string, index: number) => {
-      if (key === "Backspace" && otpCode[index] === "" && index > 0) {
-        const newOtp = [...otpCode];
-        newOtp[index - 1] = "";
-        setOtpCode(newOtp);
-        otpRefs.current[index - 1]?.focus();
-      }
-    },
-    [otpCode]
+    [handleVerifyOTP]
   );
 
   const handleOnboardingSubmit = useCallback(async () => {
@@ -307,28 +292,51 @@ export default function LoginScreen() {
               </Text>
             </Text>
 
+            {/* Single real TextInput behind visual boxes — captures typing, paste, and auto-fill */}
             <View style={styles.otpRow}>
+              <TextInput
+                ref={otpInputRef}
+                value={otpCode.join("")}
+                onChangeText={handleOtpInput}
+                maxLength={6}
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete="sms-otp"
+                caretHidden
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                }}
+              />
               {otpCode.map((digit, i) => (
-                <TextInput
+                <Pressable
                   key={i}
-                  ref={(el) => {
-                    if (el) otpRefs.current[i] = el;
-                  }}
-                  value={digit}
-                  onChangeText={(v) => handleOtpChange(v, i)}
-                  onKeyPress={({ nativeEvent }) => handleOtpKeyPress(nativeEvent.key, i)}
-                  maxLength={1}
-                  keyboardType="number-pad"
+                  onPress={() => otpInputRef.current?.focus()}
                   style={[
                     styles.otpInput,
                     {
                       backgroundColor: colors.secondary,
-                      borderColor: digit ? colors.primary : colors.border,
-                      color: colors.foreground,
+                      borderColor: digit
+                        ? colors.primary
+                        : i === otpCode.join("").length
+                          ? colors.foreground
+                          : colors.border,
                     },
                   ]}
-                  selectTextOnFocus
-                />
+                >
+                  <Text
+                    style={{
+                      color: colors.foreground,
+                      fontSize: 18,
+                      fontWeight: "800",
+                      textAlign: "center",
+                    }}
+                  >
+                    {digit}
+                  </Text>
+                </Pressable>
               ))}
             </View>
 
@@ -569,9 +577,8 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
     borderWidth: 1.5,
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "800",
+    alignItems: "center",
+    justifyContent: "center",
   },
   timerText: {
     fontSize: 13,

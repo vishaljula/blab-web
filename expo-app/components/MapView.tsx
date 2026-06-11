@@ -522,7 +522,6 @@ export default function MapView() {
         scaleBarEnabled={false}
         logoEnabled={false}
         attributionEnabled={false}
-        localizeLabels={{ locale: "en" }}
       >
         {/* defaultSettings (not animateTo) so the camera position is applied on mount
             without triggering an animation. globalCameraState is null on first launch,

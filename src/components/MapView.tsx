@@ -89,42 +89,26 @@ export default function MapView() {
     if (!map || !mapLoaded) return;
 
     const applyStyleSettings = () => {
-      console.log("=== MAPVIEW DEBUG START ===");
-      console.log("isDark:", isDark);
-      console.log("Style URL:", mapStyle);
-      console.log("setLanguage function available:", typeof (map as any).setLanguage === "function");
-      try {
-        const style = map.getStyle();
-        if (style && style.layers) {
-          console.log("Total layers in style:", style.layers.length);
-          const labelLayers = style.layers.filter((l: any) => l.id.includes("label"));
-          console.log("Label layer IDs found:", labelLayers.map((l: any) => l.id));
-        }
-      } catch (e) {
-        console.log("Error getting style:", e);
-      }
-      console.log("=== MAPVIEW DEBUG END ===");
-
       if (isDark) {
-        try {
-          const motorwayLayers = [
-            "road-motorway",
-            "road-trunk",
-            "road-motorway-link",
-            "road-trunk-link",
-            "bridge-motorway",
-            "bridge-trunk",
-            "bridge-motorway-link",
-            "bridge-trunk-link",
-            "tunnel-motorway",
-            "tunnel-trunk",
-            "tunnel-motorway-link",
-            "tunnel-trunk-link"
-          ];
-          motorwayLayers.forEach((layerId) => {
+        const motorwayLayers = [
+          "road-motorway",
+          "road-trunk",
+          "road-motorway-link",
+          "road-trunk-link",
+          "bridge-motorway",
+          "bridge-trunk",
+          "bridge-motorway-link",
+          "bridge-trunk-link",
+          "tunnel-motorway",
+          "tunnel-trunk",
+          "tunnel-motorway-link",
+          "tunnel-trunk-link"
+        ];
+        motorwayLayers.forEach((layerId) => {
+          if (map.getLayer(layerId)) {
             map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
-          });
-        } catch { }
+          }
+        });
       }
 
       // Override text-field to use the raw `name` field which has correct English
