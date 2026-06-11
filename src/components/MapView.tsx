@@ -90,6 +90,14 @@ export default function MapView() {
 
     const applyStyleSettings = () => {
       if (isDark) {
+        // Apply Mapbox Standard style config for dark mode (dusk lighting + yellow highways)
+        try {
+          (map as any).setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
+          (map as any).setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
+          (map as any).setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
+        } catch {}
+
+        // Fallback: also try direct paint properties for older style variants
         const motorwayLayers = [
           "road-motorway",
           "road-trunk",

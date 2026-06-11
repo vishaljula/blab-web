@@ -15,7 +15,7 @@ export const DRAW_COLOR = "#8B2500";
 // ── Map styles per theme ─────────────────────────────────────────────
 export const MAP_STYLES = {
   light: "mapbox://styles/mapbox/streets-v12",
-  dark: "mapbox://styles/mapbox/dark-v11",
+  dark: "mapbox://styles/mapbox/standard",
 } as const;
 
 // ── Standard (dark) config overrides ─────────────────────────────────

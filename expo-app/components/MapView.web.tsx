@@ -133,25 +133,33 @@ export default function MapViewWeb() {
 
     const applyStyleSettings = () => {
       if (isDark) {
+        // Apply Mapbox Standard style config for dark mode (dusk lighting + yellow highways)
         try {
-          const motorwayLayers = [
-            "road-motorway",
-            "road-trunk",
-            "road-motorway-link",
-            "road-trunk-link",
-            "bridge-motorway",
-            "bridge-trunk",
-            "bridge-motorway-link",
-            "bridge-trunk-link",
-            "tunnel-motorway",
-            "tunnel-trunk",
-            "tunnel-motorway-link",
-            "tunnel-trunk-link"
-          ];
-          motorwayLayers.forEach((layerId) => {
-            map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
-          });
+          (map as any).setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
+          (map as any).setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
+          (map as any).setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
         } catch {}
+
+        // Fallback: also try direct paint properties for older style variants
+        const motorwayLayers = [
+          "road-motorway",
+          "road-trunk",
+          "road-motorway-link",
+          "road-trunk-link",
+          "bridge-motorway",
+          "bridge-trunk",
+          "bridge-motorway-link",
+          "bridge-trunk-link",
+          "tunnel-motorway",
+          "tunnel-trunk",
+          "tunnel-motorway-link",
+          "tunnel-trunk-link"
+        ];
+        motorwayLayers.forEach((layerId) => {
+          if (map.getLayer(layerId)) {
+            map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
+          }
+        });
       }
 
       // Override text-field to use the raw `name` field which has correct English
