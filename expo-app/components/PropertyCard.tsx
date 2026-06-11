@@ -57,17 +57,15 @@ function getListingPhotos(listing: Listing): string[] {
   return photos;
 }
 
-
-
 export default function PropertyCard({ listing, onPress, onClose, selected }: PropertyCardProps) {
   const colorScheme = useColorScheme();
+  const scrollRef = useRef<ScrollView>(null);
+  const [cardWidth, setCardWidth] = useState(340);
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const [activeIdx, setActiveIdx] = useState(0);
-  const [cardWidth, setCardWidth] = useState(300);
-  const scrollRef = useRef<ScrollView>(null);
   const photos = getListingPhotos(listing);
-  const imageHeight = Math.min(cardWidth * 0.45, 180);
+  const imageHeight = 180;
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
@@ -87,8 +85,7 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
   const badgeColors = isDark ? listerColor.dark : listerColor.light;
 
   return (
-    <Pressable
-      onPress={onPress}
+    <View
       style={[
         styles.card,
         {
@@ -101,7 +98,12 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
       {/* Image Carousel */}
       <View
         style={{ position: "relative", height: imageHeight, overflow: "hidden" }}
-        onLayout={(e) => setCardWidth(e.nativeEvent.layout.width)}
+        onLayout={(e) => {
+          const w = Math.round(e.nativeEvent.layout.width);
+          if (w > 0 && Math.abs(cardWidth - w) > 2) {
+            setCardWidth(w);
+          }
+        }}
       >
         <ScrollView
           ref={scrollRef}
@@ -114,14 +116,15 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
           bounces={false}
         >
           {photos.map((url, i) => (
-            <Image
-              key={i}
-              source={{ uri: url }}
-              style={{ width: cardWidth, height: imageHeight }}
-              contentFit="cover"
-              transition={200}
-              priority={i === 0 ? "high" : "low"}
-            />
+            <Pressable key={i} onPress={onPress}>
+              <Image
+                source={{ uri: url }}
+                style={{ width: cardWidth, height: imageHeight }}
+                contentFit="cover"
+                transition={200}
+                priority={i === 0 ? "high" : "low"}
+              />
+            </Pressable>
           ))}
         </ScrollView>
 
@@ -175,7 +178,7 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
       </View>
 
       {/* Property Info */}
-      <View style={styles.infoContainer}>
+      <Pressable onPress={onPress} style={styles.infoContainer}>
         {/* Price + lister badge */}
         <View style={styles.priceRow}>
           <Text style={[styles.price, { color: colors.foreground }]}>
@@ -205,8 +208,8 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
         >
           {listing.address}, {listing.city}
         </Text>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 

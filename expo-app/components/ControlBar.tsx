@@ -8,7 +8,11 @@ import { useColorScheme } from "@/components/useColorScheme";
 const Haptics = Platform.OS !== "web" ? require("expo-haptics") : null;
 
 
-export default function ControlBar() {
+interface ControlBarProps {
+  hideDraw?: boolean;
+}
+
+export default function ControlBar({ hideDraw }: ControlBarProps = {}) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
@@ -46,35 +50,37 @@ export default function ControlBar() {
         </Pressable>
 
         {/* Draw — morphs to Done when active */}
-        <Pressable
-          onPress={() => {
-            Haptics?.impactAsync(Haptics?.ImpactFeedbackStyle?.Light);
-            toggleDraw();
-          }}
-          style={[
-            styles.chip,
-            {
-              backgroundColor: drawActive ? colors.foreground : colors.background,
-              borderColor: drawActive ? colors.foreground : colors.border,
-            },
-          ]}
-        >
-          <Ionicons
-            name={drawActive ? "checkmark" : "pencil"}
-            size={13}
-            color={drawActive ? colors.background : colors.foreground}
-          />
-          <Text
+        {!hideDraw && (
+          <Pressable
+            onPress={() => {
+              Haptics?.impactAsync(Haptics?.ImpactFeedbackStyle?.Light);
+              toggleDraw();
+            }}
             style={[
-              styles.chipText,
-              { color: drawActive ? colors.background : colors.foreground },
+              styles.chip,
+              {
+                backgroundColor: drawActive ? colors.foreground : colors.background,
+                borderColor: drawActive ? colors.foreground : colors.border,
+              },
             ]}
           >
-            {drawActive ? "Done" : "Draw"}
-          </Text>
-        </Pressable>
+            <Ionicons
+              name={drawActive ? "checkmark" : "pencil"}
+              size={13}
+              color={drawActive ? colors.background : colors.foreground}
+            />
+            <Text
+              style={[
+                styles.chipText,
+                { color: drawActive ? colors.background : colors.foreground },
+              ]}
+            >
+              {drawActive ? "Done" : "Draw"}
+            </Text>
+          </Pressable>
+        )}
 
-        {/* Clear boundary */}
+        {/* Clear boundary — always visible when a boundary exists, even in list mode */}
         {boundary && (
           <Pressable
             onPress={() => {

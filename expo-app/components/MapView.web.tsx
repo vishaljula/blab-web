@@ -134,22 +134,34 @@ export default function MapViewWeb() {
     const applyStyleSettings = () => {
       if (isDark) {
         try {
-          map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
-          map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
-          map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
+          const motorwayLayers = [
+            "road-motorway",
+            "road-trunk",
+            "road-motorway-link",
+            "road-trunk-link",
+            "bridge-motorway",
+            "bridge-trunk",
+            "bridge-motorway-link",
+            "bridge-trunk-link",
+            "tunnel-motorway",
+            "tunnel-trunk",
+            "tunnel-motorway-link",
+            "tunnel-trunk-link"
+          ];
+          motorwayLayers.forEach((layerId) => {
+            map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
+          });
         } catch {}
       }
 
       // Override text-field to use the raw `name` field which has correct English
       // spellings (e.g. "Secunderabad" not "Sikandarabad").
-      // For Standard style: layer.layout is empty in getStyle(), so we use
-      // getLayoutProperty() to check the runtime text-field value.
       try {
         const style = map.getStyle();
         if (style && style.layers) {
           style.layers.forEach((layer: any) => {
-            // Skip shield layers — they use ["get", "ref"] for route numbers
-            if (layer.id && layer.id.includes("shield")) return;
+            // Skip shield and road/highway layers to preserve NH shields and street route numbers
+            if (layer.id && (layer.id.includes("shield") || layer.id.includes("road") || layer.id.includes("highway"))) return;
             try {
               const tf = map.getLayoutProperty(layer.id, "text-field");
               if (tf) {
@@ -165,7 +177,11 @@ export default function MapViewWeb() {
     applyStyleSettings();
     // Also apply when new style finishes loading (theme switch)
     map.on("style.load", applyStyleSettings);
-    return () => { map.off("style.load", applyStyleSettings); };
+    map.on("idle", applyStyleSettings);
+    return () => {
+      map.off("style.load", applyStyleSettings);
+      map.off("idle", applyStyleSettings);
+    };
   }, [isDark, mapLoaded]);
 
   const {

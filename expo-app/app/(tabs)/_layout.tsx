@@ -48,9 +48,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Map",
+          title: "Explore",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
+            <Ionicons name="search" size={size} color={color} />
           ),
         }}
       />
@@ -58,8 +58,8 @@ export default function TabLayout() {
         name="list"
         options={{
           title: "List",
-          // Hide the List tab on desktop since it's integrated into the map screen
-          href: isDesktop ? null : undefined,
+          // Integrated into the map screen
+          href: null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="list" size={size} color={color} />
           ),

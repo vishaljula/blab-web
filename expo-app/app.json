@@ -35,7 +35,13 @@
           "backgroundColor": "#FAFAF8"
         }
       ],
-      "expo-image"
+      "expo-image",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsImpl": "mapbox"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -147,9 +147,18 @@ export default function Header() {
               style={[styles.searchInput, { color: colors.foreground, outlineStyle: "none" } as any]}
               autoCorrect={false}
               returnKeyType="search"
+              onSubmitEditing={Keyboard.dismiss}
             />
             {query.length > 0 && (
-              <Pressable onPress={() => { setQuery(""); setResults([]); setSearchOpen(false); }}>
+              <Pressable
+                onPress={() => {
+                  setQuery("");
+                  setResults([]);
+                  setSearchOpen(false);
+                  setBoundary(null);
+                }}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              >
                 <Ionicons name="close" size={14} color={colors.mutedForeground} />
               </Pressable>
             )}

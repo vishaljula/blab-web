@@ -1,5 +1,6 @@
-import { View, StyleSheet, Platform } from "react-native";
+import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import { useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header";
 import ControlBar from "@/components/ControlBar";
 import MapViewComponent from "@/components/MapView";
@@ -14,6 +15,7 @@ export default function MapScreen() {
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const [isDesktop, setIsDesktop] = useState(false);
+  const [viewMode, setViewMode] = useState<"map" | "list">("map");
 
   const { selectedListing, setSelectedListing } = useListingsStore();
 
@@ -30,7 +32,7 @@ export default function MapScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
-      <ControlBar />
+      <ControlBar hideDraw={!isDesktop && viewMode === "list"} />
 
       {isDesktop ? (
         /* Desktop: map left (flex 3), listings right (flex 2) */
@@ -43,17 +45,45 @@ export default function MapScreen() {
           </View>
         </View>
       ) : (
-        /* Mobile: full-screen map with floating card */
+        /* Mobile: full-screen map or list with floating toggle button */
         <View style={styles.mapContainer}>
-          <MapViewComponent />
-          {selectedListing && (
-            <View style={styles.floatingCard}>
-              <PropertyCard
-                listing={selectedListing}
-                onClose={() => setSelectedListing(null)}
-                selected
+          {viewMode === "map" ? (
+            <>
+              <MapViewComponent />
+              {selectedListing && (
+                <View style={styles.floatingCard}>
+                  <PropertyCard
+                    listing={selectedListing}
+                    onClose={() => setSelectedListing(null)}
+                    selected
+                  />
+                </View>
+              )}
+            </>
+          ) : (
+            <ListView />
+          )}
+
+          {(!selectedListing || viewMode === "list") && (
+            <Pressable
+              onPress={() => setViewMode(viewMode === "map" ? "list" : "map")}
+              style={[
+                styles.floatingToggle,
+                {
+                  backgroundColor: colors.primary,
+                  bottom: 24,
+                },
+              ]}
+            >
+              <Ionicons
+                name={viewMode === "map" ? "list" : "map"}
+                size={18}
+                color={colors.primaryForeground}
               />
-            </View>
+              <Text style={[styles.floatingToggleText, { color: colors.primaryForeground }]}>
+                {viewMode === "map" ? "List" : "Map"}
+              </Text>
+            </Pressable>
           )}
         </View>
       )}
@@ -95,5 +125,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
+  },
+  floatingToggle: {
+    position: "absolute",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
+    gap: 8,
+    zIndex: 50,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  floatingToggleText: {
+    fontSize: 14,
+    fontWeight: "700",
   },
 });

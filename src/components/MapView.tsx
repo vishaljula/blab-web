@@ -89,33 +89,61 @@ export default function MapView() {
     if (!map || !mapLoaded) return;
 
     const applyStyleSettings = () => {
+      console.log("=== MAPVIEW DEBUG START ===");
+      console.log("isDark:", isDark);
+      console.log("Style URL:", mapStyle);
+      console.log("setLanguage function available:", typeof (map as any).setLanguage === "function");
+      try {
+        const style = map.getStyle();
+        if (style && style.layers) {
+          console.log("Total layers in style:", style.layers.length);
+          const labelLayers = style.layers.filter((l: any) => l.id.includes("label"));
+          console.log("Label layer IDs found:", labelLayers.map((l: any) => l.id));
+        }
+      } catch (e) {
+        console.log("Error getting style:", e);
+      }
+      console.log("=== MAPVIEW DEBUG END ===");
+
       if (isDark) {
         try {
-          map.setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
-          map.setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
-          map.setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
-        } catch {}
+          const motorwayLayers = [
+            "road-motorway",
+            "road-trunk",
+            "road-motorway-link",
+            "road-trunk-link",
+            "bridge-motorway",
+            "bridge-trunk",
+            "bridge-motorway-link",
+            "bridge-trunk-link",
+            "tunnel-motorway",
+            "tunnel-trunk",
+            "tunnel-motorway-link",
+            "tunnel-trunk-link"
+          ];
+          motorwayLayers.forEach((layerId) => {
+            map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
+          });
+        } catch { }
       }
 
       // Override text-field to use the raw `name` field which has correct English
       // spellings (e.g. "Secunderabad" not "Sikandarabad").
-      // For Standard style: layer.layout is empty in getStyle(), so we use
-      // getLayoutProperty() to check the runtime text-field value.
       try {
         const style = map.getStyle();
         if (style && style.layers) {
           style.layers.forEach((layer: any) => {
-            // Skip shield layers — they use ["get", "ref"] for route numbers
-            if (layer.id && layer.id.includes("shield")) return;
+            // Skip shield and road/highway layers to preserve NH shields and street route numbers
+            if (layer.id && (layer.id.includes("shield") || layer.id.includes("road") || layer.id.includes("highway"))) return;
             try {
               const tf = map.getLayoutProperty(layer.id, "text-field");
               if (tf) {
                 map.setLayoutProperty(layer.id, "text-field", ["get", "name"]);
               }
-            } catch {}
+            } catch { }
           });
         }
-      } catch {}
+      } catch { }
     };
 
     // Style may already be loaded, or we need to wait
@@ -123,8 +151,10 @@ export default function MapView() {
       applyStyleSettings();
     }
     map.on("style.load", applyStyleSettings);
+    map.on("idle", applyStyleSettings);
     return () => {
       map.off("style.load", applyStyleSettings);
+      map.off("idle", applyStyleSettings);
     };
   }, [isDark, mapLoaded]);
 

@@ -50,6 +50,15 @@ export const MAP_STYLES = {
   dark: "mapbox://styles/mapbox/standard",
 } as const;
 
+// ── Standard (dark) style config overrides ────────────────────────
+// Applied via <Mapbox.StyleImport> on native (mirrors web app's setConfigProperty calls).
+// Sync with src/lib/theme.ts → DARK_MAP_CONFIG when changing.
+export const DARK_MAP_CONFIG = {
+  lightPreset: "dusk",
+  colorMotorways: "#fff04a",
+  colorTrunks: "#fff04a",
+} as const;
+
 // ── Lister type badge colors ─────────────────────────────────────
 export const LISTER_COLORS = {
   owner: {
