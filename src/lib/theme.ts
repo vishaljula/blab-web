@@ -1,27 +1,39 @@
 /**
- * Blab — Centralized Theme Constants
+ * Blab — Centralized Theme Constants (Web / Next.js)
  *
- * All JS-side theme values live here. CSS variables live in globals.css.
- * To retheme the app, edit:
- *   1. globals.css  → CSS tokens (--primary, --background, etc.)
- *   2. This file    → Mapbox map styles, draw color, highway colors
+ * CSS variables (--primary, --background, etc.) live in globals.css.
+ * This file holds the JS-side mirrors needed for Mapbox GL paint props,
+ * which cannot read CSS variables at runtime.
+ *
+ * To retheme: change a color in BOTH globals.css AND the matching slot below.
  */
 
-// ── Draw / overlay color ─────────────────────────────────────────────
-// Must match --primary in globals.css.
-// Mapbox GL paint props can't read CSS variables, so this is the JS mirror.
-export const DRAW_COLOR = "#8B2500";
-
-// ── Map styles per theme ─────────────────────────────────────────────
-export const MAP_STYLES = {
-  light: "mapbox://styles/mapbox/streets-v12",
-  dark: "mapbox://styles/mapbox/standard",
+// ── JS color tokens (light + dark) ──────────────────────────────────────────
+// Web uses CSS variables for most UI colors (Tailwind picks them up).
+// The entries here are the ones Mapbox GL paint props need explicitly.
+export const COLORS = {
+  light: {
+    drawColor:   "#8B2500",         // polygon fill + stroke — matches --primary
+    markerBg:    "#6B1A00",
+    markerBgActive: "#C4501A",
+    markerText:  "#FFFFFF",
+  },
+  dark: {
+    drawColor:   "rgb(255, 253, 0)", // yellow — matches marker + card border in dark mode
+    markerBg:    "rgb(255, 253, 0)",
+    markerBgActive: "rgb(230, 228, 0)",
+    markerText:  "rgb(0, 0, 0)",
+  },
 } as const;
 
-// ── Standard (dark) config overrides ─────────────────────────────────
-// Applied imperatively via setConfigProperty after the style loads.
-export const DARK_MAP_CONFIG = {
-  lightPreset: "dusk",
-  colorMotorways: "hsl(60, 100%, 50%)",
-  colorTrunks: "hsl(60, 100%, 50%)",
+// ── Convenience aliases (used by older imports) ──────────────────────────────
+export const DRAW_COLOR      = COLORS.light.drawColor;
+export const DRAW_COLOR_DARK = COLORS.dark.drawColor;
+
+// ── Map styles per theme ─────────────────────────────────────────────────────
+// Both are classic Mapbox styles — all layers directly accessible.
+// Labels fixed in Studio to use `name` for major, `name_en` for subdivisions.
+export const MAP_STYLES = {
+  light: "mapbox://styles/mapbox/streets-v12",
+  dark:  "mapbox://styles/purchases-moneymic/cmqbrfwec000701qw1lu90qvg",
 } as const;

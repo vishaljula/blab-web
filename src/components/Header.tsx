@@ -37,7 +37,7 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const { setBoundary, viewportBounds, setAuthModalOpen, setProfileModalOpen } = useListingsStore();
+  const { setBoundary, viewportBounds, setViewportBounds, setAuthModalOpen, setProfileModalOpen } = useListingsStore();
 
   useEffect(() => setMounted(true), []);
 
@@ -243,9 +243,14 @@ export default function Header() {
             className="flex items-center justify-center w-9 h-9 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             id="theme-toggle-btn"
             aria-label="Toggle dark mode"
-            onClick={() =>
-              setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
+            onClick={() => {
+              const next = resolvedTheme === "dark" ? "light" : "dark";
+              setTheme(next);
+              // Nudge viewportBounds so the page.tsx fetch effect re-runs
+              // and PriceMarkers re-renders with the new style
+              const vb = viewportBounds;
+              if (vb) setViewportBounds([vb[0], vb[1], vb[2], vb[3]]);
+            }}
           >
             {resolvedTheme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
           </button>

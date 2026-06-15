@@ -103,9 +103,10 @@
   --border:                #2A2A2A;
   --input:                 #2A2A2A;
   --ring:                  #C4501A;
-  --marker-bg:             #8B2500;
-  --marker-bg-active:      #C4501A;
-  --shadow-marker:         0 2px 8px rgba(139, 37, 0, 0.4);
+  --marker-bg:             rgb(255, 253, 0);
+  --marker-text:           rgb(0, 0, 0);
+  --marker-bg-active:      rgb(230, 228, 0);
+  --shadow-marker:         0 2px 8px rgba(255, 253, 0, 0.25);
   --shadow-md:             0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg:             0 12px 40px rgba(0, 0, 0, 0.5);
 }

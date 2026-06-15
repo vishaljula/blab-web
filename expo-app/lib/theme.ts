@@ -21,6 +21,7 @@ export const COLORS = {
     markerBg: "#6B1A00",
     markerBgActive: "#C4501A",
     markerText: "#FFFFFF",
+    drawColor: "#8B2500",
   },
   dark: {
     background: "#0F0F0F",
@@ -35,28 +36,26 @@ export const COLORS = {
     mutedForeground: "#A0A0A0",
     border: "#2A2A2A",
     destructive: "#C41B30",
-    markerBg: "#8B2500",
-    markerBgActive: "#C4501A",
-    markerText: "#FFFFFF",
+    markerBg: "rgb(255, 253, 0)",
+    markerBgActive: "rgb(230, 228, 0)",
+    markerText: "rgb(0, 0, 0)",
+    drawColor: "rgb(255, 253, 0)",
   },
 } as const;
 
 // ── Draw / overlay color ─────────────────────────────────────────
-export const DRAW_COLOR = "#8B2500";
+// Kept as a convenience alias for COLORS.light.drawColor.
+// Mapbox paint props can't read CSS vars, so this is the JS fallback.
+export const DRAW_COLOR = COLORS.light.drawColor;
 
 // ── Map styles per theme ─────────────────────────────────────────
 export const MAP_STYLES = {
   light: "mapbox://styles/mapbox/streets-v12",
-  dark: "mapbox://styles/mapbox/standard",
-} as const;
-
-// ── Standard (dark) style config overrides ────────────────────────
-// Applied via <Mapbox.StyleImport> on native (mirrors web app's setConfigProperty calls).
-// Sync with src/lib/theme.ts → DARK_MAP_CONFIG when changing.
-export const DARK_MAP_CONFIG = {
-  lightPreset: "dusk",
-  colorMotorways: "#fff04a",
-  colorTrunks: "#fff04a",
+  // Custom Navigation Night style with settlement-major-label text-field fixed
+  // in Mapbox Studio to use `name` instead of `coalesce(name_en, name)`.
+  // This bakes in correct Indian place spellings (Secunderabad, Tirumalagiri etc.)
+  // at the style level, so no runtime patching is needed for dark mode labels.
+  dark: "mapbox://styles/purchases-moneymic/cmqbrfwec000701qw1lu90qvg",
 } as const;
 
 // ── Lister type badge colors ─────────────────────────────────────

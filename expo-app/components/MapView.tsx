@@ -4,16 +4,18 @@
  */
 
 import { useRef, useCallback, useEffect, useState, useMemo } from "react";
-import { View, StyleSheet, PanResponder, Pressable, Text, Keyboard } from "react-native";
+import { View, StyleSheet, PanResponder, Pressable, Text, Keyboard, Animated } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import Mapbox from "@rnmapbox/maps";
 import Supercluster from "supercluster";
 import { useDebouncedCallback } from "use-debounce";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListingsStore, type Listing } from "@/store/listings";
-import { DRAW_COLOR, MAP_STYLES, DARK_MAP_CONFIG, COLORS, API_BASE_URL } from "@/lib/theme";
+import { MAP_STYLES, COLORS, API_BASE_URL } from "@/lib/theme";
 import { formatPrice } from "@/lib/format";
 import { fetchViewportListings, fetchPolygonListings } from "@/lib/api";
+import { fetchPatchedStyle } from "@/lib/mapStyle";
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
 Mapbox.setAccessToken(MAPBOX_TOKEN);
@@ -100,6 +102,26 @@ export default function MapView() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
+  const [bearing, setBearing] = useState(0);
+  const compassScale = useRef(new Animated.Value(1)).current;
+
+  const animateCompassPress = useCallback((toValue: number) => {
+    Animated.spring(compassScale, {
+      toValue,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 6,
+    }).start();
+  }, [compassScale]);
+
+  const handleResetNorth = useCallback(() => {
+    cameraRef.current?.setCamera({
+      heading: 0,   // rnmapbox Camera API uses 'heading', not 'bearing'
+      pitch: 0,
+      animationDuration: 600,
+      animationMode: "easeTo",
+    });
+  }, []);
 
   const mapRef = useRef<Mapbox.MapView>(null);
   const cameraRef = useRef<Mapbox.Camera>(null);
@@ -122,6 +144,25 @@ export default function MapView() {
   const prevDrawActiveRef = useRef(false);
   const mapStyle = useMemo(() => MAP_STYLES[isDark ? "dark" : "light"], [isDark]);
 
+  // Fetch and patch the Mapbox style JSON to fix Indian place name transliterations.
+  // The `name_en` field in Mapbox tiles has wrong spellings for Indian cities
+  // (e.g. "Sikandarabad" instead of "Secunderabad"). We fetch the full style JSON,
+  // swap the text-field expressions for the affected label layers, then pass the
+  // patched JSON as `styleJSON` so the fix is baked in before first render.
+  // Falls back to plain styleURL if the fetch fails (network error etc.).
+  const [patchedStyleJSON, setPatchedStyleJSON] = useState<string | null>(null);
+  // Incremented on every theme switch so marker keys change → rnmapbox re-registers
+  // them with the native layer after the style reload (otherwise markers stay invisible).
+  const [styleGeneration, setStyleGeneration] = useState(0);
+  // Always-current viewport bounds — avoids async getVisibleBounds() during style transition.
+  const viewportBoundsRef = useRef<[number, number, number, number] | null>(null);
+  useEffect(() => {
+    setPatchedStyleJSON(null); // clear previous style while new one loads
+    fetchPatchedStyle(mapStyle, MAPBOX_TOKEN).then((json) => {
+      if (json) setPatchedStyleJSON(json);
+    });
+  }, [mapStyle]);
+
   const {
     boundary,
     drawActive,
@@ -134,6 +175,7 @@ export default function MapView() {
     setListings,
     listingType,
     setIsLoading,
+    mapRefreshTick,
   } = useListingsStore();
 
   // Two responsibilities in one effect (both keyed to drawActive/boundary):
@@ -189,6 +231,35 @@ export default function MapView() {
 
   // Rebuild Supercluster index only when the listings array changes.
   const clusterIndex = useMemo(() => createClusterIndex(listings), [listings]);
+
+  // Keep viewportBoundsRef always current for use in effects below.
+  useEffect(() => {
+    viewportBoundsRef.current = viewportBounds;
+  }, [viewportBounds]);
+
+  // 1. Button-click refresh: Header calls bumpMapRefresh() which increments mapRefreshTick.
+  //    Remount markers (styleGeneration key change) + re-fetch listings with current bounds.
+  useEffect(() => {
+    if (mapRefreshTick === 0) return; // skip on initial mount
+    setStyleGeneration((g) => g + 1);
+    if (!drawActive && !boundary && viewportBoundsRef.current) {
+      fetchListingsForBounds(viewportBoundsRef.current);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapRefreshTick]);
+
+  // 2. patchedStyleJSON reload: custom dark style fetch is slow — it resolves AFTER the
+  //    map has shown markers, causing a silent style swap that clears the native layer.
+  //    Bump styleGeneration to remount markers; re-fetch for fresh data.
+  useEffect(() => {
+    if (!patchedStyleJSON || !mapLoaded) return;
+    setStyleGeneration((g) => g + 1);
+    if (!drawActive && !boundary && viewportBoundsRef.current) {
+      fetchListingsForBounds(viewportBoundsRef.current);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patchedStyleJSON]);
+
 
   // Derive visible clusters from the current viewport bounds + zoom level.
   // lngDelta→zoom approximation keeps cluster radius consistent at any zoom level.
@@ -495,8 +566,27 @@ export default function MapView() {
       <Mapbox.MapView
         ref={mapRef}
         style={styles.map}
-        styleURL={mapStyle}
-        onDidFinishLoadingMap={() => setMapLoaded(true)}
+        // Use patched style JSON (label spelling fix baked in) when available.
+        // Falls back to plain styleURL if fetch hasn't completed or failed.
+        styleURL={patchedStyleJSON ? undefined : mapStyle}
+        styleJSON={patchedStyleJSON ?? undefined}
+        onDidFinishLoadingMap={async () => {
+          setMapLoaded(true);
+          // Fires on EVERY style load: initial app load, patchedStyleJSON swap, theme switch.
+          // Always fetch from getVisibleBounds() — don't depend on viewportBoundsRef being
+          // set yet (onRegionDidChange may not have fired before this callback).
+          setStyleGeneration((g) => g + 1);
+          if (!drawActive && !boundary) {
+            const bounds = await mapRef.current?.getVisibleBounds();
+            if (bounds) {
+              const b: [number, number, number, number] = [
+                bounds[1][0], bounds[1][1], bounds[0][0], bounds[0][1],
+              ];
+              setViewportBounds(b);
+              fetchListingsForBounds(b);
+            }
+          }
+        }}
         onRegionDidChange={handleRegionDidChange}
         onRegionIsChanging={handleRegionIsChanging}
         onPress={() => {
@@ -522,6 +612,10 @@ export default function MapView() {
         scaleBarEnabled={false}
         logoEnabled={false}
         attributionEnabled={false}
+        onCameraChanged={(state: any) => {
+          const b = state?.properties?.heading ?? 0;  // rnmapbox MapState uses 'heading'
+          setBearing(b);
+        }}
       >
         {/* defaultSettings (not animateTo) so the camera position is applied on mount
             without triggering an animation. globalCameraState is null on first launch,
@@ -534,19 +628,6 @@ export default function MapView() {
           }}
         />
 
-        {/* Dark mode: Mapbox Standard style + dusk light preset + bright yellow motorways.
-            StyleImport is the React Native equivalent of the web app's setConfigProperty.
-            Values come from DARK_MAP_CONFIG in theme.ts (sync with src/lib/theme.ts). */}
-        {isDark && (
-          <Mapbox.StyleImport
-            id="basemap"
-            config={{
-              lightPreset: DARK_MAP_CONFIG.lightPreset,
-              colorMotorways: DARK_MAP_CONFIG.colorMotorways,
-              colorTrunks: DARK_MAP_CONFIG.colorTrunks,
-            }}
-          />
-        )}
 
         {/* Live drawing feedback layer */}
         {isDrawingSession && (
@@ -554,7 +635,7 @@ export default function MapView() {
             <Mapbox.LineLayer
               id="live-draw-line"
               style={{
-                lineColor: DRAW_COLOR,
+                lineColor: colors.drawColor,
                 lineWidth: 2.5,
               }}
             />
@@ -563,7 +644,7 @@ export default function MapView() {
               filter={["==", "$type", "Point"]}
               style={{
                 circleRadius: 6,
-                circleColor: DRAW_COLOR,
+                circleColor: colors.drawColor,
                 circleStrokeColor: "#ffffff",
                 circleStrokeWidth: 2,
               }}
@@ -578,14 +659,14 @@ export default function MapView() {
               id="draw-fill"
               filter={["==", "$type", "Polygon"]}
               style={{
-                fillColor: DRAW_COLOR,
+                fillColor: colors.drawColor,
                 fillOpacity: 0.12,
               }}
             />
             <Mapbox.LineLayer
               id="draw-line"
               style={{
-                lineColor: DRAW_COLOR,
+                lineColor: colors.drawColor,
                 lineWidth: 2.5,
               }}
             />
@@ -598,14 +679,14 @@ export default function MapView() {
             <Mapbox.FillLayer
               id="boundary-fill"
               style={{
-                fillColor: DRAW_COLOR,
+                fillColor: colors.drawColor,
                 fillOpacity: 0.12,
               }}
             />
             <Mapbox.LineLayer
               id="boundary-line"
               style={{
-                lineColor: DRAW_COLOR,
+                lineColor: colors.drawColor,
                 lineWidth: 2.0,
               }}
             />
@@ -624,7 +705,7 @@ export default function MapView() {
               const clusterId = cluster.properties.cluster_id ?? 0;
               return (
                 <Mapbox.MarkerView
-                  key={`c-${clusterId}`}
+                  key={`c-${styleGeneration}-${clusterId}`}
                   coordinate={[lng, lat]}
                   anchor={{ x: 0.5, y: 0.5 }}
                 >
@@ -648,7 +729,7 @@ export default function MapView() {
 
             return (
               <Mapbox.MarkerView
-                key={listing.id}
+                key={`${styleGeneration}-${listing.id}`}
                 coordinate={[lng, lat]}
                 anchor={{ x: 0.5, y: 1.0 }}
               >
@@ -675,6 +756,28 @@ export default function MapView() {
             );
           })}
       </Mapbox.MapView>
+
+      {/* Compass — tap to reset bearing + pitch to north-up */}
+      <Animated.View style={[
+        styles.compassButton,
+        { backgroundColor: colors.card, transform: [{ scale: compassScale }] },
+      ]}>
+        <Pressable
+          onPress={handleResetNorth}
+          onPressIn={() => animateCompassPress(0.82)}
+          onPressOut={() => animateCompassPress(1)}
+          style={styles.compassPressable}
+          android_ripple={{ color: colors.muted, borderless: true, radius: 18 }}
+        >
+          <View style={{ transform: [{ rotate: `${-bearing}deg` }] }}>
+            <Ionicons
+              name="compass"
+              size={22}
+              color={Math.abs(bearing) > 1 ? "#E84235" : colors.mutedForeground}
+            />
+          </View>
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
@@ -720,5 +823,28 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderTopWidth: 5,
     marginTop: -1,
+  },
+  compassButton: {
+    position: "absolute",
+    top: 12,
+    right: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 10,
+  },
+  compassPressable: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

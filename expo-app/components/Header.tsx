@@ -39,7 +39,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { setBoundary, viewportBounds, token, user } = useListingsStore();
+  const { setBoundary, viewportBounds, token, user, bumpMapRefresh } = useListingsStore();
 
   const handleSearch = useCallback(
     (q: string) => {
@@ -226,7 +226,10 @@ export default function Header() {
         {/* Theme toggle */}
         {toggleColorScheme && (
           <Pressable
-            onPress={toggleColorScheme}
+          onPress={() => {
+              toggleColorScheme();
+              bumpMapRefresh(); // Directly triggers marker remount + listing re-fetch in MapView
+            }}
             style={[styles.themeToggle, { borderColor: colors.border }]}
           >
             <Ionicons

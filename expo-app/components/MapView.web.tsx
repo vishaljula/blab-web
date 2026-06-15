@@ -21,7 +21,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListingsStore, type Listing } from "@/store/listings";
-import { DRAW_COLOR, MAP_STYLES, COLORS, API_BASE_URL } from "@/lib/theme";
+import { MAP_STYLES, COLORS, API_BASE_URL } from "@/lib/theme";
 import { formatPrice } from "@/lib/format";
 import { fetchViewportListings, fetchPolygonListings } from "@/lib/api";
 
@@ -119,76 +119,121 @@ export default function MapViewWeb() {
 
   const mapStyle = useMemo(() => MAP_STYLES[isDark ? "dark" : "light"], [isDark]);
 
-  // Dark mode map config
-  const DARK_MAP_CONFIG = {
-    lightPreset: "dusk",
-    colorMotorways: "hsl(60, 100%, 50%)",
-    colorTrunks: "hsl(60, 100%, 50%)",
-  };
+  // Compass control — added to Mapbox control stack so it aligns automatically
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map || !mapLoaded) return;
 
-  // When switching styles (light/dark), apply theme config and fix label spellings
+    let svgEl: SVGSVGElement | null = null;
+
+    const ctrl = {
+      onAdd() {
+        const container = document.createElement('div');
+        container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+
+        const btn = document.createElement('button');
+        btn.title = 'Reset to North';
+        btn.style.cssText = 'display:flex;align-items:center;justify-content:center';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '22');
+        svg.setAttribute('height', '22');
+        svg.setAttribute('viewBox', '0 0 22 22');
+        svg.style.transition = 'transform 0.15s linear';
+        svgEl = svg;
+
+        const north = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        north.setAttribute('d', 'M11 2 L14.5 12 L11 10 L7.5 12 Z');
+        north.setAttribute('fill', '#E84235');
+
+        const south = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        south.setAttribute('d', 'M11 20 L7.5 10 L11 12 L14.5 10 Z');
+        south.setAttribute('fill', '#6B6B6B');
+        south.setAttribute('opacity', '0.5');
+
+        svg.appendChild(north);
+        svg.appendChild(south);
+        btn.appendChild(svg);
+        container.appendChild(btn);
+
+        btn.addEventListener('click', () => {
+          map.easeTo({ bearing: 0, pitch: 0, duration: 600 });
+        });
+
+        return container;
+      },
+      onRemove() {},
+    };
+
+    const onMove = () => {
+      if (svgEl) svgEl.style.transform = `rotate(${-map.getBearing()}deg)`;
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    map.addControl(ctrl as any, 'top-right');
+    map.on('move', onMove);
+
+    return () => {
+      map.off('move', onMove);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      try { map.removeControl(ctrl as any); } catch {}
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapLoaded]);
+
+  // When switching styles (light/dark), apply label spelling overrides
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
 
     const applyStyleSettings = () => {
-      if (isDark) {
-        // Apply Mapbox Standard style config for dark mode (dusk lighting + yellow highways)
-        try {
-          (map as any).setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
-          (map as any).setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
-          (map as any).setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
-        } catch {}
+      // ── Label spelling fix ─────────────────────────────────────────────
+      // Mapbox tile data has two different problems depending on label type:
+      //
+      // MAJOR settlements (settlement-major-label, state-label, country-label):
+      //   • `name`    = correct English (e.g. "Secunderabad") ✓
+      //   • `name_en` = wrong transliteration (e.g. "Sikandarabad") ✗
+      //   Fix: use ["get", "name"]
+      //
+      // SUBDIVISION labels (settlement-subdivision-label, settlement-minor-label):
+      //   • `name`    = local/OSM romanization (e.g. "Kacheguda") ✗
+      //   • `name_en` = correct English (e.g. "Kachiguda") ✓
+      //   Fix: explicitly set ["get", "name_en"]
+      //
+      // Both light (streets-v12) and dark (dark-v11) are classic styles —
+      // all layers are directly accessible. Verified against live tile data.
 
-        // Fallback: also try direct paint properties for older style variants
-        const motorwayLayers = [
-          "road-motorway",
-          "road-trunk",
-          "road-motorway-link",
-          "road-trunk-link",
-          "bridge-motorway",
-          "bridge-trunk",
-          "bridge-motorway-link",
-          "bridge-trunk-link",
-          "tunnel-motorway",
-          "tunnel-trunk",
-          "tunnel-motorway-link",
-          "tunnel-trunk-link"
-        ];
-        motorwayLayers.forEach((layerId) => {
-          if (map.getLayer(layerId)) {
-            map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
-          }
-        });
-      }
+      const MAJOR_LABEL_LAYERS = [
+        "settlement-major-label",
+        "state-label",
+        "country-label",
+        "continent-label",
+      ];
+      const SUBDIVISION_LABEL_LAYERS = [
+        "settlement-minor-label",
+        "settlement-subdivision-label",
+      ];
 
-      // Override text-field to use the raw `name` field which has correct English
-      // spellings (e.g. "Secunderabad" not "Sikandarabad").
-      try {
-        const style = map.getStyle();
-        if (style && style.layers) {
-          style.layers.forEach((layer: any) => {
-            // Skip shield and road/highway layers to preserve NH shields and street route numbers
-            if (layer.id && (layer.id.includes("shield") || layer.id.includes("road") || layer.id.includes("highway"))) return;
-            try {
-              const tf = map.getLayoutProperty(layer.id, "text-field");
-              if (tf) {
-                map.setLayoutProperty(layer.id, "text-field", ["get", "name"]);
-              }
-            } catch {}
-          });
+      MAJOR_LABEL_LAYERS.forEach(layerId => {
+        if (map.getLayer(layerId)) {
+          try { map.setLayoutProperty(layerId, "text-field", ["get", "name"]); } catch {}
         }
-      } catch {}
+      });
+
+      SUBDIVISION_LABEL_LAYERS.forEach(layerId => {
+        if (map.getLayer(layerId)) {
+          try { map.setLayoutProperty(layerId, "text-field", ["get", "name_en"]); } catch {}
+        }
+      });
     };
 
-    // Apply immediately for the current style
-    applyStyleSettings();
-    // Also apply when new style finishes loading (theme switch)
+    // Apply immediately if style already loaded, then re-apply on every style reload
+    if (map.isStyleLoaded()) {
+      applyStyleSettings();
+    }
     map.on("style.load", applyStyleSettings);
-    map.on("idle", applyStyleSettings);
     return () => {
       map.off("style.load", applyStyleSettings);
-      map.off("idle", applyStyleSettings);
     };
   }, [isDark, mapLoaded]);
 
@@ -220,6 +265,35 @@ export default function MapViewWeb() {
       setIsLoading(false);
     }
   }, 500);
+
+  // Refresh viewport listings when theme switches dark⟷light.
+  // Style reload doesn't fire onMoveEnd, so markers stay blank until next pan/zoom.
+  useEffect(() => {
+    if (!mapLoaded) return;
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    const refreshViewport = () => {
+      if (drawActive || boundary) return;
+      const bounds = map.getBounds();
+      if (bounds) {
+        const b: [number, number, number, number] = [
+          bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth(),
+        ];
+        setViewportBounds(b);
+        fetchListingsForBounds(b);
+      }
+    };
+
+    if (map.isStyleLoaded()) {
+      refreshViewport();
+    } else {
+      map.once("style.load", refreshViewport);
+    }
+
+    return () => { try { map.off("style.load", refreshViewport); } catch {} };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDark]); // Only re-run on theme toggle
 
   // Cluster index
   const clusterIndex = useMemo(() => createClusterIndex(listings), [listings]);
@@ -485,10 +559,10 @@ export default function MapViewWeb() {
         {/* Draw layer */}
         {(isDrawingSession || boundary?.type === "polygon") && (
           <Source id={DRAW_SOURCE_ID} type="geojson" data={committedGeoJSON}>
-            <Layer id="draw-fill" type="fill" filter={["==", "$type", "Polygon"]} paint={{ "fill-color": DRAW_COLOR, "fill-opacity": 0.12 }} />
-            <Layer id="draw-line" type="line" filter={["any", ["==", "$type", "LineString"], ["==", "$type", "Polygon"]]} paint={{ "line-color": DRAW_COLOR, "line-width": 2.5 }} />
+            <Layer id="draw-fill" type="fill" filter={["==", "$type", "Polygon"]} paint={{ "fill-color": colors.drawColor, "fill-opacity": 0.12 }} />
+            <Layer id="draw-line" type="line" filter={["any", ["==", "$type", "LineString"], ["==", "$type", "Polygon"]]} paint={{ "line-color": colors.drawColor, "line-width": 2.5 }} />
             {isDrawingSession && (
-              <Layer id="draw-start-dot" type="circle" filter={["==", "$type", "Point"]} paint={{ "circle-radius": 6, "circle-color": DRAW_COLOR, "circle-stroke-color": "#fff", "circle-stroke-width": 2 }} />
+              <Layer id="draw-start-dot" type="circle" filter={["==", "$type", "Point"]} paint={{ "circle-radius": 6, "circle-color": colors.drawColor, "circle-stroke-color": "#fff", "circle-stroke-width": 2 }} />
             )}
           </Source>
         )}
@@ -496,8 +570,8 @@ export default function MapViewWeb() {
         {/* City boundary polygon overlay */}
         {boundaryGeoJSON && boundary?.type === "city" && (
           <Source id={BOUNDARY_SOURCE_ID} type="geojson" data={boundaryGeoJSON}>
-            <Layer id="boundary-fill" type="fill" paint={{ "fill-color": DRAW_COLOR, "fill-opacity": 0.12 }} />
-            <Layer id="boundary-line" type="line" paint={{ "line-color": DRAW_COLOR, "line-width": 2 }} />
+            <Layer id="boundary-fill" type="fill" paint={{ "fill-color": colors.drawColor, "fill-opacity": 0.12 }} />
+            <Layer id="boundary-line" type="line" paint={{ "line-color": colors.drawColor, "line-width": 2 }} />
           </Source>
         )}
 
@@ -565,6 +639,7 @@ export default function MapViewWeb() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

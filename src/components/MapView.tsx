@@ -13,14 +13,14 @@ import type { MapMouseEvent, GeoJSONSource } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useDebouncedCallback } from "use-debounce";
 import { useListingsStore } from "@/store/listings";
-import { DRAW_COLOR, MAP_STYLES, DARK_MAP_CONFIG } from "@/lib/theme";
+import { COLORS, MAP_STYLES } from "@/lib/theme";
 import PriceMarkers from "./PriceMarkers";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 const DRAW_SOURCE_ID = "freehand-draw-source";
 const EMPTY_FC: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
 
-// Theme constants (DRAW_COLOR, MAP_STYLES, DARK_MAP_CONFIG) imported from @/lib/theme
+// Theme constants (DRAW_COLOR, MAP_STYLES) imported from @/lib/theme
 
 const INITIAL_VIEW = {
   latitude: 17.385,
@@ -82,60 +82,116 @@ export default function MapView() {
     () => MAP_STYLES[isDark ? "dark" : "light"],
     [isDark]
   );
+  const colors = isDark ? COLORS.dark : COLORS.light;
+  const drawColor = colors.drawColor;
 
-  // When switching styles (light/dark), apply theme config and fix label spellings
+  // Compass control — added imperatively so it lives inside .mapboxgl-ctrl-top-right
+  // alongside the zoom/geolocate buttons (no pixel-guessing needed).
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map || !mapLoaded) return;
+
+    let svgEl: SVGSVGElement | null = null;
+
+    const ctrl = {
+      onAdd() {
+        const container = document.createElement('div');
+        container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+
+        const btn = document.createElement('button');
+        btn.title = 'Reset to North';
+        btn.style.cssText = 'display:flex;align-items:center;justify-content:center';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '22');
+        svg.setAttribute('height', '22');
+        svg.setAttribute('viewBox', '0 0 22 22');
+        svg.style.transition = 'transform 0.15s linear';
+        svgEl = svg;
+
+        const north = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        north.setAttribute('d', 'M11 2 L14.5 12 L11 10 L7.5 12 Z');
+        north.setAttribute('fill', '#E84235');
+
+        const south = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        south.setAttribute('d', 'M11 20 L7.5 10 L11 12 L14.5 10 Z');
+        south.setAttribute('fill', '#6B6B6B');
+        south.setAttribute('opacity', '0.5');
+
+        svg.appendChild(north);
+        svg.appendChild(south);
+        btn.appendChild(svg);
+        container.appendChild(btn);
+
+        btn.addEventListener('click', () => {
+          map.easeTo({ bearing: 0, pitch: 0, duration: 600 });
+        });
+
+        return container;
+      },
+      onRemove() {},
+    };
+
+    const onMove = () => {
+      if (svgEl) svgEl.style.transform = `rotate(${-map.getBearing()}deg)`;
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    map.addControl(ctrl as any, 'top-right');
+    map.on('move', onMove);
+
+    return () => {
+      map.off('move', onMove);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      try { map.removeControl(ctrl as any); } catch {}
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapLoaded]);
+
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
 
     const applyStyleSettings = () => {
-      if (isDark) {
-        // Apply Mapbox Standard style config for dark mode (dusk lighting + yellow highways)
-        try {
-          (map as any).setConfigProperty("basemap", "lightPreset", DARK_MAP_CONFIG.lightPreset);
-          (map as any).setConfigProperty("basemap", "colorMotorways", DARK_MAP_CONFIG.colorMotorways);
-          (map as any).setConfigProperty("basemap", "colorTrunks", DARK_MAP_CONFIG.colorTrunks);
-        } catch {}
+      // ── Label spelling fix ─────────────────────────────────────────────
+      // Mapbox tile data has two different problems depending on label type:
+      //
+      // MAJOR settlements (settlement-major-label, state-label, country-label):
+      //   • `name`    = correct English (e.g. "Secunderabad") ✓
+      //   • `name_en` = wrong transliteration (e.g. "Sikandarabad") ✗
+      //   Fix: use ["get", "name"]
+      //
+      // SUBDIVISION labels (settlement-subdivision-label, settlement-minor-label):
+      //   • `name`    = local/OSM romanization (e.g. "Kacheguda") ✗
+      //   • `name_en` = correct English (e.g. "Kachiguda") ✓
+      //   Fix: explicitly set ["get", "name_en"]
+      //
+      // Both light (streets-v12) and dark (dark-v11) are classic styles —
+      // all layers are directly accessible, no Standard-style import indirection.
+      // Verified against live tile data at Secunderabad + Kachiguda coordinates.
 
-        // Fallback: also try direct paint properties for older style variants
-        const motorwayLayers = [
-          "road-motorway",
-          "road-trunk",
-          "road-motorway-link",
-          "road-trunk-link",
-          "bridge-motorway",
-          "bridge-trunk",
-          "bridge-motorway-link",
-          "bridge-trunk-link",
-          "tunnel-motorway",
-          "tunnel-trunk",
-          "tunnel-motorway-link",
-          "tunnel-trunk-link"
-        ];
-        motorwayLayers.forEach((layerId) => {
-          if (map.getLayer(layerId)) {
-            map.setPaintProperty(layerId, "line-color", "hsl(56, 100%, 59%)");
-          }
-        });
-      }
+      const MAJOR_LABEL_LAYERS = [
+        "settlement-major-label",
+        "state-label",
+        "country-label",
+        "continent-label",
+      ];
+      const SUBDIVISION_LABEL_LAYERS = [
+        "settlement-minor-label",
+        "settlement-subdivision-label",
+      ];
 
-      // Override text-field to use the raw `name` field which has correct English
-      // spellings (e.g. "Secunderabad" not "Sikandarabad").
-      try {
-        const style = map.getStyle();
-        if (style && style.layers) {
-          style.layers.forEach((layer: any) => {
-            // Skip shield and road/highway layers to preserve NH shields and street route numbers
-            if (layer.id && (layer.id.includes("shield") || layer.id.includes("road") || layer.id.includes("highway"))) return;
-            try {
-              const tf = map.getLayoutProperty(layer.id, "text-field");
-              if (tf) {
-                map.setLayoutProperty(layer.id, "text-field", ["get", "name"]);
-              }
-            } catch { }
-          });
+      MAJOR_LABEL_LAYERS.forEach(layerId => {
+        if (map.getLayer(layerId)) {
+          try { map.setLayoutProperty(layerId, "text-field", ["get", "name"]); } catch {}
         }
-      } catch { }
+      });
+
+      SUBDIVISION_LABEL_LAYERS.forEach(layerId => {
+        if (map.getLayer(layerId)) {
+          try { map.setLayoutProperty(layerId, "text-field", ["get", "name_en"]); } catch {}
+        }
+      });
     };
 
     // Style may already be loaded, or we need to wait
@@ -143,10 +199,8 @@ export default function MapView() {
       applyStyleSettings();
     }
     map.on("style.load", applyStyleSettings);
-    map.on("idle", applyStyleSettings);
     return () => {
       map.off("style.load", applyStyleSettings);
-      map.off("idle", applyStyleSettings);
     };
   }, [isDark, mapLoaded]);
 
@@ -440,26 +494,30 @@ export default function MapView() {
           During drag: updated imperatively via setData (committed + live stroke merged).
           After drag: committedGeoJSON state drives the data prop. No blink because
           the Source stays mounted the entire time drawActive OR boundary exists. */}
+        {/* Single persistent draw/boundary Source — always shows committed polygons.
+          During drag: updated imperatively via setData (committed + live stroke merged).
+          After drag: committedGeoJSON state drives the data prop. No blink because
+          the Source stays mounted the entire time drawActive OR boundary exists. */}
         {(isDrawingSession || boundary?.type === "polygon") && (
           <Source
             id={DRAW_SOURCE_ID}
             type="geojson"
             data={committedGeoJSON}
           >
-            {/* Fill — only for polygon features */}
+            {/* Fill — only for polygon features. Uses dynamic drawColor for correct theme contrast. */}
             <Layer
               id="draw-fill"
               type="fill"
               filter={["==", "$type", "Polygon"]}
-              paint={{ "fill-color": DRAW_COLOR, "fill-opacity": 0.12 }}
+              paint={{ "fill-color": drawColor, "fill-opacity": 0.12 }}
             />
-            {/* Stroke — always solid */}
+            {/* Stroke — always solid. Uses dynamic drawColor to stand out. */}
             <Layer
               id="draw-line"
               type="line"
               filter={["any", ["==", "$type", "LineString"], ["==", "$type", "Polygon"]]}
               paint={{
-                "line-color": DRAW_COLOR,
+                "line-color": drawColor,
                 "line-width": 2.5,
               }}
             />
@@ -471,7 +529,7 @@ export default function MapView() {
                 filter={["==", "$type", "Point"]}
                 paint={{
                   "circle-radius": 6,
-                  "circle-color": DRAW_COLOR,
+                  "circle-color": drawColor,
                   "circle-stroke-color": "#fff",
                   "circle-stroke-width": 2,
                 }}
@@ -491,3 +549,4 @@ export default function MapView() {
     </div>
   );
 }
+

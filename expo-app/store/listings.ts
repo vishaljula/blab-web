@@ -80,6 +80,7 @@ interface ListingsState {
   token: string | null;
   user: any | null;
  
+  mapRefreshTick: number; // bumped by theme toggle button to trigger marker remount + refetch
   setListings: (listings: Listing[]) => void;
   addListings: (newListings: Listing[]) => void;
   setSelectedListing: (listing: Listing | null) => void;
@@ -91,6 +92,7 @@ interface ListingsState {
   setIsLoading: (loading: boolean) => void;
   setAuthModalOpen: (open: boolean) => void;
   setAuth: (token: string | null, user: any | null) => void;
+  bumpMapRefresh: () => void;
 }
 
 export const useListingsStore = create<ListingsState>((set) => ({
@@ -98,6 +100,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   selectedListing: null,
   listingType: "sale",
   viewportBounds: null,
+  mapRefreshTick: 0,
   boundary: null,
   drawActive: false,
   isLoading: false,
@@ -126,6 +129,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   setIsLoading: (loading) => set({ isLoading: loading }),
   setAuthModalOpen: (open) => set({ authModalOpen: open }),
   setAuth: (token, user) => set({ token, user }),
+  bumpMapRefresh: () => set((state) => ({ mapRefreshTick: state.mapRefreshTick + 1 })),
 }));
 
 // Load initial auth credentials asynchronously

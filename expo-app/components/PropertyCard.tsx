@@ -90,7 +90,9 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
         styles.card,
         {
           backgroundColor: colors.card,
-          borderColor: selected ? colors.primary : colors.border,
+          borderColor: selected
+            ? (isDark ? colors.markerBg : colors.primary)
+            : colors.border,
           borderWidth: selected ? 2 : 1,
         },
       ]}

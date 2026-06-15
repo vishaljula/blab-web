@@ -113,7 +113,7 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
     <article
       ref={cardRef}
       className={`flex flex-col bg-card rounded-xl border cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-border/60 hover:shadow-md overflow-hidden ${
-        isSelected ? "ring-2 ring-primary ring-offset-1 dark:ring-offset-background" : "border-border"
+        isSelected ? "ring-2 ring-primary dark:ring-[rgb(255,253,0)] ring-offset-1 dark:ring-offset-background" : "border-border"
       }`}
       onClick={onClick}
       onMouseEnter={() => setHoveredListingId(listing.id)}
