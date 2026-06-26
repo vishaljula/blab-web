@@ -1,5 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { View, Text, FlatList, ScrollView, StyleSheet, Platform, RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
 import { useListingsStore } from "@/store/listings";
 import { COLORS } from "@/lib/theme";
 import PropertyCard from "./PropertyCard";
@@ -7,13 +8,22 @@ import type { Listing } from "@/store/listings";
 import { useColorScheme } from "@/components/useColorScheme";
 
 export default function ListView() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const [numColumns, setNumColumns] = useState(1);
 
-  const { listings, setSelectedListing, selectedListing, viewportBounds, boundary, isLoading } =
+  const { listings, setSelectedListing, selectedListing, viewportBounds, boundary, isLoading, setDetailModalId } =
     useListingsStore();
+
+  const openDetail = (id: string) => {
+    if (Platform.OS === "web") {
+      setDetailModalId(id);
+    } else {
+      router.push(`/property/${id}`);
+    }
+  };
 
   // Detect desktop for 2-column grid
   useEffect(() => {
@@ -96,7 +106,7 @@ export default function ListView() {
                   >
                     <PropertyCard
                       listing={item}
-                      onPress={() => setSelectedListing(item)}
+                      onPress={() => openDetail(item.id)}
                       selected={selectedListing?.id === item.id}
                     />
                   </View>
@@ -119,12 +129,12 @@ export default function ListView() {
       <View style={numColumns === 2 ? styles.gridItem : undefined}>
         <PropertyCard
           listing={item}
-          onPress={() => setSelectedListing(item)}
+          onPress={() => openDetail(item.id)}
           selected={selectedListing?.id === item.id}
         />
       </View>
     ),
-    [setSelectedListing, numColumns, selectedListing]
+    [router, numColumns, selectedListing]
   );
 
   const keyExtractor = useCallback((item: Listing) => item.id, []);

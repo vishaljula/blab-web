@@ -1,23 +1,34 @@
 import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import Header from "@/components/Header";
 import ControlBar from "@/components/ControlBar";
 import MapViewComponent from "@/components/MapView";
 import ListView from "@/components/ListView";
 import PropertyCard from "@/components/PropertyCard";
+import PropertyDetailModal from "@/components/PropertyDetailModal";
 import { useListingsStore } from "@/store/listings";
 import { COLORS } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
 
 export default function MapScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const [isDesktop, setIsDesktop] = useState(false);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
 
-  const { selectedListing, setSelectedListing } = useListingsStore();
+  const { selectedListing, setSelectedListing, setDetailModalId } = useListingsStore();
+
+  const openDetail = (id: string) => {
+    if (Platform.OS === "web") {
+      setDetailModalId(id);
+    } else {
+      router.push(`/property/${id}`);
+    }
+  };
 
   // Detect desktop on web
   useEffect(() => {
@@ -55,6 +66,7 @@ export default function MapScreen() {
                   <PropertyCard
                     listing={selectedListing}
                     onClose={() => setSelectedListing(null)}
+                    onPress={() => openDetail(selectedListing.id)}
                     selected
                   />
                 </View>
@@ -87,6 +99,9 @@ export default function MapScreen() {
           )}
         </View>
       )}
+
+      {/* Centered modal overlay — web only */}
+      <PropertyDetailModal />
     </View>
   );
 }

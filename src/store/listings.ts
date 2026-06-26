@@ -16,6 +16,14 @@ export interface Listing {
   city: string;
   imageUrl?: string;
   contactName?: string;
+  // Contact fields — mandatory in intake forms, always populated in seed
+  contactPhone?: string;
+  contactPhotoUrl?: string;
+  description?: string;
+  yearBuilt?: number;
+  maintenance?: number;
+  features?: any;
+  marketEstimate?: number;
 }
 
 export interface Boundary {

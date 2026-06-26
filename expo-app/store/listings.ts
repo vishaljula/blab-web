@@ -57,6 +57,13 @@ export interface Listing {
   city: string;
   imageUrl?: string;
   contactName?: string;
+  contactPhone?: string;
+  contactPhotoUrl?: string;
+  description?: string;
+  yearBuilt?: number;
+  maintenance?: number;
+  features?: any;
+  marketEstimate?: number;
 }
 
 export interface Boundary {
@@ -80,7 +87,8 @@ interface ListingsState {
   token: string | null;
   user: any | null;
  
-  mapRefreshTick: number; // bumped by theme toggle button to trigger marker remount + refetch
+  mapRefreshTick: number;
+  detailModalId: string | null;
   setListings: (listings: Listing[]) => void;
   addListings: (newListings: Listing[]) => void;
   setSelectedListing: (listing: Listing | null) => void;
@@ -93,6 +101,7 @@ interface ListingsState {
   setAuthModalOpen: (open: boolean) => void;
   setAuth: (token: string | null, user: any | null) => void;
   bumpMapRefresh: () => void;
+  setDetailModalId: (id: string | null) => void;
 }
 
 export const useListingsStore = create<ListingsState>((set) => ({
@@ -101,6 +110,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   listingType: "sale",
   viewportBounds: null,
   mapRefreshTick: 0,
+  detailModalId: null,
   boundary: null,
   drawActive: false,
   isLoading: false,
@@ -130,6 +140,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   setAuthModalOpen: (open) => set({ authModalOpen: open }),
   setAuth: (token, user) => set({ token, user }),
   bumpMapRefresh: () => set((state) => ({ mapRefreshTick: state.mapRefreshTick + 1 })),
+  setDetailModalId: (id) => set({ detailModalId: id }),
 }));
 
 // Load initial auth credentials asynchronously

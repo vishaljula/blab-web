@@ -8,6 +8,7 @@ import {
   index,
   pgEnum,
   varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 // Define user roles: buyer, owner, broker, developer
@@ -70,6 +71,15 @@ export const listings = pgTable(
     city: text("city").notNull(),
     imageUrl: text("image_url"),
     contactName: text("contact_name"),
+    contactPhone: text("contact_phone"),
+    contactPhotoUrl: text("contact_photo_url"),
+    description: text("description"),
+    yearBuilt: integer("year_built"),
+    maintenance: integer("maintenance"),
+    // JSONB allows structured sub-keys (interior, appliances, amenities)
+    // while still being query-filterable. A text[] would lose nesting.
+    features: jsonb("features"),
+    marketEstimate: integer("market_estimate"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

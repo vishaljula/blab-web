@@ -122,6 +122,24 @@ const LAST_NAMES = [
   "Varma", "Chowdary", "Prasad", "Murthy", "Shetty", "Iyer", "Nair",
 ];
 
+// Professional portrait photos from randomuser.me — reliable, free, diverse
+// We use a fixed pool so re-seeds are consistent.
+// randomuser.me uses the same numeric range (1-35) for both genders.
+// Kept as separate constants so the pools can diverge without a refactor.
+const MALE_PHOTO_IDS   = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+const FEMALE_PHOTO_IDS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+
+const MALE_FIRST_NAMES   = ["Ravi","Suresh","Vikram","Rajesh","Arun","Srinivas","Venkat","Krishna","Harish","Ramesh","Prasad","Naresh","Mahesh","Ganesh","Kiran"];
+const FEMALE_FIRST_NAMES = ["Priya","Anjali","Deepa","Sunita","Kavitha","Lakshmi","Padma","Swathi","Divya","Anitha","Madhavi","Sravani","Bhavani","Jyothi","Rani"];
+
+function pickContactPhoto(firstName: string, idx: number): string {
+  const isFemale = FEMALE_FIRST_NAMES.includes(firstName);
+  const pool = isFemale ? FEMALE_PHOTO_IDS : MALE_PHOTO_IDS;
+  const photoId = pool[idx % pool.length];
+  const gender = isFemale ? "women" : "men";
+  return `https://randomuser.me/api/portraits/${gender}/${photoId}.jpg`;
+}
+
 function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -132,6 +150,97 @@ function pick<T>(arr: T[]): T {
 
 function jitter(val: number, range: number) {
   return val + (Math.random() - 0.5) * 2 * range;
+}
+
+function generateFeaturesAndDescription(
+  propertyType: string,
+  hoodName: string,
+  bedrooms: number | undefined,
+  price: number,
+  listingType: string
+) {
+  const yearBuilt = rand(2015, 2025);
+  const maintenance = propertyType === "plot" ? 0 : Math.round(rand(1500, 8000) / 100) * 100;
+  const marketEstimate = Math.round(price * (0.95 + Math.random() * 0.1));
+
+  let description = "";
+  let features: any = {};
+
+  const appliances = ["Ceiling Fan(s)", "Exhaust Fan", "LED Lighting", "Chimney", "Water Heater", "Water Softener"];
+  const selectedAppliances = appliances.filter(() => Math.random() > 0.4);
+
+  const amenities = ["Gated Community", "24/7 Security", "Power Backup", "Gymnasium", "Swimming Pool", "Clubhouse", "Children's Play Area"];
+  const selectedAmenities = amenities.filter(() => Math.random() > 0.4);
+
+  if (propertyType === "apartment") {
+    description = `Beautifully designed ${bedrooms || 3} BHK apartment located in the heart of ${hoodName}. This spacious property features excellent ventilation, modular kitchen, chimney, large balconies, and high-quality wardrobes. It offers easy connectivity to the IT corridor, schools, and shopping malls. Residents enjoy access to prime amenities including a gym, swimming pool, club house, and dedicated parking. Perfect for modern living.`;
+    features = {
+      interior: {
+        flooring: "Vitrified Tiles",
+        powerBackup: "100% DG Backup",
+        security: "Intercom & CCTV, 24/7 Security",
+      },
+      appliances: selectedAppliances,
+      amenities: selectedAmenities,
+      hoa_maintenance: {
+        maintenance_fee: maintenance,
+      },
+    };
+  } else if (propertyType === "villa") {
+    description = `Luxurious ${bedrooms || 4} BHK independent villa situated in a premium gated community at ${hoodName}. Crafted with exceptional detail, this villa boasts a double-height living room, private garden, modular kitchen with helper's quarters, high-end marble flooring, and spacious bedrooms with walk-in closets. Top-tier community with continuous water supply, solar water heaters, club amenities, and biometric security.`;
+    features = {
+      interior: {
+        flooring: "Italian Marble",
+        powerBackup: "100% DG Backup",
+        security: "Biometric Access, CCTV, 24/7 Patrol",
+      },
+      appliances: [...selectedAppliances, "Modular Kitchen Hob & Chimney", "Dishwasher"],
+      amenities: [...selectedAmenities, "Private Garden", "Tennis Court", "Mini Theatre"],
+      hoa_maintenance: {
+        maintenance_fee: maintenance,
+      },
+    };
+  } else if (propertyType === "house") {
+    description = `Cozy ${bedrooms || 3} BHK independent house in ${hoodName}. Features spacious layout spread across multiple floors, personal terrace, private car garage, and independent borewell. Located in a peaceful residential neighborhood close to supermarkets, top educational institutions, and public transit. Ideal for families seeking space and privacy.`;
+    features = {
+      interior: {
+        flooring: "Granite",
+        powerBackup: "Inverter Provision",
+        security: "Independent Gate",
+      },
+      appliances: selectedAppliances,
+      amenities: ["Terrace Garden", "Borewell Water", "Corporation Water Connection"],
+      hoa_maintenance: {
+        maintenance_fee: maintenance,
+      },
+    };
+  } else if (propertyType === "plot") {
+    description = `Excellent residential plot measuring ${bedrooms ? bedrooms + ' sq yards' : '300 sq yards'} in the fast-growing location of ${hoodName}. Clear title property, HMDA approved layout with wide internal roads, underground drainage, and electricity connection. Surrounded by upcoming premium residential villas. Excellent long-term investment opportunity.`;
+    features = {
+      interior: {},
+      appliances: [],
+      amenities: ["Water Pipeline Connection", "Street Lights", "Rainwater Harvesting Pit"],
+      hoa_maintenance: {
+        maintenance_fee: 0,
+      },
+    };
+  } else {
+    description = `Spacious commercial space suitable for retail showroom, corporate office, or IT firm in primary commercial hub of ${hoodName}. Equipped with centralized air conditioning provision, high-speed elevator, fire safety features, private restrooms, pantry space, and ample reserved parking for visitors and staff. Ready to occupy.`;
+    features = {
+      interior: {
+        flooring: "Commercial Tile/Bare Shell",
+        powerBackup: "100% DG Backup with Auto-Sync",
+        security: "Fire Alarm, Sprinklers, 24/7 Security",
+      },
+      appliances: ["Fire Extinguishers", "CCTV Cameras"],
+      amenities: ["Reserved Parking", "High Speed Elevator", "Pantry Area"],
+      hoa_maintenance: {
+        maintenance_fee: maintenance,
+      },
+    };
+  }
+
+  return { yearBuilt, maintenance, marketEstimate, description, features };
 }
 
 function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): NewListing {
@@ -149,6 +258,17 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
     ["broker", 40],
     ["developer", 20],
   ]) as "owner" | "broker" | "developer";
+
+  // Pick a name consistent with gender pools so photo matches
+  const isFemale = Math.random() < 0.4;
+  const firstName = isFemale ? pick(FEMALE_FIRST_NAMES) : pick(MALE_FIRST_NAMES);
+  const lastName = pick(LAST_NAMES);
+  const contactName = `${firstName} ${lastName}`;
+  const contactPhotoUrl = pickContactPhoto(firstName, index);  // all types get a photo
+  // Indian mobile: +91 followed by 9XXXXXXXXX (10-digit, starts with 9/8/7/6)
+  const mobilePrefix = ["6", "7", "8", "9"][Math.floor(Math.random() * 4)];
+  const mobileRest = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join("");
+  const contactPhone = `+91${mobilePrefix}${mobileRest}`;
 
   const premiumMultiplier = hood.premium ? 1.8 : 1;
 
@@ -221,8 +341,10 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
     }
   }
 
+  const details = generateFeaturesAndDescription(propertyType, hood.name, bedrooms, price!, listingType);
+
   return {
-    latitude: jitter(hood.lat, 0.018),   // ~2km spread around center
+    latitude: jitter(hood.lat, 0.018),
     longitude: jitter(hood.lng, 0.018),
     price: price!,
     propertyType,
@@ -235,7 +357,14 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
     address: hood.name,
     city: "Hyderabad",
     imageUrl: null,
-    contactName: `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`,
+    contactName,
+    contactPhone,
+    contactPhotoUrl,
+    description: details.description,
+    yearBuilt: details.yearBuilt,
+    maintenance: details.maintenance,
+    features: details.features,
+    marketEstimate: details.marketEstimate,
   };
 }
 

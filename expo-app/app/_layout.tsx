@@ -2,6 +2,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { Platform, NativeModules } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -34,6 +35,15 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  // Global portrait lock — only the lightbox overrides this temporarily.
+  // Guards against Expo Go by checking if the native module is actually registered.
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    if (!NativeModules.ExpoScreenOrientation) return; // not in Expo Go — skip
+    const SO = require("expo-screen-orientation");
+    SO.lockAsync(SO.OrientationLock.PORTRAIT_UP);
+  }, []);
+
   if (!loaded) {
     return null;
   }
@@ -55,6 +65,13 @@ function RootLayoutNav() {
             options={{
               presentation: "modal",
               animation: "slide_from_bottom",
+            }}
+          />
+          <Stack.Screen
+            name="property/[id]"
+            options={{
+              presentation: "containedModal",
+              animation: "slide_from_right",
             }}
           />
         </Stack>

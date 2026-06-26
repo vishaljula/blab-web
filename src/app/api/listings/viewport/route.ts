@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
       built_up_area AS "builtUpArea",
       plot_area AS "plotArea",
       address, city, image_url AS "imageUrl",
-      contact_name AS "contactName"
+      contact_name AS "contactName",
+      contact_phone AS "contactPhone"
     FROM listings
     WHERE latitude BETWEEN ${swLat} AND ${neLat}
       AND longitude BETWEEN ${swLng} AND ${neLng}

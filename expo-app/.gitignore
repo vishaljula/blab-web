@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# dev scratch files — local only, do not commit
+foo.html
+buglist.md

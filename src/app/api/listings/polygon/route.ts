@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
       built_up_area AS "builtUpArea",
       plot_area AS "plotArea",
       address, city, image_url AS "imageUrl",
-      contact_name AS "contactName"
+      contact_name AS "contactName",
+      contact_phone AS "contactPhone"
     FROM listings
     WHERE ST_Within(
       ST_SetSRID(ST_MakePoint(longitude, latitude), 4326),
