@@ -6,7 +6,6 @@ import {
   Pressable,
   FlatList,
   StyleSheet,
-  Platform,
   Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -252,7 +251,7 @@ export default function Header() {
               alert("Buyers cannot create listings. Please edit your role in your profile to Owner, Broker, or Developer.");
               return;
             }
-            alert("Listing wizard opening...");
+            router.push("/list");
           }}
         >
           <Ionicons name="add" size={16} color={colors.primaryForeground} />

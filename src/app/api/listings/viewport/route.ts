@@ -37,9 +37,10 @@ export async function GET(request: NextRequest) {
       contact_name AS "contactName",
       contact_phone AS "contactPhone"
     FROM listings
-    WHERE latitude BETWEEN ${swLat} AND ${neLat}
+    WHERE latitude  BETWEEN ${swLat} AND ${neLat}
       AND longitude BETWEEN ${swLng} AND ${neLng}
       AND listing_type = ${listingType}
+      AND status = 'active'
     ORDER BY created_at DESC
     LIMIT 200
   `;

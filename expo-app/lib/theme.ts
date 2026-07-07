@@ -2,6 +2,7 @@
  * Blab — Centralized Theme Constants
  * Mirrors the web app's theme.ts + globals.css design tokens
  */
+import { Platform } from "react-native";
 
 // ── Brand colors ─────────────────────────────────────────────────
 export const COLORS = {
@@ -75,6 +76,9 @@ export const LISTER_COLORS = {
 } as const;
 
 // ── API base URL ─────────────────────────────────────────────────
-// In development, point to the Next.js backend running locally.
-// In production, this will be the deployed Vercel URL.
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+// Web (browser on Mac): use localhost to avoid WiFi hairpin routing.
+// Native (iPhone): use the LAN IP so the device can reach the Mac's server.
+export const API_BASE_URL =
+  Platform.OS === "web"
+    ? (process.env.EXPO_PUBLIC_WEB_API_URL || "http://localhost:3000")
+    : (process.env.EXPO_PUBLIC_API_URL    || "http://localhost:3000");

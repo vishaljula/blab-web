@@ -37,11 +37,11 @@ import { getRoleLabel, getRoleBadge } from "@/lib/listerRole";
 // Keep these in sync with the StyleSheet values below.
 // GALLERY_THRESHOLD is derived so changes to gallery dimensions stay in sync.
 const GALLERY_MARGIN_TOP = 16;   // galleryGrid.marginTop
-const GALLERY_HEIGHT     = 390;  // galleryGrid.height
-const TAB_BAR_HEIGHT     = 48;   // tabBar content height
+const GALLERY_HEIGHT = 390;  // galleryGrid.height
+const TAB_BAR_HEIGHT = 48;   // tabBar content height
 // Start the curtain animation this many px BEFORE the gallery bottom leaves the
 // viewport — animation finishes exactly as gallery disappears.
-const GALLERY_THRESHOLD  = GALLERY_MARGIN_TOP + GALLERY_HEIGHT - TAB_BAR_HEIGHT; // 358
+const GALLERY_THRESHOLD = GALLERY_MARGIN_TOP + GALLERY_HEIGHT - TAB_BAR_HEIGHT; // 358
 
 // ─── constants ────────────────────────────────────────────────────────────────
 // Tour data
@@ -145,6 +145,19 @@ export default function PropertyDetailModal() {
       .then(setListing)
       .catch(() => setListing(null))
       .finally(() => setLoading(false));
+  }, [detailModalId]);
+
+  // Sync the browser URL bar with modal state so every open property is
+  // directly shareable. replaceState (not pushState) avoids polluting the
+  // browser history stack with every marker click.
+  // Direct visits to /property/[id] are handled by app/property/[id].tsx —
+  // expo-router routes them to the full-page view without opening this modal.
+  useEffect(() => {
+    if (detailModalId) {
+      window.history.replaceState(null, "", `/property/${detailModalId}`);
+    } else if (window.location.pathname.startsWith("/property/")) {
+      window.history.replaceState(null, "", "/");
+    }
   }, [detailModalId]);
 
   // Pre-fill the contact message once the listing data arrives.
@@ -511,7 +524,7 @@ export default function PropertyDetailModal() {
   // single Send CTA, phone number shown large. No WhatsApp on desktop (doesn't
   // make sense — WhatsApp stays native mobile only).
   const renderCTA = (l: Listing) => {
-    const agentName    = l.contactName ?? "Agent";
+    const agentName = l.contactName ?? "Agent";
     const agentInitial = agentName.charAt(0).toUpperCase();
     // getRoleLabel / getRoleBadge are in lib/listerRole.ts — single source of
     // truth shared with the native route (app/property/[id].tsx).

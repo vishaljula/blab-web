@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       ST_SetSRID(ST_GeomFromGeoJSON(${geoJSON}), 4326)
     )
     AND listing_type = ${listingType}
+    AND status = 'active'
     ORDER BY created_at DESC
     LIMIT 200
   `;

@@ -74,6 +74,16 @@ function RootLayoutNav() {
               animation: "slide_from_right",
             }}
           />
+          <Stack.Screen
+            name="list/index"
+            options={{
+              // fullScreenModal on native: eliminates the black peek gap and sheet overlay.
+              // Web keeps "modal" (Expo Router ignores presentation on web anyway).
+              presentation: Platform.OS === "web" ? "modal" : "fullScreenModal",
+              animation: "slide_from_bottom",
+              gestureEnabled: false,
+            }}
+          />
         </Stack>
       </GestureHandlerRootView>
     </SafeAreaProvider>
