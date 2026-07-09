@@ -132,7 +132,46 @@ async function run() {
     `;
     console.log("✔ Added listing wizard columns");
 
+    // ── SCRUM-192: PostGIS GIST spatial index (BLAB-SPATIAL-01) ──────────────
+    // PostGIS is already enabled on Neon — this is a safety no-op.
+    console.log("→ Confirming PostGIS extension...");
+    await sql`CREATE EXTENSION IF NOT EXISTS postgis;`;
+    console.log("✔ PostGIS extension confirmed");
+
+    // Drop the old separate B-tree indexes on lat/lng columns.
+    // They cannot be used together for bounding-box queries (Postgres can only
+    // use one at a time) and are superseded by the GIST index below.
+    console.log("→ Dropping superseded lat/lng B-tree indexes...");
+    await sql`DROP INDEX IF EXISTS idx_listings_lat;`;
+    await sql`DROP INDEX IF EXISTS idx_listings_lng;`;
+    console.log("✔ Dropped superseded lat/lng B-tree indexes");
+
+    // Add a generated geography(POINT) column.
+    // GENERATED ALWAYS AS ... STORED: Postgres auto-computes and stores the
+    // value on every INSERT/UPDATE — no application-layer maintenance needed.
+    // Cast to ::geography so the GIST index uses the sphere-aware geography
+    // type (correct distance calculations across lat/lng boundaries).
+    console.log("→ Adding generated 'location' geography column...");
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS location geography(POINT, 4326)
+        GENERATED ALWAYS AS (
+          ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography
+        ) STORED;
+    `;
+    console.log("✔ Added generated 'location' geography column");
+
+    // Create GIST index — enables O(log n) bounding-box and distance queries.
+    // The && (bounding-box intersects) and ST_DWithin operators both use this.
+    console.log("→ Creating GIST index on listings.location...");
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_location
+        ON listings USING GIST(location);
+    `;
+    console.log("✔ Created GIST index on listings.location");
+
     console.log("Migration completed successfully!");
+
 
   } catch (error) {
     console.error("Migration failed:", error);

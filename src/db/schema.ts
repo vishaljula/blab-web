@@ -60,7 +60,7 @@ export const users = pgTable(
  *
  * Spatial queries (viewport, polygon) use raw SQL with PostGIS functions
  * on the latitude/longitude columns + a GiST index on a generated
- * geography column. See the migration in db/seed.ts for the PostGIS setup.
+ * geography column. See the migration in db/migrate.ts for the PostGIS setup.
  */
 export const listings = pgTable(
   "listings",
@@ -126,10 +126,13 @@ export const listings = pgTable(
   (table) => [
     // B-tree index for listing_type filter (sale vs rent)
     index("idx_listings_type").on(table.listingType),
-    // B-tree index on lat/lng for basic range queries (fallback)
-    index("idx_listings_lat").on(table.latitude),
-    index("idx_listings_lng").on(table.longitude),
     index("idx_listings_lister").on(table.listerId),
+    // NOTE: spatial bounding-box queries use a PostGIS GIST index on a
+    // generated geography(POINT, 4326) column called 'location'.
+    // That index (idx_listings_location) is managed via raw SQL in migrate.ts
+    // because Drizzle ORM does not natively support PostGIS geography types.
+    // The old idx_listings_lat / idx_listings_lng B-tree indexes were dropped
+    // in the SCRUM-192 migration (they were superseded by the GIST index).
   ]
 );
 
