@@ -170,6 +170,102 @@ async function run() {
     `;
     console.log("✔ Created GIST index on listings.location");
 
+    // ── SCRUM-195: H3 spatial index (BLAB-MAP-H3-01) ──────────────────────────
+    // H3 (Uber's Hexagonal Hierarchical Spatial Index) divides the entire Earth
+    // into a uniform hexagonal grid at 16 resolution levels.
+    //
+    // Why H3 on top of the GIST index?
+    //   GIST answers "which rows are inside this rectangle?" (fast lookup).
+    //   H3 answers "how many listings per hexagon cell?" (fast aggregation).
+    //
+    //   At billion scale, returning individual rows for a city-wide viewport
+    //   would send megabytes of JSON. Instead, the viewport API will GROUP BY
+    //   h3_index at low zoom levels, returning ~20-200 hex cells with counts —
+    //   regardless of whether there are 563 or 50,000,000 listings underneath.
+    //
+    // Resolution guide (at Hyderabad's latitude):
+    //   Res 7 → ~86 km²  (major area: Gachibowli, Banjara Hills)   — mid-zoom
+    //   Res 9 → ~1.7 km² (street block: a few roads)               — fine-zoom + dispatch
+    //
+    // h3_postgis bridges H3 with PostGIS geometry types so we can feed
+    // ST_MakePoint() directly into h3_lat_lng_to_cell().
+
+    console.log("→ Enabling H3 extension...");
+    await sql`CREATE EXTENSION IF NOT EXISTS h3;`;
+    console.log("✔ H3 extension enabled (v4.1.3)");
+
+    // ── listings: h3_index_res7 and h3_index_res9 ────────────────────────────
+    // Both are GENERATED ALWAYS AS STORED — Postgres auto-computes on every
+    // INSERT/UPDATE of latitude or longitude. No application code changes needed.
+    // latitude/longitude on listings are NOT NULL, so no null guard required.
+    // Note: h3_lat_lng_to_cell takes point(lat, lng) — latitude first, then longitude.
+    // This is H3's native coordinate convention (opposite of PostGIS).
+    console.log("→ Adding H3 index columns to listings...");
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS h3_index_res7 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(latitude, longitude), 7)
+        ) STORED;
+    `;
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS h3_index_res9 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(latitude, longitude), 9)
+        ) STORED;
+    `;
+    console.log("✔ Added h3_index_res7 + h3_index_res9 to listings");
+
+    // B-tree indexes on H3 columns — required for efficient GROUP BY aggregation.
+    // (GIST is for geography types; B-tree is correct for h3index integer keys.)
+    console.log("→ Creating B-tree indexes on listings H3 columns...");
+    await sql`CREATE INDEX IF NOT EXISTS idx_listings_h3_res7 ON listings (h3_index_res7);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_listings_h3_res9 ON listings (h3_index_res9);`;
+    console.log("✔ Created idx_listings_h3_res7 and idx_listings_h3_res9");
+
+    // ── users: latitude, longitude, location, h3_index_res9 ──────────────────
+    // Realtors and photographers need location-aware features:
+    //   - ST_DWithin  → nearest-realtor matching (SCRUM-194)
+    //   - h3_grid_disk → photographer dispatch ring expansion (SCRUM-199)
+    //
+    // lat/lng are nullable (not all users are realtors/photographers).
+    // CASE WHEN guard ensures generated columns return NULL when location
+    // is not set, rather than passing NULL into geometry functions.
+    console.log("→ Adding location columns to users table...");
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS latitude  double precision;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS longitude double precision;`;
+    await sql`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS location geography(POINT, 4326)
+        GENERATED ALWAYS AS (
+          CASE
+            WHEN latitude IS NOT NULL AND longitude IS NOT NULL
+            THEN ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography
+            ELSE NULL
+          END
+        ) STORED;
+    `;
+    await sql`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS h3_index_res9 h3index
+        GENERATED ALWAYS AS (
+          CASE
+            WHEN latitude IS NOT NULL AND longitude IS NOT NULL
+            THEN h3_lat_lng_to_cell(point(latitude, longitude), 9)
+            ELSE NULL
+          END
+        ) STORED;
+    `;
+    console.log("✔ Added latitude, longitude, location, h3_index_res9 to users");
+
+    // GIST index on users.location → fast ST_DWithin for realtor nearest-match.
+    // B-tree index on h3_index_res9 → fast h3_grid_disk ring expansion for dispatch.
+    console.log("→ Creating spatial indexes on users table...");
+    await sql`CREATE INDEX IF NOT EXISTS idx_users_location ON users USING GIST(location);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_users_h3_res9  ON users (h3_index_res9);`;
+    console.log("✔ Created idx_users_location (GIST) and idx_users_h3_res9 (B-tree)");
+
     console.log("Migration completed successfully!");
 
 

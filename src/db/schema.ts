@@ -58,9 +58,17 @@ export const users = pgTable(
 /**
  * Listings table — stores all property listings.
  *
- * Spatial queries (viewport, polygon) use raw SQL with PostGIS functions
- * on the latitude/longitude columns + a GiST index on a generated
- * geography column. See the migration in db/migrate.ts for the PostGIS setup.
+ * Three generated columns are managed by Postgres (not Drizzle ORM) — they
+ * are intentionally absent from this schema definition because Drizzle does
+ * not support custom types like h3index or generated geography columns:
+ *
+ *   location       geography(POINT, 4326)   — PostGIS GIST index (SCRUM-192)
+ *   h3_index_res7  h3index                  — H3 res7 B-tree index (SCRUM-195)
+ *   h3_index_res9  h3index                  — H3 res9 B-tree index (SCRUM-195)
+ *
+ * All three are GENERATED ALWAYS AS STORED — Postgres auto-computes them
+ * on every INSERT/UPDATE of latitude/longitude. No application code needed.
+ * See db/migrate.ts for the PostGIS + H3 setup and index creation.
  */
 export const listings = pgTable(
   "listings",
