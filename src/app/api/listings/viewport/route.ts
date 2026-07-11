@@ -4,15 +4,30 @@ import { getRawSql } from "@/db";
 /**
  * GET /api/listings/viewport
  *
- * Fetches listings within the visible map bounding box.
- * Query params: sw_lng, sw_lat, ne_lng, ne_lat, type (sale|rent)
+ * Zoom-conditional response (SCRUM-196):
  *
- * Spatial query pattern (two-stage):
- *   1. location && bbox::geography  → GIST index scan (fast, approximate)
- *   2. ST_Within(location::geometry, bbox) → exact containment filter
+ *   zoom < 12  → H3 aggregation mode
+ *     Returns ~10-50 hex cluster objects for the viewport. The B-tree index on
+ *     h3_index_res7 makes GROUP BY efficient. The GIST index on `location` still
+ *     handles the WHERE bbox pre-filter. Payload is tiny (a few KB) regardless
+ *     of how many listings exist underneath — scales to billions.
+ *     Response: { type: "clusters", data: ClusterPoint[] }
  *
- * The CTE computes ST_MakeEnvelope once and reuses it in both predicates.
+ *   zoom ≥ 12  → Individual listings mode (current behaviour)
+ *     Returns individual listing rows. LIMIT 200 removed — the zoom gate ensures
+ *     the viewport is geographically small enough to bound the result set naturally.
+ *     Supercluster on the client handles final visual grouping + price pin rendering.
+ *     Response: { type: "listings", data: Listing[] }
+ *
+ * Zoom thresholds:
+ *   < 12  → res7 hex cells (~86 km²/cell, neighborhood level)
+ *   ≥ 12  → individual pins
+ *
+ * Query params: sw_lng, sw_lat, ne_lng, ne_lat, type (sale|rent), zoom (int 0-22)
  */
+
+const CLUSTER_ZOOM_THRESHOLD = 12;
+
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const swLng = parseFloat(params.get("sw_lng") || "");
@@ -20,6 +35,7 @@ export async function GET(request: NextRequest) {
   const neLng = parseFloat(params.get("ne_lng") || "");
   const neLat = parseFloat(params.get("ne_lat") || "");
   const listingType = params.get("type") || "sale";
+  const zoom = parseInt(params.get("zoom") || "14", 10);
 
   if ([swLng, swLat, neLng, neLat].some(isNaN)) {
     return NextResponse.json(
@@ -35,9 +51,47 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  if (isNaN(zoom) || zoom < 0 || zoom > 22) {
+    return NextResponse.json(
+      { error: "zoom must be an integer between 0 and 22" },
+      { status: 400 }
+    );
+  }
+
   const sql = getRawSql();
 
   try {
+    if (zoom < CLUSTER_ZOOM_THRESHOLD) {
+      // ── H3 aggregation mode (zoomed out) ─────────────────────────────────────
+      // GROUP BY h3_index_res7 collapses all listings into ~10-50 hex cells.
+      // AVG(lat/lng) gives the centroid of actual listings in each cell —
+      // close enough to the true hex centroid for cluster badge placement.
+      // min_price lets the client show "from ₹45L" if desired.
+      const rows = await sql`
+        WITH bbox AS (
+          SELECT ST_MakeEnvelope(${swLng}, ${swLat}, ${neLng}, ${neLat}, 4326) AS geom
+        )
+        SELECT
+          h3_index_res7::text   AS h3index,
+          COUNT(*)::int         AS count,
+          MIN(price)            AS min_price,
+          AVG(latitude)::float  AS lat,
+          AVG(longitude)::float AS lng
+        FROM listings, bbox
+        WHERE location && bbox.geom::geography
+          AND ST_Within(location::geometry, bbox.geom)
+          AND listing_type = ${listingType}
+          AND status = 'active'
+        GROUP BY h3_index_res7
+        ORDER BY count DESC
+      `;
+
+      return NextResponse.json({ type: "clusters", data: rows });
+    }
+
+    // ── Individual listings mode (zoomed in) ─────────────────────────────────
+    // Same two-stage spatial filter as before (GIST → ST_Within).
+    // LIMIT 200 removed — zoom gate bounds the result set geographically.
     const rows = await sql`
       WITH bbox AS (
         SELECT ST_MakeEnvelope(${swLng}, ${swLat}, ${neLng}, ${neLat}, 4326) AS geom
@@ -60,10 +114,9 @@ export async function GET(request: NextRequest) {
         AND l.listing_type = ${listingType}
         AND l.status = 'active'
       ORDER BY l.created_at DESC
-      LIMIT 200
     `;
 
-    return NextResponse.json(rows);
+    return NextResponse.json({ type: "listings", data: rows });
   } catch (err) {
     console.error("[viewport] DB error:", err);
     return NextResponse.json(

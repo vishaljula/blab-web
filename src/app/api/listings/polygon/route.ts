@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
         AND l.listing_type = ${listingType}
         AND l.status = 'active'
       ORDER BY l.created_at DESC
-      LIMIT 200
+      -- LIMIT removed (SCRUM-196): the 500 KB geometry guard (above) already
+      -- bounds the polygon area, making a row count cap unnecessary.
     `;
 
     return NextResponse.json(rows);

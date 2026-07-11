@@ -15,7 +15,15 @@ import { useListingsStore, type Listing } from "@/store/listings";
 import { MAP_STYLES, COLORS, API_BASE_URL } from "@/lib/theme";
 import { formatPrice } from "@/lib/format";
 import { fetchViewportListings, fetchPolygonListings } from "@/lib/api";
+import type { ClusterPoint } from "@/lib/api";
 import { fetchPatchedStyle } from "@/lib/mapStyle";
+
+// Abbreviates a listing count for cluster badge display: 62000 → "62k", 1250000 → "1.3M"
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
 Mapbox.setAccessToken(MAPBOX_TOKEN);
@@ -128,6 +136,10 @@ export default function MapView() {
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isDrawingSession, setIsDrawingSession] = useState(false);
+  // H3 cluster badges from server at low zoom (empty = individual pin mode)
+  const [serverClusters, setServerClusters] = useState<ClusterPoint[]>([]);
+  // Track current zoom level via ref to avoid stale closures in debounced callbacks
+  const currentZoomRef = useRef(INITIAL_VIEW.zoom);
 
   const [committedGeoJSON, setCommittedGeoJSON] = useState<GeoJSON.FeatureCollection>(() => ({
     type: "FeatureCollection",
@@ -220,8 +232,17 @@ export default function MapView() {
     if (drawActive || boundary) return; // don't fetch viewport listings while a boundary search is active
     try {
       setIsLoading(true);
-      const data = await fetchViewportListings(bounds, listingType);
-      addListings(data); // merges with existing listings so markers from adjacent areas persist
+      const zoom = currentZoomRef.current;
+      const response = await fetchViewportListings(bounds, listingType, zoom);
+      if (response.type === "clusters") {
+        // Low zoom: replace everything with H3 cluster badges.
+        setServerClusters(response.data);
+        setListings([]);
+      } else {
+        // High zoom: individual pins — clear clusters, merge new listings.
+        setServerClusters([]);
+        addListings(response.data); // merges with existing listings so markers from adjacent areas persist
+      }
     } catch (err) {
       console.error("Failed to fetch listings:", err);
     } finally {
@@ -365,6 +386,7 @@ export default function MapView() {
       globalPolygons = [];
       setCommittedGeoJSON(EMPTY_FC);
       setBoundaryGeoJSON(null);
+      setServerClusters([]); // clear stale cluster badges from before the boundary search
 
       // Refetch viewport listings
       (async () => {
@@ -398,6 +420,7 @@ export default function MapView() {
       const cam = await mapRef.current?.getZoom();
       const center = await mapRef.current?.getCenter();
       if (cam !== undefined && center) {
+        currentZoomRef.current = cam; // keep ref current for fetchListingsForBounds
         globalCameraState = { centerCoordinate: [center[0], center[1]], zoomLevel: cam };
       }
     } catch { }
@@ -693,8 +716,37 @@ export default function MapView() {
           </Mapbox.ShapeSource>
         )}
 
-        {/* Markers and Clusters */}
-        {mapLoaded &&
+        {/* ── H3 cluster badges (low zoom, server-aggregated) ─────────────── */}
+        {mapLoaded && serverClusters.length > 0 && serverClusters.map((cluster) => (
+          <Mapbox.MarkerView
+            key={`h3-${cluster.h3index}`}
+            coordinate={[cluster.lng, cluster.lat]}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <Pressable
+              onPress={() => {
+                // Zoom into the cluster area — at zoom 12 server switches to individual pins
+                cameraRef.current?.setCamera({
+                  centerCoordinate: [cluster.lng, cluster.lat],
+                  zoomLevel: 12,
+                  animationDuration: 700,
+                  animationMode: "flyTo",
+                });
+              }}
+              style={[
+                styles.clusterBadge,
+                { backgroundColor: colors.markerBg },
+              ]}
+            >
+              <Text style={[styles.clusterBadgeText, { color: colors.markerText }]}>
+                {formatCount(cluster.count)}
+              </Text>
+            </Pressable>
+          </Mapbox.MarkerView>
+        ))}
+
+        {/* ── Individual price pins (high zoom, Supercluster-grouped) ──────── */}
+        {mapLoaded && serverClusters.length === 0 &&
           clusters.map((cluster) => {
             const [lng, lat] = cluster.geometry.coordinates;
             if (!isFinite(lng) || !isFinite(lat)) return null;
@@ -799,6 +851,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 3,
+  },
+  clusterBadge: {
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  clusterBadgeText: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   priceTag: {
     paddingHorizontal: 10,
