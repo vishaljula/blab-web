@@ -38,6 +38,7 @@ export interface Boundary {
 
 interface ListingsState {
   listings: Listing[];
+  total: number;          // actual listing count in current viewport (not just H3 representatives)
   selectedListing: Listing | null;
   listingType: "sale" | "rent";
   viewportBounds: [number, number, number, number] | null;
@@ -49,6 +50,7 @@ interface ListingsState {
   profileModalOpen: boolean;
 
   setListings: (listings: Listing[]) => void;
+  setTotal: (total: number) => void;
   addListings: (newListings: Listing[]) => void; // merge + dedup by id
   setSelectedListing: (listing: Listing | null) => void;
   setHoveredListingId: (id: string | null) => void;
@@ -66,6 +68,7 @@ interface ListingsState {
 
 export const useListingsStore = create<ListingsState>((set) => ({
   listings: [],
+  total: 0,
   selectedListing: null,
   listingType: "sale",
   viewportBounds: null,
@@ -76,7 +79,9 @@ export const useListingsStore = create<ListingsState>((set) => ({
   authModalOpen: false,
   profileModalOpen: false,
 
-  setListings: (listings) => set({ listings }),
+  // Reset total alongside listings so stale total never shows while new listings load.
+  setListings: (listings) => set({ listings, total: 0 }),
+  setTotal: (total) => set({ total }),
   addListings: (newListings) =>
     set((state) => {
       const existingIds = new Set(state.listings.map((l) => l.id));

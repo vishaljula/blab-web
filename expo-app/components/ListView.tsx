@@ -7,6 +7,11 @@ import PropertyCard from "./PropertyCard";
 import type { Listing } from "@/store/listings";
 import { useColorScheme } from "@/components/useColorScheme";
 
+// Parsed once at module load — matches VIEWPORT_STREET_ZOOM on the server.
+// At this zoom and above, the API returns ALL listings (no H3 grouping),
+// so the "X of N properties" breakdown is meaningless and should be hidden.
+const STREET_ZOOM = parseInt(process.env.EXPO_PUBLIC_VIEWPORT_STREET_ZOOM ?? "13", 10);
+
 export default function ListView() {
   const router = useRouter();
   const colorScheme = useColorScheme();
@@ -16,6 +21,12 @@ export default function ListView() {
 
   const { listings, setSelectedListing, selectedListing, viewportBounds, boundary, isLoading, setDetailModalId } =
     useListingsStore();
+  const total = useListingsStore((s) => s.total);
+  const currentZoom = useListingsStore((s) => s.currentZoom);
+
+  // At street-level zoom the server returns ALL listings — no H3 grouping.
+  // "X of N" is meaningless here; just show the count.
+  const isStreetLevel = currentZoom >= STREET_ZOOM;
 
   const openDetail = (id: string) => {
     if (Platform.OS === "web") {
@@ -72,8 +83,9 @@ export default function ListView() {
       <View style={[styles.container, { backgroundColor: `${colors.muted}66` }]}>
         <View style={styles.header}>
           <Text style={[styles.headerText, { color: colors.mutedForeground }]}>
-            {visibleListings.length}{" "}
-            {visibleListings.length === 1 ? "property" : "properties"} found
+            {!isStreetLevel && total > 0 && total > visibleListings.length
+              ? `${visibleListings.length} of ${total.toLocaleString()} properties`
+              : `${visibleListings.length} ${visibleListings.length === 1 ? "property" : "properties"}`}
           </Text>
         </View>
 
@@ -143,8 +155,9 @@ export default function ListView() {
     <View style={[styles.container, { backgroundColor: `${colors.muted}66` }]}>
       <View style={styles.header}>
         <Text style={[styles.headerText, { color: colors.mutedForeground }]}>
-          {visibleListings.length}{" "}
-          {visibleListings.length === 1 ? "property" : "properties"} found
+          {!isStreetLevel && total > 0 && total > visibleListings.length
+            ? `${visibleListings.length} of ${total.toLocaleString()} properties`
+            : `${visibleListings.length} ${visibleListings.length === 1 ? "property" : "properties"}`}
         </Text>
       </View>
 

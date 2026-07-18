@@ -7,7 +7,7 @@ import { useRef, useCallback, useEffect, useState, useMemo } from "react";
 import { View, StyleSheet, PanResponder, Pressable, Text, Keyboard, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Mapbox from "@rnmapbox/maps";
-import Supercluster from "supercluster";
+
 import { useDebouncedCallback } from "use-debounce";
 
 import { useColorScheme } from "@/components/useColorScheme";
@@ -15,15 +15,9 @@ import { useListingsStore, type Listing } from "@/store/listings";
 import { MAP_STYLES, COLORS, API_BASE_URL } from "@/lib/theme";
 import { formatPrice } from "@/lib/format";
 import { fetchViewportListings, fetchPolygonListings } from "@/lib/api";
-import type { ClusterPoint } from "@/lib/api";
 import { fetchPatchedStyle } from "@/lib/mapStyle";
 
-// Abbreviates a listing count for cluster badge display: 62000 → "62k", 1250000 → "1.3M"
-function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}k`;
-  return String(n);
-}
+
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
 Mapbox.setAccessToken(MAPBOX_TOKEN);
@@ -72,18 +66,6 @@ function buildDrawGeoJSON(pts: number[][], closed = false): GeoJSON.FeatureColle
   return { type: "FeatureCollection", features };
 }
 
-// Builds a Supercluster index from the current listings array.
-// Called inside useMemo so the index is only rebuilt when listings change.
-function createClusterIndex(listings: Listing[]) {
-  const index = new Supercluster({ radius: 40, maxZoom: 20, minZoom: 0 });
-  const points: Supercluster.PointFeature<{ listing: Listing }>[] = listings.map((listing) => ({
-    type: "Feature",
-    geometry: { type: "Point", coordinates: [listing.longitude, listing.latitude] },
-    properties: { listing },
-  }));
-  index.load(points);
-  return index;
-}
 
 function makeCircle(lat: number, lng: number, radiusKm: number): GeoJSON.Polygon {
   const pts = 64;
@@ -136,10 +118,11 @@ export default function MapView() {
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isDrawingSession, setIsDrawingSession] = useState(false);
-  // H3 cluster badges from server at low zoom (empty = individual pin mode)
-  const [serverClusters, setServerClusters] = useState<ClusterPoint[]>([]);
-  // Track current zoom level via ref to avoid stale closures in debounced callbacks
-  const currentZoomRef = useRef(INITIAL_VIEW.zoom);
+  // Track current zoom level via ref to avoid stale closures in debounced callbacks.
+  // Initialise from globalCameraState so that the FIRST fetch after a tab-switch remount
+  // uses the correct zoom (e.g. 11) rather than the hardcoded default (12), which would
+  // otherwise cause a brief flash of wrong-resolution pins before onMapIdle fires.
+  const currentZoomRef = useRef(globalCameraState?.zoomLevel ?? INITIAL_VIEW.zoom);
 
   const [committedGeoJSON, setCommittedGeoJSON] = useState<GeoJSON.FeatureCollection>(() => ({
     type: "FeatureCollection",
@@ -185,9 +168,11 @@ export default function MapView() {
     viewportBounds,
     addListings,
     setListings,
+    setTotal,
     listingType,
     setIsLoading,
     mapRefreshTick,
+    setCurrentZoom,
   } = useListingsStore();
 
   // Two responsibilities in one effect (both keyed to drawActive/boundary):
@@ -224,25 +209,17 @@ export default function MapView() {
     prevDrawActiveRef.current = drawActive;
   }, [drawActive, boundary]);
 
-  // 150ms debounce: collapses rapid successive onRegionDidChange calls that happen
-  // during programmatic camera animations (flyTo / fitBounds). onRegionDidChange
-  // already only fires after the camera settles, so for normal scrolling the debounce
-  // adds minimal perceived delay while still protecting against animation burst calls.
+  // Fetch representative listing pins for the current viewport.
+  // The server always returns Listing[] — uses setListings (replace) not addListings (merge)
+  // so panning to a new area shows only the current viewport's pins.
   const fetchListingsForBounds = useDebouncedCallback(async (bounds: [number, number, number, number]) => {
     if (drawActive || boundary) return; // don't fetch viewport listings while a boundary search is active
     try {
       setIsLoading(true);
       const zoom = currentZoomRef.current;
-      const response = await fetchViewportListings(bounds, listingType, zoom);
-      if (response.type === "clusters") {
-        // Low zoom: replace everything with H3 cluster badges.
-        setServerClusters(response.data);
-        setListings([]);
-      } else {
-        // High zoom: individual pins — clear clusters, merge new listings.
-        setServerClusters([]);
-        addListings(response.data); // merges with existing listings so markers from adjacent areas persist
-      }
+      const data = await fetchViewportListings(bounds, listingType, zoom);
+      setListings(Array.isArray(data.listings) ? data.listings : []);
+      setTotal(data.total ?? 0);
     } catch (err) {
       console.error("Failed to fetch listings:", err);
     } finally {
@@ -250,8 +227,7 @@ export default function MapView() {
     }
   }, 150);
 
-  // Rebuild Supercluster index only when the listings array changes.
-  const clusterIndex = useMemo(() => createClusterIndex(listings), [listings]);
+
 
   // Keep viewportBoundsRef always current for use in effects below.
   useEffect(() => {
@@ -282,19 +258,16 @@ export default function MapView() {
   }, [patchedStyleJSON]);
 
 
-  // Derive visible clusters from the current viewport bounds + zoom level.
-  // lngDelta→zoom approximation keeps cluster radius consistent at any zoom level.
-  const clusters = useMemo(() => {
-    if (!viewportBounds) return [];
-    try {
-      const lngDelta = Math.abs(viewportBounds[2] - viewportBounds[0]);
-      const zoom = Math.round(Math.log2(360 / lngDelta)); // approximate map zoom from lng span
-      return clusterIndex.getClusters(
-        [viewportBounds[0], viewportBounds[1], viewportBounds[2], viewportBounds[3]],
-        Math.min(Math.max(zoom, 0), 16)
-      );
-    } catch { return []; }
-  }, [clusterIndex, viewportBounds]);
+  // H3 DISTINCT ON already returns one representative pin per cell server-side —
+  // client-side Supercluster grouping is redundant and shows incorrect count bubbles.
+  // Map listings directly to point features for rendering.
+  const clusters = useMemo(() =>
+    (Array.isArray(listings) ? listings : []).map((listing) => ({
+      type: "Feature" as const,
+      geometry: { type: "Point" as const, coordinates: [listing.longitude, listing.latitude] },
+      properties: { listing, cluster: false },
+    })),
+  [listings]);
 
   // Fit map to city boundary + fetch city polygon from OSM
   useEffect(() => {
@@ -386,7 +359,7 @@ export default function MapView() {
       globalPolygons = [];
       setCommittedGeoJSON(EMPTY_FC);
       setBoundaryGeoJSON(null);
-      setServerClusters([]); // clear stale cluster badges from before the boundary search
+
 
       // Refetch viewport listings
       (async () => {
@@ -421,6 +394,7 @@ export default function MapView() {
       const center = await mapRef.current?.getCenter();
       if (cam !== undefined && center) {
         currentZoomRef.current = cam; // keep ref current for fetchListingsForBounds
+        setCurrentZoom(cam);          // push to store so ListView knows zoom level
         globalCameraState = { centerCoordinate: [center[0], center[1]], zoomLevel: cam };
       }
     } catch { }
@@ -440,38 +414,7 @@ export default function MapView() {
 
   // Expands a cluster into its leaves and flies the camera to fit them.
   // Key trick: setViewportBounds is called with the TARGET bounds BEFORE the camera
-  // animation starts. This causes the clusters useMemo to recompute immediately,
-  // so individual markers render during the fly animation instead of appearing
-  // only after it completes (eliminating the blank-map flash).
-  const handleClusterClick = useCallback((clusterId: number, coordinates: [number, number]) => {
-    try {
-      const leaves = (clusterIndex as any).getLeaves(clusterId, 100);
-      const coords = leaves.map((l: any) => l.geometry.coordinates as [number, number]);
-      if (coords.length === 0) return;
-      if (!cameraRef.current) return;
 
-      if (coords.length === 1) {
-        // Pre-update viewport bounds immediately so markers render during the fly animation
-        const pad = 0.005;
-        const targetBounds: [number, number, number, number] = [
-          coordinates[0] - pad, coordinates[1] - pad,
-          coordinates[0] + pad, coordinates[1] + pad,
-        ];
-        setViewportBounds(targetBounds);
-        cameraRef.current.setCamera({ centerCoordinate: coordinates, zoomLevel: 16, animationDuration: 750, animationMode: "flyTo" });
-        return;
-      }
-      let [minLng, minLat, maxLng, maxLat] = [coords[0][0], coords[0][1], coords[0][0], coords[0][1]];
-      for (const [lng, lat] of coords) {
-        if (lng < minLng) minLng = lng; if (lat < minLat) minLat = lat;
-        if (lng > maxLng) maxLng = lng; if (lat > maxLat) maxLat = lat;
-      }
-      // Pre-update viewport bounds immediately so markers render during the fly animation
-      const targetBounds: [number, number, number, number] = [minLng, minLat, maxLng, maxLat];
-      setViewportBounds(targetBounds);
-      cameraRef.current.fitBounds([maxLng, maxLat], [minLng, minLat], [80, 80, 80, 80], 650);
-    } catch (err) { console.error("Cluster click error:", err); }
-  }, [clusterIndex, setViewportBounds]);
 
   // Called when the user lifts their finger after freehand drawing.
   // Closes the polygon, commits it to globalPolygons (survives tab switches),
@@ -716,65 +659,15 @@ export default function MapView() {
           </Mapbox.ShapeSource>
         )}
 
-        {/* ── H3 cluster badges (low zoom, server-aggregated) ─────────────── */}
-        {mapLoaded && serverClusters.length > 0 && serverClusters.map((cluster) => (
-          <Mapbox.MarkerView
-            key={`h3-${cluster.h3index}`}
-            coordinate={[cluster.lng, cluster.lat]}
-            anchor={{ x: 0.5, y: 0.5 }}
-          >
-            <Pressable
-              onPress={() => {
-                // Zoom into the cluster area — at zoom 12 server switches to individual pins
-                cameraRef.current?.setCamera({
-                  centerCoordinate: [cluster.lng, cluster.lat],
-                  zoomLevel: 12,
-                  animationDuration: 700,
-                  animationMode: "flyTo",
-                });
-              }}
-              style={[
-                styles.clusterBadge,
-                { backgroundColor: colors.markerBg },
-              ]}
-            >
-              <Text style={[styles.clusterBadgeText, { color: colors.markerText }]}>
-                {formatCount(cluster.count)}
-              </Text>
-            </Pressable>
-          </Mapbox.MarkerView>
-        ))}
-
-        {/* ── Individual price pins (high zoom, Supercluster-grouped) ──────── */}
-        {mapLoaded && serverClusters.length === 0 &&
+        {/* ── Price pins — all zoom levels (DISTINCT ON representative pins) ── */}
+        {mapLoaded &&
           clusters.map((cluster) => {
             const [lng, lat] = cluster.geometry.coordinates;
             if (!isFinite(lng) || !isFinite(lat)) return null;
 
-            const isCluster = cluster.properties.cluster;
 
-            if (isCluster) {
-              const clusterId = cluster.properties.cluster_id ?? 0;
-              return (
-                <Mapbox.MarkerView
-                  key={`c-${styleGeneration}-${clusterId}`}
-                  coordinate={[lng, lat]}
-                  anchor={{ x: 0.5, y: 0.5 }}
-                >
-                  <Pressable
-                    onPress={() => handleClusterClick(clusterId, [lng, lat])}
-                    style={[
-                      styles.clusterDot,
-                      {
-                        backgroundColor: colors.markerBg,
-                        borderColor: colors.markerText,
-                      },
-                    ]}
-                  />
-                </Mapbox.MarkerView>
-              );
-            }
-
+            // H3 grouping is server-side — cluster bubbles are never shown.
+            // All entries are individual listing pins.
             const listing = cluster.properties.listing as Listing;
             const isActive = selectedListing?.id === listing.id;
             const bg = isActive ? colors.markerBgActive : colors.markerBg;

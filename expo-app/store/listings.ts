@@ -77,6 +77,7 @@ export interface Boundary {
 
 interface ListingsState {
   listings: Listing[];
+  total: number;          // actual listing count in current viewport (not just H3 representatives)
   selectedListing: Listing | null;
   listingType: "sale" | "rent";
   viewportBounds: [number, number, number, number] | null;
@@ -89,7 +90,9 @@ interface ListingsState {
  
   mapRefreshTick: number;
   detailModalId: string | null;
+  currentZoom: number;
   setListings: (listings: Listing[]) => void;
+  setTotal: (total: number) => void;
   addListings: (newListings: Listing[]) => void;
   setSelectedListing: (listing: Listing | null) => void;
   setListingType: (type: "sale" | "rent") => void;
@@ -102,15 +105,18 @@ interface ListingsState {
   setAuth: (token: string | null, user: any | null) => void;
   bumpMapRefresh: () => void;
   setDetailModalId: (id: string | null) => void;
+  setCurrentZoom: (zoom: number) => void;
 }
 
 export const useListingsStore = create<ListingsState>((set) => ({
   listings: [],
+  total: 0,
   selectedListing: null,
   listingType: "sale",
   viewportBounds: null,
   mapRefreshTick: 0,
   detailModalId: null,
+  currentZoom: 12,
   boundary: null,
   drawActive: false,
   isLoading: false,
@@ -118,7 +124,9 @@ export const useListingsStore = create<ListingsState>((set) => ({
   token: null,
   user: null,
  
-  setListings: (listings) => set({ listings }),
+  // Reset total alongside listings so stale total never shows while new listings load.
+  setListings: (listings) => set({ listings, total: 0 }),
+  setTotal: (total) => set({ total }),
   addListings: (newListings) =>
     set((state) => {
       const existingIds = new Set(state.listings.map((l) => l.id));
@@ -141,6 +149,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   setAuth: (token, user) => set({ token, user }),
   bumpMapRefresh: () => set((state) => ({ mapRefreshTick: state.mapRefreshTick + 1 })),
   setDetailModalId: (id) => set({ detailModalId: id }),
+  setCurrentZoom: (zoom) => set({ currentZoom: zoom }),
 }));
 
 // Load initial auth credentials asynchronously

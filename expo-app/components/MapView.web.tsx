@@ -15,9 +15,7 @@ import Map, {
   type MapRef,
   type ViewStateChangeEvent,
 } from "react-map-gl/mapbox";
-import Supercluster from "supercluster";
 import { useDebouncedCallback } from "use-debounce";
-import type { ClusterPoint } from "@/lib/api";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useColorScheme } from "@/components/useColorScheme";
@@ -26,12 +24,7 @@ import { MAP_STYLES, COLORS, API_BASE_URL } from "@/lib/theme";
 import { formatPrice } from "@/lib/format";
 import { fetchViewportListings, fetchPolygonListings } from "@/lib/api";
 
-// Abbreviates a listing count for cluster badge display: 62000 → "62k", 1250000 → "1.3M"
-function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}k`;
-  return String(n);
-}
+
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
 const DRAW_SOURCE_ID = "freehand-draw-source";
@@ -88,16 +81,6 @@ function buildDrawGeoJSON(pts: number[][], closed = false): GeoJSON.FeatureColle
   return { type: "FeatureCollection", features };
 }
 
-function createClusterIndex(listings: Listing[]) {
-  const index = new Supercluster({ radius: 40, maxZoom: 20, minZoom: 0 });
-  const points: Supercluster.PointFeature<{ listing: Listing }>[] = listings.map((listing) => ({
-    type: "Feature",
-    geometry: { type: "Point", coordinates: [listing.longitude, listing.latitude] },
-    properties: { listing },
-  }));
-  index.load(points);
-  return index;
-}
 
 // Generate a circle polygon (64 points) for boundary fallback
 function makeCircle(lat: number, lng: number, radiusKm: number): GeoJSON.Polygon {
@@ -121,8 +104,6 @@ export default function MapViewWeb() {
   const [isDrawingSession, setIsDrawingSession] = useState(false);
   const [committedGeoJSON, setCommittedGeoJSON] = useState<GeoJSON.FeatureCollection>(EMPTY_FC);
   const [boundaryGeoJSON, setBoundaryGeoJSON] = useState<GeoJSON.FeatureCollection | null>(null);
-  // H3 cluster badges from server at low zoom (empty = individual pin mode)
-  const [serverClusters, setServerClusters] = useState<ClusterPoint[]>([]);
   const committedFeaturesRef = useRef<GeoJSON.Feature[]>([]);
   const dragPointsRef = useRef<number[][]>([]);
   const isDrawingRef = useRef(false);
@@ -257,34 +238,31 @@ export default function MapViewWeb() {
     viewportBounds,
     addListings,
     setListings,
+    setTotal,
     listingType,
     setIsLoading,
     setBoundary,
+    setCurrentZoom,
   } = useListingsStore();
 
-  // Fetch listings (or H3 clusters) when viewport changes.
-  // Reads current zoom from Mapbox so the server can branch on it.
+  // Fetch representative listing pins for the current viewport.
+  // The server always returns Listing[] (DISTINCT ON representative pins or raw listings).
+  // Uses setListings (replace) not addListings (merge) so panning to a new area
+  // shows only the pins relevant to the current viewport — no stale pins from prior areas.
   const fetchListingsForBounds = useDebouncedCallback(async (bounds: [number, number, number, number]) => {
     if (drawActive || boundary) return;
     try {
       setIsLoading(true);
       const zoom = mapRef.current?.getMap()?.getZoom() ?? 14;
-      const response = await fetchViewportListings(bounds, listingType, zoom);
-      if (response.type === "clusters") {
-        // Low zoom: replace everything with H3 cluster badges.
-        setServerClusters(response.data);
-        setListings([]);
-      } else {
-        // High zoom: individual pins — clear clusters, merge new listings.
-        setServerClusters([]);
-        addListings(response.data);
-      }
+      const data = await fetchViewportListings(bounds, listingType, zoom);
+      setListings(Array.isArray(data.listings) ? data.listings : []);
+      setTotal(data.total ?? 0);
     } catch (err) {
       console.error("Failed to fetch listings:", err);
     } finally {
       setIsLoading(false);
     }
-  }, 500);
+  }, 150);
 
   // Refresh viewport listings when theme switches dark⟷light.
   // Style reload doesn't fire onMoveEnd, so markers stay blank until next pan/zoom.
@@ -315,19 +293,6 @@ export default function MapViewWeb() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark]); // Only re-run on theme toggle
 
-  // Cluster index
-  const clusterIndex = useMemo(() => createClusterIndex(listings), [listings]);
-  const clusters = useMemo(() => {
-    if (!viewportBounds) return [];
-    try {
-      const lngDelta = Math.abs(viewportBounds[2] - viewportBounds[0]);
-      const zoom = Math.round(Math.log2(360 / lngDelta));
-      return clusterIndex.getClusters(
-        [viewportBounds[0], viewportBounds[1], viewportBounds[2], viewportBounds[3]],
-        Math.min(Math.max(zoom, 0), 16)
-      );
-    } catch { return []; }
-  }, [clusterIndex, viewportBounds]);
 
   // Fit map to city boundary + fetch city polygon from OSM
   useEffect(() => {
@@ -405,7 +370,6 @@ export default function MapViewWeb() {
       committedFeaturesRef.current = [];
       setCommittedGeoJSON(EMPTY_FC);
       setBoundaryGeoJSON(null);
-      setServerClusters([]);  // clear any stale cluster badges from before the boundary search
 
       // Refetch viewport listings immediately
       const map = mapRef.current?.getMap();
@@ -444,6 +408,8 @@ export default function MapViewWeb() {
   const handleMoveEnd = useDebouncedCallback((_evt: ViewStateChangeEvent) => {
     const map = mapRef.current;
     if (!map) return;
+    const zoom = map.getMap().getZoom();
+    setCurrentZoom(zoom);
     const bounds = map.getMap().getBounds();
     if (bounds) {
       const b: [number, number, number, number] = [
@@ -452,12 +418,14 @@ export default function MapViewWeb() {
       setViewportBounds(b);
       fetchListingsForBounds(b);
     }
-  }, 300);
+  }, 150);
 
   const handleLoad = useCallback(() => {
     setMapLoaded(true);
     const map = mapRef.current;
     if (!map) return;
+    const zoom = map.getMap().getZoom();
+    setCurrentZoom(zoom);
     const bounds = map.getMap().getBounds();
     if (bounds) {
       const b: [number, number, number, number] = [
@@ -466,27 +434,8 @@ export default function MapViewWeb() {
       setViewportBounds(b);
       fetchListingsForBounds(b);
     }
-  }, [setViewportBounds]);
+  }, [setViewportBounds, setCurrentZoom]);
 
-  const handleClusterClick = useCallback((clusterId: number) => {
-    try {
-      const leaves = (clusterIndex as any).getLeaves(clusterId, 100);
-      const coords = leaves.map((l: any) => l.geometry.coordinates as [number, number]);
-      if (coords.length === 0) return;
-      const map = mapRef.current?.getMap();
-      if (!map) return;
-      if (coords.length === 1) {
-        map.flyTo({ center: coords[0], zoom: 16, duration: 800 });
-        return;
-      }
-      let [minLng, minLat, maxLng, maxLat] = [coords[0][0], coords[0][1], coords[0][0], coords[0][1]];
-      for (const [lng, lat] of coords) {
-        if (lng < minLng) minLng = lng; if (lat < minLat) minLat = lat;
-        if (lng > maxLng) maxLng = lng; if (lat > maxLat) maxLat = lat;
-      }
-      map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, maxZoom: 16, duration: 800 });
-    } catch (err) { console.error("Cluster click error:", err); }
-  }, [clusterIndex]);
 
   // Draw handlers
   const updateDrawSource = useCallback(() => {
@@ -596,75 +545,12 @@ export default function MapViewWeb() {
           </Source>
         )}
 
-        {/* ── H3 cluster badges (low zoom, server-aggregated) ─────────────── */}
-        {mapLoaded && serverClusters.length > 0 && serverClusters.map((cluster) => (
-          <Marker
-            key={`h3-${cluster.h3index}`}
-            longitude={cluster.lng}
-            latitude={cluster.lat}
-            anchor="center"
-            onClick={(e: any) => {
-              e.originalEvent?.stopPropagation();
-              // Zoom into this cluster's area — at zoom 12 the server switches to individual pins
-              mapRef.current?.getMap()?.flyTo({
-                center: [cluster.lng, cluster.lat],
-                zoom: 12,
-                duration: 700,
-              });
-            }}
-          >
-            <div
-              title={`${cluster.count} listings from ${formatPrice(cluster.min_price)}`}
-              style={{
-                padding: "5px 11px",
-                background: colors.markerBg,
-                color: colors.markerText,
-                borderRadius: 20,
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
-                cursor: "pointer",
-                transition: "transform 150ms cubic-bezier(0.34,1.56,0.64,1)",
-                userSelect: "none",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.15)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            >
-              {formatCount(cluster.count)}
-            </div>
-          </Marker>
-        ))}
-
-        {/* ── Individual price pins (high zoom, Supercluster-grouped) ──────── */}
-        {mapLoaded && serverClusters.length === 0 && clusters.map((cluster) => {
-          const [lng, lat] = cluster.geometry.coordinates;
-          if (!isFinite(lng) || !isFinite(lat)) return null;
-          const isCluster = cluster.properties.cluster;
-
-          if (isCluster) {
-            const clusterId = cluster.properties.cluster_id ?? 0;
-            return (
-              <Marker key={`c-${clusterId}`} longitude={lng} latitude={lat} anchor="center"
-                onClick={(e: any) => { e.originalEvent?.stopPropagation(); handleClusterClick(clusterId); }}>
-                <div style={{
-                  width: 14, height: 14, borderRadius: 7,
-                  background: colors.markerBg,
-                  border: `2px solid ${colors.markerText}`,
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                  cursor: "pointer",
-                  transition: "transform 150ms cubic-bezier(0.34,1.56,0.64,1)",
-                }} onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.3)")}
-                   onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")} />
-              </Marker>
-            );
-          }
-
-          const listing = cluster.properties.listing as Listing;
+        {/* ── Price pins — one per listing, all zoom levels ───────────────────── */}
+        {mapLoaded && listings.map((listing) => {
           const isActive = selectedListing?.id === listing.id;
           const bg = isActive ? colors.markerBgActive : colors.markerBg;
           return (
-            <Marker key={listing.id} longitude={lng} latitude={lat} anchor="bottom"
+            <Marker key={listing.id} longitude={listing.longitude} latitude={listing.latitude} anchor="bottom"
               onClick={(e: any) => { e.originalEvent?.stopPropagation(); setSelectedListing(listing); }}>
               <div style={{ position: "relative", cursor: "pointer" }}>
                 <div style={{

@@ -6,6 +6,7 @@ import PropertyCard from "./PropertyCard";
 
 export default function ListView() {
   const { listings, setSelectedListing, viewportBounds, boundary, selectedListing } = useListingsStore();
+  const total = useListingsStore((s) => s.total);
 
   useEffect(() => {
     if (selectedListing) {
@@ -38,7 +39,9 @@ export default function ListView() {
       {/* Count header */}
       <div className="flex items-center justify-between py-1 mb-3">
         <span className="text-[0.8125rem] text-muted-foreground">
-          {visibleListings.length} {visibleListings.length === 1 ? "property" : "properties"} found
+          {total > visibleListings.length
+            ? `${visibleListings.length} of ${total.toLocaleString()} properties`
+            : `${visibleListings.length} ${visibleListings.length === 1 ? "property" : "properties"}`}
         </span>
       </div>
 

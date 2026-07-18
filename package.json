@@ -24,6 +24,7 @@
     "drizzle-orm": "^0.45.2",
     "expo-screen-orientation": "^56.0.5",
     "framer-motion": "^12.39.0",
+    "h3-js": "^4.5.0",
     "lucide-react": "^1.16.0",
     "mapbox-gl": "^3.24.0",
     "mappls-web-maps": "^3.8.0",

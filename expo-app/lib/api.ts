@@ -6,37 +6,27 @@
 import { API_BASE_URL } from "./theme";
 import type { Listing } from "@/store/listings";
 
-// ── Viewport API response types (SCRUM-196) ──────────────────────────────────
-
-/** One H3 hex cluster returned by the viewport API at low zoom levels. */
-export type ClusterPoint = {
-  h3index:   string;   // H3 resolution-7 cell ID (hex string)
-  count:     number;   // total listing count in this cell
-  min_price: number;   // cheapest listing price in this cell
-  lat:       number;   // centroid latitude  (avg of listings in cell)
-  lng:       number;   // centroid longitude (avg of listings in cell)
-};
-
-/** Union response shape from GET /api/listings/viewport */
-export type ViewportResponse =
-  | { type: "listings"; data: Listing[] }
-  | { type: "clusters"; data: ClusterPoint[] };
-
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Fetch listings within a viewport bounding box.
  *
- * The server branches on `zoom`:
- *   zoom < 12  → returns H3 hex aggregation clusters (low zoom, city view)
- *   zoom ≥ 12  → returns individual listing rows (high zoom, street view)
+ * Always returns Listing[] — the server uses H3 DISTINCT ON to return one
+ * representative price pin per cell at low zoom, and all listings at street
+ * level zoom. No cluster count objects are ever returned.
+ *
+ * Resolution ladder (server-side):
+ *   zoom < 8   → returns [] (viewport too large)
+ *   zoom 8-10  → one pin per res7 cell (~5 km²)
+ *   zoom 11-13 → one pin per res9 cell (~0.1 km²)
+ *   zoom ≥ 14  → all active listings in viewport, LIMIT 100
  */
 export async function fetchViewportListings(
   bounds:      [number, number, number, number],
   listingType: "sale" | "rent",
   zoom:        number,
   signal?:     AbortSignal
-): Promise<ViewportResponse> {
+): Promise<{ listings: Listing[]; total: number }> {
   const [swLng, swLat, neLng, neLat] = bounds;
   const zoomInt = Math.round(zoom);
   const url =
@@ -45,7 +35,7 @@ export async function fetchViewportListings(
     `&type=${listingType}&zoom=${zoomInt}`;
   const res = await fetch(url, { signal });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  return res.json(); // { listings: Listing[], total: number }
 }
 
 /**

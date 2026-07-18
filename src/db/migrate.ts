@@ -266,6 +266,154 @@ async function run() {
     await sql`CREATE INDEX IF NOT EXISTS idx_users_h3_res9  ON users (h3_index_res9);`;
     console.log("✔ Created idx_users_location (GIST) and idx_users_h3_res9 (B-tree)");
 
+    // ── COORDINATE ORDER FIX + DISTINCT ON INDEXES ────────────────────────────
+    // BUG: h3_lat_lng_to_cell(point(latitude, longitude), r) was wrong.
+    // h3_pg follows PostGIS convention: point(x, y) → x=longitude, y=latitude.
+    // So point(latitude, longitude) computed cells for a swapped coordinate pair
+    // (effectively treating Hyderabad at ~17°N,78°E as a location at ~78°N,17°E —
+    // somewhere in the Arctic Ocean). Verified via: h3-js latLngToCell(lng,lat,7)
+    // matched DB cell, confirming the swap.
+    // Fix: use point(longitude, latitude) so point.x=lng, point.y=lat (correct).
+    //
+    // Also adds composite partial indexes for DISTINCT ON representative-pin queries
+    // and a boost_score column for future premium listing monetisation.
+
+    console.log("→ Fixing H3 coordinate order (lat/lng were swapped in point())...");
+
+    // Must drop indexes before dropping the columns they depend on
+    await sql`DROP INDEX IF EXISTS idx_listings_h3_res7;`;
+    await sql`DROP INDEX IF EXISTS idx_listings_h3_res9;`;
+    await sql`DROP INDEX IF EXISTS idx_listings_h3_res7_rank;`;
+    await sql`DROP INDEX IF EXISTS idx_listings_h3_res9_rank;`;
+
+    // Drop the incorrectly-computed generated columns
+    await sql`ALTER TABLE listings DROP COLUMN IF EXISTS h3_index_res7;`;
+    await sql`ALTER TABLE listings DROP COLUMN IF EXISTS h3_index_res9;`;
+
+    // Re-add with corrected convention: point(longitude, latitude) → x=lng, y=lat
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN h3_index_res7 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(longitude, latitude), 7)
+        ) STORED;
+    `;
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN h3_index_res9 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(longitude, latitude), 9)
+        ) STORED;
+    `;
+    console.log("✔ Fixed h3_index_res7 + h3_index_res9 coordinate order");
+
+    // Composite partial indexes for DISTINCT ON (newest active listing per cell).
+    // The (h3_index, created_at DESC) ordering lets Postgres do a pure index scan:
+    // it reads the first row per cell group without sorting the full result set.
+    // WHERE status='active' shrinks the index to ~10-20% of total rows.
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_h3_res7_rank
+        ON listings (h3_index_res7, created_at DESC)
+        WHERE status = 'active';
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_h3_res9_rank
+        ON listings (h3_index_res9, created_at DESC)
+        WHERE status = 'active';
+    `;
+    // Simple B-tree indexes kept for any remaining GROUP BY uses
+    await sql`CREATE INDEX IF NOT EXISTS idx_listings_h3_res7 ON listings (h3_index_res7);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_listings_h3_res9 ON listings (h3_index_res9);`;
+    console.log("✔ Created H3 composite partial indexes for DISTINCT ON representative pins");
+
+    // boost_score: future hook for premium listing monetisation.
+    // When activated: ORDER BY h3_index_res7, boost_score DESC, created_at DESC
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS boost_score smallint NOT NULL DEFAULT 0;
+    `;
+    console.log("✔ Added boost_score column to listings");
+
+    // ── MULTI-RESOLUTION H3 (res5, res6, res8) ─────────────────────────────
+    // Adds intermediate resolutions for consistent ~50-100 pin density at every
+    // zoom level. Without these, using res7 for all of zoom 8-12 causes visual
+    // compression at low zoom (5km² cells are too small relative to the viewport).
+    //
+    // Resolution ladder:
+    //   zoom 8-9  → res5 (~252 km²) → ~30-90 cells visible
+    //   zoom 10-11 → res6 (~36 km²) → ~60-130 cells visible
+    //   zoom 12   → res7 (~5 km²)   → ~50 cells  [existing column]
+    //   zoom 13   → res8 (~0.74 km²) → ~110 cells
+    //   zoom ≥14  → raw listings
+    //
+    // Space cost: ~48 bytes/listing/resolution (column + composite index).
+    // 3 new columns → ~144 bytes/listing. At 1M listings: ~144 MB (negligible).
+    //
+    // Generated columns: Postgres auto-computes on every INSERT/UPDATE of
+    // latitude/longitude. No application code changes needed.
+
+    console.log("→ Adding H3 multi-resolution columns (res5, res6, res8) to listings...");
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS h3_index_res5 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(longitude, latitude), 5)
+        ) STORED;
+    `;
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS h3_index_res6 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(longitude, latitude), 6)
+        ) STORED;
+    `;
+    await sql`
+      ALTER TABLE listings
+        ADD COLUMN IF NOT EXISTS h3_index_res8 h3index
+        GENERATED ALWAYS AS (
+          h3_lat_lng_to_cell(point(longitude, latitude), 8)
+        ) STORED;
+    `;
+    console.log("✔ Added h3_index_res5, res6, res8 to listings");
+
+    // Composite partial indexes for DISTINCT ON representative-pin queries.
+    // Order: (cell, boost_score DESC, created_at DESC) — boost_score first so
+    // premium listings (boost_score > 0) win their cell when monetisation is active.
+    // WHERE status='active' shrinks the index to active listings only.
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_h3_res5_rank
+        ON listings (h3_index_res5, boost_score DESC, created_at DESC)
+        WHERE status = 'active';
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_h3_res6_rank
+        ON listings (h3_index_res6, boost_score DESC, created_at DESC)
+        WHERE status = 'active';
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_h3_res8_rank
+        ON listings (h3_index_res8, boost_score DESC, created_at DESC)
+        WHERE status = 'active';
+    `;
+    console.log("✔ Created composite partial indexes (res5_rank, res6_rank, res8_rank)");
+
+    // Fix users table — same coordinate order bug
+    await sql`DROP INDEX IF EXISTS idx_users_h3_res9;`;
+    await sql`ALTER TABLE users DROP COLUMN IF EXISTS h3_index_res9;`;
+    await sql`
+      ALTER TABLE users
+        ADD COLUMN h3_index_res9 h3index
+        GENERATED ALWAYS AS (
+          CASE
+            WHEN latitude IS NOT NULL AND longitude IS NOT NULL
+            THEN h3_lat_lng_to_cell(point(longitude, latitude), 9)
+            ELSE NULL
+          END
+        ) STORED;
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_users_h3_res9 ON users (h3_index_res9);`;
+    console.log("✔ Fixed users.h3_index_res9 coordinate order");
+
     console.log("Migration completed successfully!");
 
 
