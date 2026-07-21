@@ -7,7 +7,7 @@ export interface Listing {
   price: number;
   propertyType: string;
   listingType: "sale" | "rent";
-  listerType: "owner" | "broker" | "developer";
+  listerType: "owner" | "realtor" | "developer";
   bedrooms?: number;
   bathrooms?: number;
   builtUpArea?: number;

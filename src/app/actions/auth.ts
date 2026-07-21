@@ -20,7 +20,7 @@ export async function sendOtpAction(phone: string) {
 interface OnboardingInput {
   name: string;
   email?: string;
-  role: "buyer" | "owner" | "broker" | "developer";
+  role: "buyer" | "owner" | "realtor" | "developer";
   reraNumber?: string;
   companyName?: string;
   projectCount?: string;
@@ -53,8 +53,8 @@ export async function completeOnboardingAction(data: OnboardingInput) {
         encryptedEmail,
         emailHash,
         role: data.role,
-        reraNumber: data.role === "broker" || data.role === "developer" ? data.reraNumber || null : null,
-        companyName: data.role === "broker" || data.role === "developer" ? data.companyName || null : null,
+        reraNumber: data.role === "realtor" || data.role === "developer" ? data.reraNumber || null : null,
+        companyName: data.role === "realtor" || data.role === "developer" ? data.companyName || null : null,
         projectCount: data.role === "developer" ? data.projectCount || null : null,
         updatedAt: new Date(),
       })

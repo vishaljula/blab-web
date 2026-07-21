@@ -30,7 +30,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
   // Profile fields
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"buyer" | "owner" | "broker" | "developer">("owner");
+  const [role, setRole] = useState<"buyer" | "owner" | "realtor" | "developer">("owner");
   const [reraNumber, setReraNumber] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [projectCount, setProjectCount] = useState("1-5");
@@ -197,8 +197,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         name,
         email: typedEmail || undefined,
         role,
-        reraNumber: role === "broker" || role === "developer" ? reraNumber : undefined,
-        companyName: role === "broker" || role === "developer" ? companyName : undefined,
+        reraNumber: role === "realtor" || role === "developer" ? reraNumber : undefined,
+        companyName: role === "realtor" || role === "developer" ? companyName : undefined,
         projectCount: role === "developer" ? projectCount : undefined,
       });
 
@@ -208,8 +208,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           name,
           email: typedEmail || undefined,
           role,
-          reraNumber: role === "broker" || role === "developer" ? reraNumber : undefined,
-          companyName: role === "broker" || role === "developer" ? companyName : undefined,
+          reraNumber: role === "realtor" || role === "developer" ? reraNumber : undefined,
+          companyName: role === "realtor" || role === "developer" ? companyName : undefined,
           projectCount: role === "developer" ? projectCount : undefined,
         });
         onClose();
@@ -385,7 +385,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     {[
                       { id: "owner", label: "Property Owner", desc: "Selling / renting out" },
                       { id: "buyer", label: "Buyer / Renter", desc: "Finding properties" },
-                      { id: "broker", label: "Agent / Broker", desc: "Listing properties" },
+                      { id: "realtor", label: "Agent / Realtor", desc: "Listing properties" },
                       { id: "developer", label: "Developer", desc: "New projects builder" },
                     ].map((item) => (
                       <button
@@ -406,7 +406,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 </div>
 
                 {/* Conditional Fields for Brokers and Developers */}
-                {(role === "broker" || role === "developer") && (
+                {(role === "realtor" || role === "developer") && (
                   <div className="space-y-3 pt-2 border-t border-border">
                     <div className="space-y-1">
                       <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">

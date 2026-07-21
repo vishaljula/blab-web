@@ -108,7 +108,7 @@ const NEIGHBORHOODS: { name: string; lat: number; lng: number; premium: boolean 
 // ── Property configuration ───────────────────────────────────────────────
 const PROPERTY_TYPES = ["apartment", "villa", "house", "plot", "commercial"];
 const LISTING_TYPES: ("sale" | "rent")[] = ["sale", "rent"];
-const LISTER_TYPES: ("owner" | "broker" | "developer")[] = ["owner", "broker", "developer"];
+const LISTER_TYPES: ("owner" | "realtor" | "developer")[] = ["owner", "realtor", "developer"];
 
 const FIRST_NAMES = [
   "Ravi", "Priya", "Suresh", "Anjali", "Vikram", "Deepa", "Rajesh", "Sunita",
@@ -255,9 +255,9 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
   const listingType = Math.random() < 0.75 ? "sale" : "rent";
   const listerType = weightedPick([
     ["owner", 40],
-    ["broker", 40],
+    ["realtor", 40],
     ["developer", 20],
-  ]) as "owner" | "broker" | "developer";
+  ]) as "owner" | "realtor" | "developer";
 
   // Pick a name consistent with gender pools so photo matches
   const isFemale = Math.random() < 0.4;

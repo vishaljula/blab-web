@@ -39,8 +39,8 @@ export async function POST(request: Request) {
       .set({
         encryptedName,
         role: role,
-        reraNumber: role === "broker" || role === "developer" ? reraNumber || null : null,
-        companyName: role === "broker" || role === "developer" ? companyName || null : null,
+        reraNumber: role === "realtor" || role === "developer" ? reraNumber || null : null,
+        companyName: role === "realtor" || role === "developer" ? companyName || null : null,
         projectCount: role === "developer" ? projectCount || null : null,
         updatedAt: new Date(),
       })

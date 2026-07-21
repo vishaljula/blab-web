@@ -12,8 +12,8 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-// Define user roles: buyer, owner, broker, developer
-export const userRoleEnum = pgEnum("user_role", ["buyer", "owner", "broker", "developer"]);
+// Define user roles: buyer, owner, realtor, developer
+export const userRoleEnum = pgEnum("user_role", ["buyer", "owner", "realtor", "developer"]);
 
 // Listing lifecycle status
 export const listingStatusEnum = pgEnum("listing_status", [
@@ -80,7 +80,7 @@ export const listings = pgTable(
     price: integer("price").notNull(),
     propertyType: text("property_type").notNull(), // apartment, villa, house, plot, commercial, pg
     listingType: text("listing_type").notNull(),   // sale, rent
-    listerType: text("lister_type").notNull(),     // owner, broker, developer
+    listerType: text("lister_type").notNull(),     // owner, realtor, developer
 
     // ─── Status & lifecycle ────────────────────────────────────────────────
     status: listingStatusEnum("status").default("pending_photography").notNull(),

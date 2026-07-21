@@ -414,6 +414,28 @@ async function run() {
     await sql`CREATE INDEX IF NOT EXISTS idx_users_h3_res9 ON users (h3_index_res9);`;
     console.log("✔ Fixed users.h3_index_res9 coordinate order");
 
+    // ── Rename 'broker' → 'realtor' in user_role enum ──────────────────────
+    // PostgreSQL 10+ supports renaming enum values directly without recreating
+    // the type. This is safe on live data — existing rows are updated in place.
+    await sql`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM pg_enum
+          WHERE enumlabel = 'broker'
+            AND enumtypid = 'user_role'::regtype
+        ) THEN
+          ALTER TYPE user_role RENAME VALUE 'broker' TO 'realtor';
+        END IF;
+      END
+      $$;
+    `;
+    console.log("✔ Renamed user_role enum value 'broker' → 'realtor'");
+
+    // Also update lister_type text column on listings (free-text, not enum)
+    await sql`UPDATE listings SET lister_type = 'realtor' WHERE lister_type = 'broker';`;
+    console.log("✔ Updated listings.lister_type 'broker' → 'realtor'");
+
     console.log("Migration completed successfully!");
 
 

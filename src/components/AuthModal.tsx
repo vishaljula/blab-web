@@ -54,7 +54,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   // Onboarding profile states
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"buyer" | "owner" | "broker" | "developer">("owner");
+  const [role, setRole] = useState<"buyer" | "owner" | "realtor" | "developer">("owner");
   const [reraNumber, setReraNumber] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [projectCount, setProjectCount] = useState("1-5");
@@ -175,8 +175,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const res = await completeOnboardingAction({
         name,
         role,
-        reraNumber: role === "broker" || role === "developer" ? reraNumber : undefined,
-        companyName: role === "broker" || role === "developer" ? companyName : undefined,
+        reraNumber: role === "realtor" || role === "developer" ? reraNumber : undefined,
+        companyName: role === "realtor" || role === "developer" ? companyName : undefined,
         projectCount: role === "developer" ? projectCount : undefined,
       });
 
@@ -500,7 +500,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     {[
                       { id: "owner", label: "Property Owner", desc: "Selling / renting out" },
                       { id: "buyer", label: "Buyer / Renter", desc: "Finding properties" },
-                      { id: "broker", label: "Agent / Broker", desc: "Listing properties" },
+                      { id: "realtor", label: "Agent / Realtor", desc: "Listing properties" },
                       { id: "developer", label: "Developer", desc: "New projects builder" },
                     ].map((item) => (
                       <button
@@ -521,7 +521,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </div>
 
                 {/* Conditional Fields for Brokers and Developers */}
-                {(role === "broker" || role === "developer") && (
+                {(role === "realtor" || role === "developer") && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}

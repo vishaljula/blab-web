@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         24               AS "avgResponseHours",
         TRUE             AS "isVerified"
       FROM users
-      WHERE role = 'broker'
+      WHERE role = 'realtor'
         AND rera_number IS NOT NULL
         AND rera_number != ''
       ORDER BY created_at DESC

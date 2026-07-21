@@ -13,7 +13,7 @@ interface PropertyCardProps {
 
 const listerColors: Record<string, string> = {
   owner: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800",
-  broker: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800",
+  realtor: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800",
   developer: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-400 dark:border-purple-800",
 };
 
@@ -210,7 +210,7 @@ export default function PropertyCard({ listing, onClick, onClose }: PropertyCard
           </span>
           <span
             className={`inline-flex items-center px-1 py-0.5 rounded text-[10px] font-semibold border ${
-              listerColors[listing.listerType] ?? listerColors.broker
+              listerColors[listing.listerType] ?? listerColors.realtor
             }`}
           >
             {listing.listerType}
