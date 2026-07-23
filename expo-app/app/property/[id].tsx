@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Linking,
+  Share,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image } from "expo-image";
@@ -88,6 +89,27 @@ export default function PropertyDetailScreen() {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [activeTab, setActiveTab] = useState<"overview" | "features" | "neighborhood" | "calculator">("overview");
   const [favorited, setFavorited] = useState(false);
+
+  const handleShare = async () => {
+    const shareId = id || listing?.id;
+    if (!shareId) return;
+    const url = `https://blab.in/listing/${shareId}`;
+    const msg = listing
+      ? `${listing.address}, ${listing.city} — Check this on Blab: ${url}`
+      : url;
+    try {
+      if (Platform.OS === "web") {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({ title: listing?.address ?? "Property", text: msg, url });
+        } else {
+          await navigator.clipboard?.writeText(url);
+        }
+      } else {
+        await Share.share({ message: msg, url });
+      }
+    } catch {}
+  };
+
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -626,11 +648,12 @@ export default function PropertyDetailScreen() {
 
   // ── Tour & Contact CTA widget (Contact-first ordering) ────────────────────────
   const renderCTAWidget = () => {
-    const agentName   = listing.contactName ?? "Agent";
+    const agentName    = listing.contactName ?? "Agent";
     const agentInitial = agentName.charAt(0).toUpperCase();
-    // getRoleLabel from lib/listerRole.ts — shared with web modal.
-    const roleLabel = getRoleLabel(listing.listerType);
-    const hasPhone = !!listing.contactPhone;
+    // When an assigned realtor is handling the listing, override the role label
+    const isRealtorHandled = !!(listing as any).handledByRealtor;
+    const roleLabel = isRealtorHandled ? "Licensed Realtor · Blab" : getRoleLabel(listing.listerType);
+    const hasPhone  = !!listing.contactPhone;
 
     return (
       <View style={[s.ctaWidget, { backgroundColor: C.card, borderColor: C.border }]}>
@@ -653,9 +676,9 @@ export default function PropertyDetailScreen() {
           <View style={s.desktopAgentInfo}>
             <View style={s.desktopAgentNameRow}>
               <Text style={[s.desktopAgentName, { color: C.foreground }]} numberOfLines={1}>{agentName}</Text>
-              <View style={[s.desktopAgentBadge, { backgroundColor: C.primary }]}>
+              <View style={[s.desktopAgentBadge, { backgroundColor: isRealtorHandled ? "#10B981" : C.primary }]}>
                 <Text style={s.desktopAgentBadgeText}>
-                  {getRoleBadge(listing.listerType)}
+                  {isRealtorHandled ? "Realtor" : getRoleBadge(listing.listerType)}
                 </Text>
               </View>
             </View>
@@ -934,26 +957,26 @@ export default function PropertyDetailScreen() {
     const phone = listing.contactPhone;
     if (!phone) return;
 
-    // Strip '+' for WhatsApp URL (wa.me expects digits only)
+    // Strip all non-digits (wa.me expects digits only, no '+')
     const digits = phone.replace(/\D/g, "");
 
-    // Property deep link — blab://property/<id> works via Expo Router scheme
+    // Property deep link
     const deepLink = `https://blab.in/property/${listing.id}`;
     const msg = encodeURIComponent(
       `Hi ${listing.contactName ?? "there"}, I'm interested in your property at ${listing.address}, ${listing.city} listed on Blab.\n\nView it here: ${deepLink}`
     );
 
-    const whatsappUrl = `whatsapp://send?phone=${digits}&text=${msg}`;
-    const smsUrl = Platform.OS === "ios"
-      ? `sms:${phone}&body=${msg}`
-      : `sms:${phone}?body=${msg}`;
-
-    const canWhatsApp = await Linking.canOpenURL(whatsappUrl);
-    if (canWhatsApp) {
-      Linking.openURL(whatsappUrl);
-    } else {
-      Linking.openURL(smsUrl);
-    }
+    // Use https://wa.me/ — universal link that works whether WhatsApp is installed
+    // or not (opens WhatsApp Web). No LSApplicationQueriesSchemes entry needed.
+    const waUrl = `https://wa.me/${digits}?text=${msg}`;
+    Linking.openURL(waUrl).catch(() => {
+      // Last resort fallback: SMS
+      // iOS uses semicolon before body=, Android uses ?body=
+      const smsUrl = Platform.OS === "ios"
+        ? `sms:${phone};body=${msg}`
+        : `sms:${phone}?body=${msg}`;
+      Linking.openURL(smsUrl).catch(() => {});
+    });
   };
 
   const handleNativeCall = () => {
@@ -963,15 +986,16 @@ export default function PropertyDetailScreen() {
 
   // ── Mobile sticky bottom CTA ──────────────────────────────────────────────────
   const renderMobileBottomBar = () => {
-    const isOwner  = listing.listerType === "owner";
+    const isRealtorHandled = !!(listing as any).handledByRealtor;
+    // Owner self-list with no realtor assigned: show simple Call + Tour buttons
+    const isOwner  = listing.listerType === "owner" && !isRealtorHandled;
     const name     = listing.contactName ?? "Agent";
     const initial  = name.charAt(0).toUpperCase();
-    // getRoleLabel from lib/listerRole.ts — shared with web modal.
-    const roleLabel = getRoleLabel(listing.listerType);
+    const roleLabel = isRealtorHandled ? "Licensed Realtor · Blab" : getRoleLabel(listing.listerType);
     const hasPhone = !!listing.contactPhone;
 
     if (isOwner) {
-      // Owner: simple Call + Request Tour
+      // Owner self-list: simple Call + Request Tour
       return (
         <View style={[s.mobileBottomBar, { backgroundColor: C.card, borderTopColor: C.border }]}>
           <Pressable
@@ -1008,9 +1032,9 @@ export default function PropertyDetailScreen() {
           <View style={s.agentBarInfo}>
             <View style={s.agentBarNameRow}>
               <Text style={[s.agentBarName, { color: C.foreground }]} numberOfLines={1}>{name}</Text>
-              <View style={[s.agentBarBadge, { backgroundColor: C.primary }]}>
+              <View style={[s.agentBarBadge, { backgroundColor: isRealtorHandled ? "#10B981" : C.primary }]}>
                 <Text style={s.agentBarBadgeText}>
-                  {getRoleBadge(listing.listerType)}
+                  {isRealtorHandled ? "Realtor" : getRoleBadge(listing.listerType)}
                 </Text>
               </View>
             </View>
@@ -1342,7 +1366,7 @@ export default function PropertyDetailScreen() {
             <Pressable onPress={() => setFavorited(!favorited)} style={s.iconBtn}>
               <Ionicons name={favorited ? "heart" : "heart-outline"} size={20} color={favorited ? "#EF4444" : C.foreground} />
             </Pressable>
-            <Pressable style={s.iconBtn}>
+            <Pressable style={s.iconBtn} onPress={handleShare}>
               <Ionicons name="share-outline" size={20} color={C.foreground} />
             </Pressable>
           </View>
@@ -1377,7 +1401,7 @@ export default function PropertyDetailScreen() {
                 color={favorited ? "#EF4444" : (headerOpaque ? C.foreground : "#fff")}
               />
             </Pressable>
-            <Pressable style={s.iconBtn}>
+            <Pressable style={s.iconBtn} onPress={handleShare}>
               <Ionicons name="share-outline" size={22} color={headerOpaque ? C.foreground : "#fff"} />
             </Pressable>
           </View>

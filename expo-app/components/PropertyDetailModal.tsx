@@ -81,6 +81,20 @@ export default function PropertyDetailModal() {
   // deep-link / share-URL sync — currently unused in render.
   const [activeTab, setActiveTab] = useState<"overview" | "features" | "neighborhood" | "calculator">("overview");
   const [favorited, setFavorited] = useState(false);
+
+  const handleShare = async () => {
+    if (!listing) return;
+    const url = `${window.location.origin}/listing/${listing.id}`;
+    const text = `${listing.address}, ${listing.city} — ₹${listing.price?.toLocaleString("en-IN")} — Check this on Blab`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: listing.address, text, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch {}
+  };
+
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
@@ -714,7 +728,7 @@ export default function PropertyDetailModal() {
               <Pressable onPress={() => setFavorited(!favorited)} style={m.iconBtn}>
                 <Ionicons name={favorited ? "heart" : "heart-outline"} size={19} color={favorited ? "#EF4444" : C.foreground} />
               </Pressable>
-              <Pressable style={m.iconBtn}>
+              <Pressable style={m.iconBtn} onPress={handleShare}>
                 <Ionicons name="share-outline" size={19} color={C.foreground} />
               </Pressable>
             </View>

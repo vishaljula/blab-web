@@ -65,13 +65,41 @@ export const LISTER_COLORS = {
     light: { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" },
     dark: { bg: "#064E3B", text: "#6EE7B7", border: "#065F46" },
   },
-  broker: {
+  realtor: {
     light: { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" },
     dark: { bg: "#1E3A5F", text: "#93C5FD", border: "#1E40AF" },
   },
   developer: {
     light: { bg: "#FAF5FF", text: "#7C3AED", border: "#DDD6FE" },
     dark: { bg: "#3B0764", text: "#C4B5FD", border: "#5B21B6" },
+  },
+} as const;
+
+/** Subscription tier badge colours for the realtor dashboard. */
+export const TIER_COLORS = {
+  free_trial: {
+    bg: "#F1F5F9",
+    text: "#475569",
+    border: "#CBD5E1",
+    label: "Trial",
+  },
+  soft_cap: {
+    bg: "#FFFBEB",
+    text: "#92400E",
+    border: "#FDE68A",
+    label: "Free",
+  },
+  pro: {
+    bg: "#EFF6FF",
+    text: "#1D4ED8",
+    border: "#BFDBFE",
+    label: "Pro",
+  },
+  pro_plus: {
+    bg: "#FEF3C7",
+    text: "#92400E",
+    border: "#F59E0B",
+    label: "Pro+",
   },
 } as const;
 

@@ -436,7 +436,195 @@ async function run() {
     await sql`UPDATE listings SET lister_type = 'realtor' WHERE lister_type = 'broker';`;
     console.log("✔ Updated listings.lister_type 'broker' → 'realtor'");
 
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // Realtor Platform — schema additions
+    // All blocks are idempotent (IF NOT EXISTS / DO $$ ... END $$).
+    // ══════════════════════════════════════════════════════════════════════════
+
+    // ── subscription_tier enum ───────────────────────────────────────────────
+    await sql`
+      DO $$ BEGIN
+        CREATE TYPE subscription_tier AS ENUM (
+          'free_trial', 'soft_cap', 'pro', 'pro_plus'
+        );
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$;
+    `;
+    console.log("✔ subscription_tier enum ready");
+
+    // ── New columns on users ─────────────────────────────────────────────────
+    // Realtor profile
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_url             text;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio                   text;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS years_experience      smallint;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS languages_spoken      jsonb;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS areas_served          jsonb;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS realtor_latitude      double precision;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS realtor_longitude     double precision;`;
+
+    // Subscription / trial
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier           subscription_tier DEFAULT 'free_trial';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_started_at            timestamptz;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_sale_leads_used       smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_rental_leads_used     smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS soft_cap_sale_leads_month   smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS soft_cap_rental_leads_month smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS soft_cap_month              varchar(7);`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS soft_cap_overflow_leads     smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lead_assigned_at       timestamptz;`;
+
+    // Ranking score components
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS realtor_score        integer DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_tier_base      integer DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_response_rate  smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_response_speed smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_listing_activity smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_reviews        smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_profile        smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS score_tenure         smallint DEFAULT 0;`;
+
+    // Capacity (pre-computed, event-driven — never a subquery at routing time)
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS active_listing_count  smallint DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS max_listing_capacity  smallint DEFAULT 2;`;
+
+    console.log("✔ Added realtor columns to users table");
+
+    // ── base_location — PostGIS generated geography from realtor_lat/lng ─────
+    await sql`
+      DO $$ BEGIN
+        ALTER TABLE users
+          ADD COLUMN base_location geography(POINT, 4326)
+          GENERATED ALWAYS AS (
+            CASE
+              WHEN realtor_latitude IS NOT NULL AND realtor_longitude IS NOT NULL
+              THEN ST_SetSRID(ST_MakePoint(realtor_longitude, realtor_latitude), 4326)::geography
+              ELSE NULL
+            END
+          ) STORED;
+      EXCEPTION WHEN duplicate_column THEN NULL;
+      END $$;
+    `;
+    console.log("✔ base_location generated geography column ready");
+
+    // ── Realtor-specific indexes ─────────────────────────────────────────────
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_users_realtor_score
+        ON users (realtor_score DESC)
+        WHERE role = 'realtor' AND subscription_tier != 'soft_cap';
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_users_realtor_location
+        ON users USING GIST (base_location)
+        WHERE role = 'realtor' AND base_location IS NOT NULL;
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_users_realtor_capacity
+        ON users (active_listing_count, max_listing_capacity)
+        WHERE role = 'realtor';
+    `;
+    // Partial B-tree for assigned realtor lookups on active listings — O(log N)
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_listings_assigned_realtor
+        ON listings (assigned_realtor_id)
+        WHERE status = 'active';
+    `;
+    console.log("✔ Realtor indexes ready");
+
+    // ── Backfill existing realtor rows ───────────────────────────────────────
+    await sql`
+      UPDATE users
+      SET
+        subscription_tier    = 'free_trial',
+        trial_started_at     = NOW(),
+        score_tier_base      = 1000,
+        realtor_score        = 1000,
+        max_listing_capacity = 2
+      WHERE role = 'realtor'
+        AND subscription_tier IS NULL;
+    `;
+    console.log("✔ Backfilled existing realtors to free_trial");
+
+    // ── leads table ──────────────────────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS leads (
+        id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        realtor_id       uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        listing_id       uuid REFERENCES listings(id) ON DELETE SET NULL,
+        requester_id     uuid REFERENCES users(id) ON DELETE SET NULL,
+        requester_phone  text,
+        requester_name   text,
+        type             text NOT NULL CHECK (type IN ('buyer_enquiry', 'seller_listing_request')),
+        created_at       timestamptz DEFAULT NOW() NOT NULL,
+        responded_at     timestamptz,
+        response_channel text CHECK (response_channel IN ('whatsapp', 'call', 'in_app')),
+        closed_at        timestamptz,
+        outcome          text CHECK (outcome IN ('converted', 'lost', 'no_response', 'duplicate')),
+        notes            text
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_leads_realtor_created ON leads (realtor_id, created_at DESC);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_leads_listing ON leads (listing_id);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_leads_unresponded ON leads (realtor_id, created_at) WHERE responded_at IS NULL;`;
+    console.log("✔ leads table ready");
+
+    // ── viewings table ───────────────────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS viewings (
+        id                   uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        listing_id           uuid REFERENCES listings(id) ON DELETE SET NULL,
+        realtor_id           uuid REFERENCES users(id) ON DELETE CASCADE,
+        buyer_id             uuid REFERENCES users(id) ON DELETE SET NULL,
+        scheduled_at         timestamptz NOT NULL,
+        duration_mins        integer DEFAULT 30,
+        status               text DEFAULT 'pending' NOT NULL
+                             CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed')),
+        cancellation_reason  text,
+        notes                text,
+        created_at           timestamptz DEFAULT NOW() NOT NULL,
+        updated_at           timestamptz DEFAULT NOW() NOT NULL
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_viewings_realtor_scheduled ON viewings (realtor_id, scheduled_at) WHERE status NOT IN ('cancelled', 'completed');`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_viewings_listing ON viewings (listing_id);`;
+    console.log("✔ viewings table ready");
+
+    // ── realtor_closings table ───────────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS realtor_closings (
+        id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        realtor_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        listing_id     uuid REFERENCES listings(id) ON DELETE SET NULL,
+        lead_id        uuid REFERENCES leads(id) ON DELETE SET NULL,
+        closed_at      timestamptz DEFAULT NOW() NOT NULL,
+        sale_price     integer,
+        commission_pct numeric(5, 2),
+        notes          text
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_closings_realtor ON realtor_closings (realtor_id, closed_at DESC);`;
+    console.log("✔ realtor_closings table ready");
+
+    // ── realtor_reviews table ────────────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS realtor_reviews (
+        id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        realtor_id    uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        reviewer_id   uuid REFERENCES users(id) ON DELETE SET NULL,
+        listing_id    uuid REFERENCES listings(id) ON DELETE SET NULL,
+        rating        smallint NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        review_text   text,
+        reviewer_role text CHECK (reviewer_role IN ('buyer', 'seller')),
+        created_at    timestamptz DEFAULT NOW() NOT NULL
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_reviews_realtor ON realtor_reviews (realtor_id, created_at DESC);`;
+    console.log("✔ realtor_reviews table ready");
+
+    // ════════════════════════════════════════════════════════════════════════
     console.log("Migration completed successfully!");
+
+
 
 
   } catch (error) {

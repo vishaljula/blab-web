@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/db";
 import { listings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { decrypt } from "@/lib/crypto";
 
 export async function GET(
   request: NextRequest,
@@ -16,44 +17,53 @@ export async function GET(
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
-    const dbUrl = process.env.DATABASE_URL;
+    const dbUrl = process.env.DATABASE_URL_POOL ?? process.env.DATABASE_URL;
     if (!dbUrl) return NextResponse.json({ error: "DB not configured" }, { status: 500 });
     const sql = neon(dbUrl);
 
-    // Aliases convert snake_case DB columns to camelCase expected by the Listing interface
+    // Join the assigned realtor so we can serve their contact details when present.
+    // If no realtor is assigned (self-list path), fall back to listing contact_* columns.
     const rows = await sql`
       SELECT
-        id, latitude, longitude, price, status,
-        property_type       AS "propertyType",
-        listing_type        AS "listingType",
-        lister_type         AS "listerType",
-        listing_path        AS "listingPath",
-        bedrooms, bathrooms,
-        built_up_area       AS "builtUpArea",
-        carpet_area         AS "carpetArea",
-        plot_area           AS "plotArea",
-        area_unit           AS "areaUnit",
-        floor_number        AS "floorNumber",
-        total_floors        AS "totalFloors",
-        society_name        AS "societyName",
-        facing, negotiable,
-        security_deposit    AS "securityDeposit",
-        available_from      AS "availableFrom",
-        furnishing,
-        preferred_tenant    AS "preferredTenant",
-        address, city,
-        image_url           AS "imageUrl",
-        contact_name        AS "contactName",
-        contact_phone       AS "contactPhone",
-        contact_photo_url   AS "contactPhotoUrl",
-        description,
-        year_built          AS "yearBuilt",
-        maintenance,
-        features,
-        market_estimate     AS "marketEstimate",
-        expires_at          AS "expiresAt"
-      FROM listings
-      WHERE id = ${id}
+        l.id, l.latitude, l.longitude, l.price, l.status,
+        l.property_type       AS "propertyType",
+        l.listing_type        AS "listingType",
+        l.lister_type         AS "listerType",
+        l.listing_path        AS "listingPath",
+        l.bedrooms, l.bathrooms,
+        l.built_up_area       AS "builtUpArea",
+        l.carpet_area         AS "carpetArea",
+        l.plot_area           AS "plotArea",
+        l.area_unit           AS "areaUnit",
+        l.floor_number        AS "floorNumber",
+        l.total_floors        AS "totalFloors",
+        l.society_name        AS "societyName",
+        l.facing, l.negotiable,
+        l.security_deposit    AS "securityDeposit",
+        l.available_from      AS "availableFrom",
+        l.furnishing,
+        l.preferred_tenant    AS "preferredTenant",
+        l.address, l.city,
+        l.image_url           AS "imageUrl",
+        -- Contact: prefer assigned realtor over raw listing contact
+        l.contact_name        AS "rawContactName",
+        l.contact_phone       AS "rawContactPhone",
+        l.contact_photo_url   AS "rawContactPhotoUrl",
+        -- Realtor fields (NULL when no realtor assigned)
+        l.assigned_realtor_id AS "assignedRealtorId",
+        r.encrypted_name      AS "realtorEncName",
+        r.encrypted_phone     AS "realtorEncPhone",
+        r.photo_url           AS "realtorPhotoUrl",
+        r.company_name        AS "realtorCompanyName",
+        l.description,
+        l.year_built          AS "yearBuilt",
+        l.maintenance,
+        l.features,
+        l.market_estimate     AS "marketEstimate",
+        l.expires_at          AS "expiresAt"
+      FROM listings l
+      LEFT JOIN users r ON r.id = l.assigned_realtor_id
+      WHERE l.id = ${id}
       LIMIT 1
     `;
 
@@ -61,7 +71,40 @@ export async function GET(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]);
+    const row = rows[0] as any;
+
+    // Resolve contact: realtor takes priority when assigned
+    let contactName     = row.rawContactName     ?? null;
+    let contactPhone    = row.rawContactPhone    ?? null;
+    let contactPhotoUrl = row.rawContactPhotoUrl ?? null;
+
+    if (row.assignedRealtorId && row.realtorEncName) {
+      try { contactName = decrypt(row.realtorEncName); } catch (e) {
+        console.warn(`[listing/${id}] Failed to decrypt realtor name:`, e);
+      }
+      if (row.realtorEncPhone) {
+        try { contactPhone = decrypt(row.realtorEncPhone); } catch (e) {
+          console.warn(`[listing/${id}] Failed to decrypt realtor phone:`, e);
+        }
+      }
+      contactPhotoUrl = row.realtorPhotoUrl ?? contactPhotoUrl;
+    }
+
+    // Strip internal fields before sending to client
+    const {
+      rawContactName, rawContactPhone, rawContactPhotoUrl,
+      realtorEncName, realtorEncPhone, realtorPhotoUrl, realtorCompanyName,
+      ...rest
+    } = row;
+
+    return NextResponse.json({
+      ...rest,
+      contactName,
+      contactPhone,
+      contactPhotoUrl,
+      // Surface whether a realtor is handling this listing (useful for UI labels)
+      handledByRealtor: !!row.assignedRealtorId,
+    });
   } catch (error: any) {
     console.error("Error fetching listing by ID:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

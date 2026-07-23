@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRawSql } from "@/db";
+import { neon } from "@neondatabase/serverless";
 import { polygonToCells } from "h3-js";
 
 /**
@@ -116,13 +116,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ listings: [], total: 0 });
   }
 
-  const sql = getRawSql();
+  // Fresh neon() per request — avoids stale undici connection pool that
+  // survives WiFi drops and causes ETIMEDOUT on subsequent requests.
+  const dbUrl = process.env.DATABASE_URL_POOL ?? process.env.DATABASE_URL;
+  if (!dbUrl) return NextResponse.json({ error: "DB not configured" }, { status: 500 });
+  const sql = neon(dbUrl);
   const resolution = zoomToResolution(zoom);
 
   try {
-    // ── Street level (zoom ≥ 14): all listings in viewport ────────────────────
-    // No LIMIT — at zoom ≥ 14 the viewport covers ~0.25 km², so the coordinate
-    // BETWEEN filter naturally bounds the result. Every seller's listing is visible.
+    // ── Street level (zoom ≥ STREET_ZOOM): all listings in viewport ───────────
     if (resolution === -1) {
       const rows = await sql.query(
         `SELECT ${SELECT_COLS}
@@ -134,98 +136,55 @@ export async function GET(request: NextRequest) {
          ORDER BY l.created_at DESC`,
         [swLat, neLat, swLng, neLng, listingType]
       );
-      // At street level every listing is returned — total === shown count
       return NextResponse.json({ listings: rows, total: rows.length });
     }
 
-    // ── H3 DISTINCT ON mode (zoom 8-13) ───────────────────────────────────────
+    // ── H3 DISTINCT ON mode (zoom 8–13) ───────────────────────────────────────
     //
-    // Step 1: Compute H3 cells that overlap the viewport (pure math, no DB, ~0.1ms).
-    //
-    // ⚠️  h3-js v4: polygonToCells uses [lng, lat] (GeoJSON), while latLngToCell
-    //     uses (lat, lng). Ring MUST be built as [lng, lat] pairs.
+    // Step 1: Compute H3 cells that overlap the viewport (pure JS, ~0.1ms, no DB).
+    // ⚠️  h3-js v4: polygonToCells uses [lng, lat] (GeoJSON convention).
     const ring: [number, number][] = [
-      [swLng, swLat],  // SW corner
-      [swLng, neLat],  // NW corner
-      [neLng, neLat],  // NE corner
-      [neLng, swLat],  // SE corner
-      [swLng, swLat],  // close the ring
+      [swLng, swLat],
+      [swLng, neLat],
+      [neLng, neLat],
+      [neLng, swLat],
+      [swLng, swLat],
     ];
 
     const cells = polygonToCells(ring, resolution, true);
-
     if (cells.length === 0) return NextResponse.json({ listings: [], total: 0 });
 
-    // Safety: enormous viewports at low zoom can produce too many cells
     if (cells.length > MAX_CELLS) {
       console.warn(`[viewport] zoom=${zoom} res=${resolution} produced ${cells.length} cells — bailing`);
       return NextResponse.json({ listings: [], total: 0 });
     }
 
-    // Step 2: Build a PostgreSQL array literal from cell IDs.
-    // h3 IDs only contain [0-9a-f] chars — safe to embed directly.
+    // Step 2: PostgreSQL array literal — h3 IDs are [0-9a-f] only, safe to embed.
     const cellsLiteral = `{${cells.join(",")}}`;
 
-    // Step 3: Dynamic DISTINCT ON query — one representative listing per H3 cell.
-    //
-    // The column name (h3_index_res5 … h3_index_res8) is determined by our
-    // zoomToResolution() — not user input — so string interpolation is safe.
-    //
-    // Ordering: boost_score DESC, created_at DESC
-    //   → premium listings (boost_score > 0) win their cell (monetisation)
-    //   → ties broken by recency (newest listing wins)
-    //
-    // Padded bbox for the DISTINCT ON query.
-    //
-    // Problem: the exact viewport bbox caused edge-cell representatives to be
-    // silently dropped when the newest listing sat just outside the boundary,
-    // producing fewer pins on pan even though the cell was clearly visible.
-    //
-    // Full removal of the filter caused the opposite problem: edge cells whose
-    // representative listing is far from the viewport showed phantom pins in the
-    // ListView with no corresponding marker on the map.
-    //
-    // Solution: expand the bbox by ~half a cell diameter per resolution so
-    // edge-cell representatives are almost certainly captured, while listings
-    // from cells clearly outside the viewport are still excluded.
-    //
-    // Approximate cell circumradius in degrees (max distance from cell center to any vertex):
-    //   res5 ~252 km² → ~0.09°   res6 ~36 km² → ~0.034°
-    //   res7 ~5 km²   → ~0.013°  res8 ~0.74 km² → ~0.005°
+    // Step 3: Single DISTINCT ON query with COUNT(*) OVER() — one DB round-trip.
+    // col is derived from our own zoomToResolution(), NOT user input → safe to interpolate.
     const col = `h3_index_res${resolution}`;
     const PAD: Record<number, number> = { 5: 0.09, 6: 0.034, 7: 0.013, 8: 0.005 };
     const pad = PAD[resolution] ?? 0.034;
 
-    // Run DISTINCT ON and COUNT in parallel — one B-tree index hit each.
-    // - DISTINCT ON uses padded bbox → catches edge-cell representatives
-    // - COUNT uses exact bbox → total reflects only truly visible listings
-    const [rows, countRows] = await Promise.all([
-      sql.query(
-        `SELECT DISTINCT ON (l.${col})
-           ${SELECT_COLS}
-         FROM listings l
-         WHERE l.${col} = ANY($1::h3index[])
-           AND l.latitude  BETWEEN $2 AND $3
-           AND l.longitude BETWEEN $4 AND $5
-           AND l.listing_type = $6
-           AND l.status = 'active'
-         ORDER BY l.${col}, l.boost_score DESC, l.created_at DESC`,
-        [cellsLiteral, swLat - pad, neLat + pad, swLng - pad, neLng + pad, listingType]
-      ),
-      sql.query(
-        `SELECT COUNT(*) AS total
-         FROM listings
-         WHERE ${col} = ANY($1::h3index[])
-           AND latitude  BETWEEN $2 AND $3
-           AND longitude BETWEEN $4 AND $5
-           AND listing_type = $6
-           AND status = 'active'`,
-        [cellsLiteral, swLat, neLat, swLng, neLng, listingType]
-      ),
-    ]);
+    const rows = await sql.query(
+      `SELECT DISTINCT ON (l.${col})
+         ${SELECT_COLS},
+         COUNT(*) OVER() AS "_total"
+       FROM listings l
+       WHERE l.${col} = ANY($1::h3index[])
+         AND l.latitude  BETWEEN $2 AND $3
+         AND l.longitude BETWEEN $4 AND $5
+         AND l.listing_type = $6
+         AND l.status = 'active'
+       ORDER BY l.${col}, l.boost_score DESC, l.created_at DESC`,
+      [cellsLiteral, swLat - pad, neLat + pad, swLng - pad, neLng + pad, listingType]
+    );
 
-    const total = parseInt(String(countRows[0]?.total ?? rows.length), 10);
-    return NextResponse.json({ listings: rows, total });
+    const total = rows.length > 0 ? parseInt(String((rows[0] as any)._total ?? rows.length), 10) : 0;
+    const listings = rows.map(({ _total, ...r }: any) => r);
+    return NextResponse.json({ listings, total });
 
   } catch (err) {
     console.error("[viewport] DB error:", err);

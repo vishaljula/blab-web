@@ -343,6 +343,11 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
 
   const details = generateFeaturesAndDescription(propertyType, hood.name, bedrooms, price!, listingType);
 
+  // Realistic listing status distribution for seed data:
+  // 80% active (visible in search), 12% closed, 8% expired
+  const statusRoll = Math.random();
+  const status = statusRoll < 0.80 ? "active" : statusRoll < 0.92 ? "closed" : "expired";
+
   return {
     latitude: jitter(hood.lat, 0.018),
     longitude: jitter(hood.lng, 0.018),
@@ -350,6 +355,7 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
     propertyType,
     listingType,
     listerType,
+    status: status as "active" | "closed" | "expired",
     bedrooms: bedrooms ?? null,
     bathrooms: bathrooms ?? null,
     builtUpArea: builtUpArea ?? null,
@@ -368,6 +374,7 @@ function generateListing(hood: typeof NEIGHBORHOODS[number], index: number): New
   };
 }
 
+
 function weightedPick(options: [string, number][]): string {
   const total = options.reduce((sum, [, w]) => sum + w, 0);
   let r = Math.random() * total;
@@ -385,11 +392,10 @@ async function seed() {
   console.log("📍 Enabling PostGIS...");
   await sql`CREATE EXTENSION IF NOT EXISTS postgis`;
 
-  // Push schema first (tables + indexes)
+  // ── Listings ─────────────────────────────────────────────────────────────
   console.log("📋 Clearing existing listings...");
   await sql`DELETE FROM listings`;
 
-  // Generate 200+ listings (6-8 per neighborhood)
   const allListings: NewListing[] = [];
   for (const hood of NEIGHBORHOODS) {
     const count = hood.premium ? rand(10, 15) : rand(6, 10);
@@ -399,16 +405,12 @@ async function seed() {
   }
 
   console.log(`📦 Inserting ${allListings.length} listings...`);
-
-  // Insert in batches of 50
   for (let i = 0; i < allListings.length; i += 50) {
     const batch = allListings.slice(i, i + 50);
     await db.insert(listings).values(batch);
     console.log(`   Batch ${Math.floor(i / 50) + 1}: ${batch.length} listings`);
   }
 
-  // Create PostGIS spatial index using raw SQL
-  console.log("🗺️  Creating spatial index...");
   await sql.query(`
     CREATE INDEX IF NOT EXISTS idx_listings_spatial
     ON listings USING GiST (
@@ -418,14 +420,438 @@ async function seed() {
 
   console.log(`\n✅ Seeded ${allListings.length} listings across ${NEIGHBORHOODS.length} neighborhoods!`);
 
-  // Print summary
+  // ── Realtors ──────────────────────────────────────────────────────────────
+  // Programmatic generation — proportional to listings, spread across neighborhoods.
+  //
+  // Coverage strategy (intentional gaps = no-realtor path testing):
+  //   Premium neighborhoods (10) : ALWAYS covered — 2–3 realtors each
+  //   Non-premium neighborhoods  : 45% chance of coverage — 1–2 realtors each
+  //   Remaining ~33 hoods        : 0 realtors (tests graceful empty-state handling)
+  //
+  // Tier distribution: 10% Pro+ | 22% Pro | 44% Trial | 24% SoftCap
+  // Target: ~55 realtors for 633 listings → ~1:11 ratio (healthy market)
+  console.log("\n👔 Seeding realtors...");
+
+  const { encrypt, hashString } = await import("./../../src/lib/crypto");
+
+  // ── Deterministic seeding helpers ───────────────────────────────────────
+  // Use a simple LCG so each run produces the same realtors (reproducible).
+  let _seed = 9001;
+  function seededRand(): number {
+    _seed = (_seed * 1664525 + 1013904223) & 0xffffffff;
+    return ((_seed >>> 0) / 0xffffffff);
+  }
+  function seededChoice<T>(arr: readonly T[]): T {
+    return arr[Math.floor(seededRand() * arr.length)];
+  }
+  function seededInt(min: number, max: number): number {
+    return min + Math.floor(seededRand() * (max - min + 1));
+  }
+
+  const LANG_POOLS: Record<string, string[][]> = {
+    west:    [["Telugu","English","Hindi"], ["Telugu","English"], ["Telugu","Kannada","English"]],
+    central: [["Telugu","Urdu","English"],  ["Telugu","Hindi"],   ["Telugu","English"]],
+    east:    [["Telugu","Urdu"],            ["Telugu","English"], ["Telugu","Tamil"]],
+    south:   [["Telugu","Urdu"],            ["Telugu","Tamil"],   ["Telugu","Malayalam","English"]],
+    north:   [["Telugu","Hindi","English"], ["Hindi","Telugu"],   ["Telugu","English"]],
+    outer:   [["Telugu","English"],         ["Telugu","Hindi"],   ["Telugu"]],
+  };
+
+  const COMPANY_SUFFIXES = [
+    "Properties", "Realty", "Homes", "Estates", "Real Estate",
+    "Land & Homes", "Infra", "Ventures", "Realtors", "Associates",
+  ];
+
+  const BIO_TEMPLATES = [
+    (hood: string, yrs: number) => `${yrs} years in ${hood} real estate. Specialised in apartments and villas.`,
+    (hood: string, yrs: number) => `Helping families find their dream home in ${hood} since ${new Date().getFullYear() - yrs}.`,
+    (hood: string, yrs: number) => `${hood} area expert. ${yrs} years experience across sale and rental markets.`,
+    (hood: string, yrs: number) => `Trusted ${hood} realtor. ${yrs}+ years of market knowledge at your service.`,
+    (hood: string, yrs: number) => `Your go-to agent for ${hood} and surrounding areas. ${yrs} years on the ground.`,
+  ];
+
+  function neighborhoodRegion(hood: { name: string; lat: number; lng: number }): string {
+    if (hood.lng < 78.36) return "west";
+    if (hood.lng > 78.55) return "east";
+    if (hood.lat > 17.50) return "north";
+    if (hood.lat < 17.37) return "south";
+    if (hood.lng < 78.45) return "central";
+    return "outer";
+  }
+
+  function pickTier(): "pro_plus" | "pro" | "free_trial" | "soft_cap" {
+    const r = seededRand();
+    if (r < 0.10) return "pro_plus";
+    if (r < 0.32) return "pro";
+    if (r < 0.76) return "free_trial";
+    return "soft_cap";
+  }
+
+  function scoreForTier(tier: string) {
+    if (tier === "pro_plus") {
+      const resp  = seededInt(140, 200);
+      const speed = seededInt(120, 200);
+      const act   = seededInt(100, 200);
+      const rev   = seededInt(80, 200);
+      const prof  = seededInt(70, 100);
+      const ten   = seededInt(50, 99);
+      return { tierBase: 10000, resp, speed, act, rev, prof, ten,
+               score: 10000 + resp + speed + act + rev + prof + ten,
+               yearsExp: seededInt(7, 20), activeListings: seededInt(3, 8),
+               maxCapacity: seededInt(11, 15) };
+    }
+    if (tier === "pro") {
+      const resp  = seededInt(70, 140);
+      const speed = seededInt(50, 140);
+      const act   = seededInt(40, 130);
+      const rev   = seededInt(20, 130);
+      const prof  = seededInt(50, 90);
+      const ten   = seededInt(20, 70);
+      return { tierBase: 5000, resp, speed, act, rev, prof, ten,
+               score: 5000 + resp + speed + act + rev + prof + ten,
+               yearsExp: seededInt(3, 12), activeListings: seededInt(1, 4),
+               maxCapacity: seededInt(5, 9) };
+    }
+    if (tier === "free_trial") {
+      const resp  = seededInt(0, 40);
+      const speed = seededInt(0, 30);
+      const prof  = seededInt(20, 60);
+      const ten   = seededInt(0, 15);
+      return { tierBase: 1000, resp, speed, act: 0, rev: 0, prof, ten,
+               score: 1000 + resp + speed + prof + ten,
+               yearsExp: seededInt(1, 5), activeListings: seededInt(0, 1),
+               maxCapacity: 2 };
+    }
+    // soft_cap
+    const resp = seededInt(10, 40);
+    return { tierBase: 0, resp, speed: seededInt(5, 25), act: 0, rev: 0,
+             prof: seededInt(15, 40), ten: seededInt(3, 20),
+             score: 0,
+             yearsExp: seededInt(1, 4), activeListings: 0, maxCapacity: 1 };
+  }
+
+  // ── Build realtor list from neighborhood coverage rules ──────────────────
+  type RealtorSpec = {
+    name: string; phone: string; company: string; rera: string;
+    tier: string; lat: number; lng: number;
+    score: number; tierBase: number; responseRate: number; responseSpeed: number;
+    listingActivity: number; reviews: number; profileScore: number; tenure: number;
+    activeListings: number; maxCapacity: number;
+    yearsExp: number; languages: string[]; areas: string[];
+    bio: string; isMale: boolean; photoId: number;
+  };
+
+  const realtorSpecs: RealtorSpec[] = [];
+  let realtorSeq = 1; // for phone numbers and RERA
+
+  for (const hood of NEIGHBORHOODS) {
+    const isPremium = hood.premium;
+    // Decide how many realtors this neighborhood gets
+    const rng = seededRand();
+    let count = 0;
+    if (isPremium) {
+      count = seededRand() > 0.35 ? 3 : 2;           // 2–3
+    } else if (rng < 0.45) {
+      count = seededRand() > 0.6 ? 2 : 1;            // 1–2, 45% of non-premium hoods
+    } else {
+      count = 0;                                       // intentional gap ~55% of non-premium
+    }
+
+    for (let k = 0; k < count; k++) {
+      const isMale  = seededRand() > 0.42;
+      const firstName = isMale ? seededChoice(MALE_FIRST_NAMES) : seededChoice(FEMALE_FIRST_NAMES);
+      const lastName  = seededChoice(LAST_NAMES);
+      const name = `${firstName} ${lastName}`;
+      const tier = pickTier();
+      const scores = scoreForTier(tier);
+      const region = neighborhoodRegion(hood);
+      const langPool = LANG_POOLS[region] ?? LANG_POOLS.outer;
+      const languages = seededChoice(langPool);
+      const photoId = seededInt(1, 35);
+
+      // Small coordinate jitter ±~400m so realtors aren't all stacked on the same point
+      const latJitter = (seededRand() - 0.5) * 0.008;
+      const lngJitter = (seededRand() - 0.5) * 0.008;
+
+      const nearbyHoods = NEIGHBORHOODS
+        .filter(n => Math.abs(n.lat - hood.lat) < 0.05 && Math.abs(n.lng - hood.lng) < 0.05)
+        .slice(0, 3)
+        .map(n => n.name);
+
+      const company = (tier === "free_trial" || tier === "soft_cap")
+        ? "Independent"
+        : `${lastName} ${seededChoice(COMPANY_SUFFIXES)}`;
+
+      const bioFn = seededChoice(BIO_TEMPLATES);
+      const bio = bioFn(hood.name, scores.yearsExp);
+
+      realtorSpecs.push({
+        name, phone: `+9191${String(realtorSeq).padStart(8, "0")}`,
+        company, rera: `TSRERA/AGT/${String(realtorSeq).padStart(5, "0")}`,
+        tier, lat: hood.lat + latJitter, lng: hood.lng + lngJitter,
+        score: scores.score, tierBase: scores.tierBase,
+        responseRate: scores.resp, responseSpeed: scores.speed,
+        listingActivity: scores.act, reviews: scores.rev,
+        profileScore: scores.prof, tenure: scores.ten,
+        activeListings: scores.activeListings, maxCapacity: scores.maxCapacity,
+        yearsExp: scores.yearsExp, languages, areas: nearbyHoods,
+        bio, isMale, photoId,
+      });
+      realtorSeq++;
+    }
+  }
+
+  // ── Clear existing realtor seed data (cascade removes leads + viewings) ──
+  await sql`DELETE FROM users WHERE role = 'realtor'`;
+  console.log(`   🗑  Cleared existing realtors`);
+
+  // ── INSERT all realtors ──────────────────────────────────────────────────
+  let realtorsInserted = 0;
+  const realtorIds: string[] = [];
+
+  for (const r of realtorSpecs) {
+    const phoneHash     = hashString(r.phone);
+    const encryptedName  = encrypt(r.name);
+    const encryptedPhone = encrypt(r.phone);
+    const photoUrl = `https://randomuser.me/api/portraits/${r.isMale ? "men" : "women"}/${r.photoId}.jpg`;
+    const trialDaysAgo   = seededInt(10, 90);
+    const createdDaysAgo = seededInt(30, 365);
+    const trialSale   = r.tier === "free_trial" ? seededInt(0, 2) : 3;
+    const trialRental = r.tier === "free_trial" ? seededInt(0, 2) : 3;
+    const softSale    = r.tier === "soft_cap" ? 1 : 0;
+    const softRental  = r.tier === "soft_cap" ? 1 : 0;
+
+    const [inserted] = await sql.query(`
+      INSERT INTO users (
+        role, phone_hash, encrypted_name, encrypted_phone,
+        rera_number, company_name,
+        photo_url, bio, years_experience, languages_spoken, areas_served,
+        realtor_latitude, realtor_longitude,
+        subscription_tier, trial_started_at,
+        trial_sale_leads_used, trial_rental_leads_used,
+        soft_cap_sale_leads_month, soft_cap_rental_leads_month,
+        realtor_score, score_tier_base, score_response_rate,
+        score_response_speed, score_listing_activity,
+        score_reviews, score_profile, score_tenure,
+        active_listing_count, max_listing_capacity,
+        created_at, updated_at
+      ) VALUES (
+        'realtor', $1, $2, $3,
+        $4, $5,
+        $6, $7, $8,
+        $9::jsonb, $10::jsonb,
+        $11, $12,
+        $13::subscription_tier,
+        NOW() - ($14 || ' days')::interval,
+        $15, $16,
+        $17, $18,
+        $19, $20, $21,
+        $22, $23,
+        $24, $25, $26,
+        $27, $28,
+        NOW() - ($29 || ' days')::interval,
+        NOW()
+      )
+      RETURNING id
+    `, [
+      phoneHash, encryptedName, encryptedPhone,
+      r.rera, r.company,
+      photoUrl, r.bio, r.yearsExp,
+      JSON.stringify(r.languages), JSON.stringify(r.areas),
+      r.lat, r.lng,
+      r.tier,
+      String(trialDaysAgo),
+      trialSale, trialRental,
+      softSale, softRental,
+      r.score, r.tierBase, r.responseRate,
+      r.responseSpeed, r.listingActivity,
+      r.reviews, r.profileScore, r.tenure,
+      r.activeListings, r.maxCapacity,
+      String(createdDaysAgo),
+    ]);
+
+    realtorIds.push(inserted.id);
+    realtorsInserted++;
+  }
+
+  // Tier summary
+  const tierCounts = realtorSpecs.reduce((acc, r) => {
+    acc[r.tier] = (acc[r.tier] ?? 0) + 1; return acc;
+  }, {} as Record<string, number>);
+  console.log(`\n✅ Seeded ${realtorsInserted} realtors:`);
+  console.log(`   Pro+: ${tierCounts.pro_plus ?? 0}  Pro: ${tierCounts.pro ?? 0}  Trial: ${tierCounts.free_trial ?? 0}  SoftCap: ${tierCounts.soft_cap ?? 0}`);
+  console.log(`   Ratio: 1 realtor per ${Math.round(allListings.length / realtorsInserted)} listings`);
+
+  const uncoveredHoods = NEIGHBORHOODS.length - new Set(realtorSpecs.map(r => {
+    // map back to closest neighborhood name for coverage stats
+    return NEIGHBORHOODS.reduce((best, h) =>
+      Math.abs(h.lat - r.lat) + Math.abs(h.lng - r.lng) < Math.abs(best.lat - r.lat) + Math.abs(best.lng - r.lng) ? h : best
+    ).name;
+  })).size;
+  console.log(`   Coverage: ~${NEIGHBORHOODS.length - uncoveredHoods}/${NEIGHBORHOODS.length} neighborhoods covered`);
+  console.log(`   ~${uncoveredHoods} neighborhoods intentionally uncovered (no-realtor path test)`);
+
+  // ── Sample Leads ──────────────────────────────────────────────────────────
+  // 4 leads per realtor for the first 8 realtors (mix of all statuses).
+  console.log("\n📬 Seeding sample leads...");
+
+  const sampleListings = await sql`SELECT id FROM listings WHERE status = 'active' LIMIT 30`;
+
+  const BUYER_NAMES  = ["Kiran Mehta","Rohan Gupta","Sneha Pillai","Aditya Joshi","Pooja Nair",
+                        "Vikram Rao","Sunita Bose","Arjun Patel","Divya Thomas","Ravi Krishnan",
+                        "Neha Shah","Siddharth Verma","Ananya Bose","Rahul Nair","Meena Reddy"];
+  const BUYER_PHONES = ["+919200000001","+919200000002","+919200000003","+919200000004","+919200000005",
+                        "+919200000006","+919200000007","+919200000008","+919200000009","+919200000010",
+                        "+919200000011","+919200000012","+919200000013","+919200000014","+919200000015"];
+
+  const leadsSeeded = realtorIds.slice(0, 8);
+  let totalLeads = 0;
+  for (let i = 0; i < leadsSeeded.length; i++) {
+    const realtorId = leadsSeeded[i];
+    for (let j = 0; j < 4; j++) {
+      const daysAgo     = seededInt(0, 14);
+      const hoursAgo    = seededInt(0, 47);
+      const isResponded = seededRand() > 0.4;
+      const isClosed    = isResponded && seededRand() > 0.65;
+      const listing     = sampleListings[seededInt(0, sampleListings.length - 1)];
+      const buyerIdx    = (i * 4 + j) % BUYER_NAMES.length;
+      const channel     = seededRand() > 0.5 ? "whatsapp" : "call";
+      const outcome     = seededRand() > 0.5 ? "converted" : "lost";
+      const now         = Date.now();
+      const createdAt   = new Date(now - daysAgo * 86400000 - hoursAgo * 3600000).toISOString();
+      const respondedAt = isResponded
+        ? new Date(now - daysAgo * 86400000 - Math.floor(hoursAgo / 2) * 3600000).toISOString()
+        : null;
+      const closedAt    = isClosed
+        ? new Date(now - Math.max(0, daysAgo - 1) * 86400000).toISOString()
+        : null;
+
+      await sql.query(`
+        INSERT INTO leads (realtor_id, listing_id, requester_name, requester_phone,
+          type, created_at, responded_at, response_channel, closed_at, outcome)
+        VALUES ($1,$2,$3,$4,'buyer_enquiry',$5,$6,$7,$8,$9)
+      `, [
+        realtorId, listing?.id ?? null,
+        BUYER_NAMES[buyerIdx], BUYER_PHONES[buyerIdx],
+        createdAt, respondedAt, isResponded ? channel : null,
+        closedAt, isClosed ? outcome : null,
+      ]);
+      totalLeads++;
+    }
+  }
+  console.log(`   ✔ ${totalLeads} leads across ${leadsSeeded.length} realtors`);
+
+  // ── Sample Viewings ───────────────────────────────────────────────────────
+  console.log("\n🏠 Seeding sample viewings...");
+  const sampleListings2 = await sql`SELECT id FROM listings WHERE status = 'active' LIMIT 15`;
+  const viewingStatuses = ["pending", "confirmed", "confirmed"];
+  const viewingRealtos  = realtorIds.slice(0, 6);
+  let totalViewings = 0;
+  for (let i = 0; i < viewingRealtos.length; i++) {
+    const realtorId = viewingRealtos[i];
+    for (let j = 0; j < 3; j++) {
+      const daysFromNow = j + 1 + seededInt(0, 5);
+      const hoursOffset = seededInt(9, 17);
+      const listing     = sampleListings2[seededInt(0, sampleListings2.length - 1)];
+      const status      = viewingStatuses[seededInt(0, viewingStatuses.length - 1)];
+      const duration    = seededRand() > 0.5 ? 30 : 45;
+
+      await sql.query(`
+        INSERT INTO viewings (realtor_id, listing_id, scheduled_at, status, duration_mins)
+        VALUES ($1,$2, NOW() + ($3 || ' days ' || $4 || ' hours')::interval, $5,$6)
+      `, [realtorId, listing?.id ?? null, String(daysFromNow), String(hoursOffset), status, duration]);
+      totalViewings++;
+    }
+  }
+  console.log(`   ✔ ${totalViewings} viewings across ${viewingRealtos.length} realtors`);
+
   const saleCount = allListings.filter(l => l.listingType === "sale").length;
   const rentCount = allListings.filter(l => l.listingType === "rent").length;
-  console.log(`   📊 ${saleCount} for sale, ${rentCount} for rent`);
-  console.log(`   🏠 Property types: ${[...new Set(allListings.map(l => l.propertyType))].join(", ")}`);
+  console.log(`\n📊 Final summary:`);
+  console.log(`   Listings: ${allListings.length} (${saleCount} sale, ${rentCount} rent)`);
+  console.log(`   Realtors: ${realtorsInserted} | Leads: ${totalLeads} | Viewings: ${totalViewings}`);
 }
 
-seed().catch((err) => {
-  console.error("❌ Seed failed:", err);
-  process.exit(1);
-});
+
+if (!process.argv.includes("--leads-only")) {
+  seed().catch((err) => {
+    console.error("❌ Seed failed:", err);
+    process.exit(1);
+  });
+}
+
+// ── reseedLeads — run this standalone to fix leads/viewings without full reseed ─
+// Usage: npx tsx src/db/seed.ts --leads-only  (detected below)
+async function reseedLeads() {
+  console.log("\n🔄 Reseeding leads and viewings with real listing IDs...");
+  await sql`DELETE FROM viewings`;
+  await sql`DELETE FROM leads`;
+  console.log("   Cleared existing leads and viewings");
+
+  const listings = await sql`
+    SELECT id, address, city, listing_type, property_type, price, bedrooms, image_url
+    FROM listings WHERE status = 'active' ORDER BY RANDOM() LIMIT 30
+  `;
+  if (!listings.length) { console.error("No active listings found — run full seed first"); return; }
+
+  const realtors = await sql`SELECT id FROM users WHERE role = 'realtor' ORDER BY created_at ASC LIMIT 8`;
+  const realtorIds = realtors.map((r: any) => r.id);
+
+  const BUYER_NAMES  = ["Kiran Mehta","Rohan Gupta","Sneha Pillai","Aditya Joshi","Pooja Nair",
+                        "Vikram Rao","Sunita Bose","Arjun Patel","Divya Thomas","Ravi Krishnan",
+                        "Neha Shah","Siddharth Verma","Ananya Bose","Rahul Nair","Meena Reddy"];
+  const BUYER_PHONES = ["+919200000001","+919200000002","+919200000003","+919200000004","+919200000005",
+                        "+919200000006","+919200000007","+919200000008","+919200000009","+919200000010",
+                        "+919200000011","+919200000012","+919200000013","+919200000014","+919200000015"];
+
+  let totalLeads = 0;
+  for (let i = 0; i < realtorIds.length; i++) {
+    const realtorId = realtorIds[i];
+    for (let j = 0; j < 4; j++) {
+      const daysAgo     = Math.floor(Math.random() * 14);
+      const hoursAgo    = Math.floor(Math.random() * 47);
+      const isResponded = Math.random() > 0.4;
+      const isClosed    = isResponded && Math.random() > 0.65;
+      const listing     = listings[Math.floor(Math.random() * listings.length)];
+      const buyerIdx    = (i * 4 + j) % BUYER_NAMES.length;
+      const channel     = Math.random() > 0.5 ? "whatsapp" : "call";
+      const outcome     = Math.random() > 0.5 ? "converted" : "lost";
+      const now         = Date.now();
+      const createdAt   = new Date(now - daysAgo * 86400000 - hoursAgo * 3600000).toISOString();
+      const respondedAt = isResponded ? new Date(now - daysAgo * 86400000 - Math.floor(hoursAgo / 2) * 3600000).toISOString() : null;
+      const closedAt    = isClosed ? new Date(now - Math.max(0, daysAgo - 1) * 86400000).toISOString() : null;
+
+      await sql.query(`
+        INSERT INTO leads (realtor_id, listing_id, requester_name, requester_phone,
+          type, created_at, responded_at, response_channel, closed_at, outcome)
+        VALUES ($1,$2,$3,$4,'buyer_enquiry',$5,$6,$7,$8,$9)
+      `, [realtorId, listing.id, BUYER_NAMES[buyerIdx], BUYER_PHONES[buyerIdx],
+          createdAt, respondedAt, isResponded ? channel : null, closedAt, isClosed ? outcome : null]);
+      totalLeads++;
+    }
+  }
+
+  const viewingStatuses = ["pending", "confirmed", "confirmed"];
+  let totalViewings = 0;
+  for (let i = 0; i < Math.min(6, realtorIds.length); i++) {
+    const realtorId = realtorIds[i];
+    for (let j = 0; j < 3; j++) {
+      const daysFromNow = j + 1 + Math.floor(Math.random() * 5);
+      const hoursOffset = Math.floor(Math.random() * 8) + 9;
+      const listing     = listings[Math.floor(Math.random() * listings.length)];
+      const status      = viewingStatuses[Math.floor(Math.random() * viewingStatuses.length)];
+      const duration    = Math.random() > 0.5 ? 30 : 45;
+      const scheduledAt = new Date(Date.now() + daysFromNow * 86400000 + hoursOffset * 3600000).toISOString();
+      await sql.query(
+        `INSERT INTO viewings (realtor_id, listing_id, scheduled_at, status, duration_mins) VALUES ($1,$2,$3,$4,$5)`,
+        [realtorId, listing.id, scheduledAt, status, duration]
+      );
+      totalViewings++;
+    }
+  }
+  console.log(`   ✔ ${totalLeads} leads | ${totalViewings} viewings — all with real listing IDs`);
+}
+
+if (process.argv.includes("--leads-only")) {
+  reseedLeads().catch((err) => { console.error("❌ reseedLeads failed:", err); process.exit(1); });
+}

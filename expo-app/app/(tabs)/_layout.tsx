@@ -1,10 +1,11 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { useState, useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
+import { useListingsStore } from "@/store/listings";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,6 +13,9 @@ export default function TabLayout() {
   const colors = isDark ? COLORS.dark : COLORS.light;
   const [isDesktop, setIsDesktop] = useState(false);
   const insets = useSafeAreaInsets();
+  const { user } = useListingsStore();
+
+  const isRealtor = user?.role === "realtor";
 
   // Detect desktop on web — hide bottom tabs
   useEffect(() => {
@@ -74,6 +78,35 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Dashboard tab — realtors only. href:null removes it from the tab bar entirely for other roles. */}
+      {/* NOTE: this is a UX gate only. The dashboard screen itself enforces role checks. */}
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: "Dashboard",
+          href: isRealtor ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <View>
+              <Ionicons name="grid-outline" size={size} color={color} />
+              {/* Gold dot — signals active professional feature */}
+              <View
+                style={{
+                  position: "absolute",
+                  top: -2,
+                  right: -4,
+                  width: 7,
+                  height: 7,
+                  borderRadius: 3.5,
+                  backgroundColor: "#F59E0B",
+                  borderWidth: 1.5,
+                  borderColor: colors.card,
+                }}
+              />
+            </View>
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="profile"
         options={{

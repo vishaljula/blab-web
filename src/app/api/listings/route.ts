@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getDb } from "@/db";
 import { listings } from "@/db/schema";
+import { neon } from "@neondatabase/serverless";
 
 /**
  * POST /api/listings
@@ -114,6 +115,39 @@ export async function POST(request: NextRequest) {
         yearBuilt: (body.yearBuilt as number) ?? null,
       })
       .returning({ id: listings.id, status: listings.status });
+
+    // ── Seller-lead trial counter ─────────────────────────────────────────────
+    // When a seller picks a realtor (assignedRealtorId) during the realtor listing
+    // path, this is the "seller lead" for that realtor. Increment their trial cap
+    // counter here — NOT in the buyer-contact flow.
+    const assignedRealtorId = (body.assignedRealtorId as string) ?? null;
+    if (assignedRealtorId && listingPath === "realtor") {
+      try {
+        const rawSql = neon(process.env.DATABASE_URL!);
+        const [rt] = await rawSql`
+          SELECT subscription_tier FROM users
+          WHERE id = ${assignedRealtorId} AND role = 'realtor'
+          LIMIT 1
+        `;
+        if (rt?.subscription_tier === "free_trial") {
+          if (listingType === "sale") {
+            await rawSql`UPDATE users SET trial_sale_leads_used = trial_sale_leads_used + 1 WHERE id = ${assignedRealtorId}`;
+          } else {
+            await rawSql`UPDATE users SET trial_rental_leads_used = trial_rental_leads_used + 1 WHERE id = ${assignedRealtorId}`;
+          }
+          // If both caps hit, graduate to soft_cap
+          const [updated] = await rawSql`
+            SELECT trial_sale_leads_used, trial_rental_leads_used FROM users WHERE id = ${assignedRealtorId}
+          `;
+          if ((updated.trial_sale_leads_used ?? 0) >= 3 && (updated.trial_rental_leads_used ?? 0) >= 3) {
+            await rawSql`UPDATE users SET subscription_tier = 'soft_cap' WHERE id = ${assignedRealtorId}`;
+          }
+        }
+      } catch (tierErr) {
+        // Non-fatal — listing is already created; just log the failure
+        console.error("Seller-lead trial counter update failed:", tierErr);
+      }
+    }
 
     return NextResponse.json({ id: created.id, status: created.status }, { status: 201 });
   } catch (err) {

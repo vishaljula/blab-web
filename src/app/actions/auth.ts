@@ -39,6 +39,7 @@ export async function completeOnboardingAction(data: OnboardingInput) {
 
   try {
     const db = getDb();
+    if (!db) return { success: false, error: "Database unavailable" };
     
     // Encrypt the fields at application level
     const encryptedName = encrypt(data.name);

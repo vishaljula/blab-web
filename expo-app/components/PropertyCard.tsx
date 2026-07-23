@@ -4,6 +4,7 @@ import {
   Text,
   Pressable,
   ScrollView,
+  Share,
   NativeSyntheticEvent,
   NativeScrollEvent,
   StyleSheet,
@@ -80,6 +81,24 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
     Haptics?.impactAsync(Haptics?.ImpactFeedbackStyle?.Light);
   }, []);
 
+  const handleShare = useCallback(async () => {
+    const url = `https://blab.in/listing/${listing.id}`;
+    const message = `${listing.address}, ${listing.city} — ₹${formatPrice(listing.price)} — Check this property on Blab: ${url}`;
+    if (Platform.OS === "web") {
+      try {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({ title: listing.address, text: message, url });
+        } else {
+          await navigator.clipboard?.writeText(url);
+        }
+      } catch {}
+    } else {
+      try {
+        await Share.share({ message, url });
+      } catch {}
+    }
+  }, [listing]);
+
   const listerType = listing.listerType || "broker";
   const listerColor = LISTER_COLORS[listerType as keyof typeof LISTER_COLORS] || LISTER_COLORS.broker;
   const badgeColors = isDark ? listerColor.dark : listerColor.light;
@@ -147,6 +166,18 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
           hitSlop={8}
         >
           <Ionicons name="heart-outline" size={18} color={colors.foreground} />
+        </Pressable>
+
+        {/* Share button */}
+        <Pressable
+          onPress={(e) => {
+            e.stopPropagation?.();
+            handleShare();
+          }}
+          style={[styles.iconButton, styles.shareButton, { backgroundColor: `${colors.background}CC` }]}
+          hitSlop={8}
+        >
+          <Ionicons name="share-outline" size={18} color={colors.foreground} />
         </Pressable>
 
         {/* Close button */}
@@ -253,9 +284,13 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
-  closeButton: {
+  shareButton: {
     top: 10,
     right: 50,
+  },
+  closeButton: {
+    top: 10,
+    right: 90,
   },
   dotsContainer: {
     position: "absolute",

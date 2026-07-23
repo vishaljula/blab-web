@@ -12,10 +12,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Phone and code are required" }, { status: 400 });
     }
 
-    const isVerified = await verifyOTP(phone, code);
+    // ── Dev bypass ────────────────────────────────────────────────────────────
+    // Accepts OTP 123456 for any phone in local development ONLY.
+    // Requires BOTH conditions simultaneously — double guard against accidents:
+    //   1. NODE_ENV !== 'production'  (Vercel production sets this automatically)
+    //   2. DEV_OTP_BYPASS === 'true'  (must be set explicitly in .env.local, which is gitignored)
+    // NEVER add DEV_OTP_BYPASS to Vercel production environment variables.
+    const isDevBypass =
+      process.env.NODE_ENV !== "production" &&
+      process.env.DEV_OTP_BYPASS === "true" &&
+      code === "123456";
+
+    const isVerified = isDevBypass || (await verifyOTP(phone, code));
     if (!isVerified) {
       return NextResponse.json({ success: false, error: "Invalid OTP code" }, { status: 400 });
     }
+
 
     const phoneHash = hashString(phone);
     const db = getDb();
