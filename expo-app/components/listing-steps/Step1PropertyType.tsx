@@ -33,9 +33,9 @@ export default function Step1PropertyType() {
   const C = isDark ? COLORS.dark : COLORS.light;
   const { width } = useWindowDimensions();
 
-  const { setStep1, goNext } = useListingFormStore();
-  const [listingType, setListingType]   = useState<ListingType | null>(null);
-  const [propertyType, setPropertyType] = useState<PropertyType | null>(null);
+  const { setStep1, goNext, listingType: savedListingType, propertyType: savedPropertyType } = useListingFormStore();
+  const [listingType, setListingType]   = useState<ListingType | null>(savedListingType);
+  const [propertyType, setPropertyType] = useState<PropertyType | null>(savedPropertyType);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const canProceed = !!listingType && !!propertyType;

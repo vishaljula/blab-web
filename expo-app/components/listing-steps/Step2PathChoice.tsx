@@ -36,9 +36,9 @@ export default function Step2PathChoice() {
   const isDark = colorScheme === "dark";
   const C = isDark ? COLORS.dark : COLORS.light;
 
-  const { listingType, realtorAvailability, setListingPath, goNext } = useListingFormStore();
+  const { listingType, listingPath: savedPath, realtorAvailability, setListingPath, goNext } = useListingFormStore();
   const [selected, setSelected] = useState<ListingPath>(
-    realtorAvailability === "unavailable" ? "self" : "realtor"
+    savedPath ?? (realtorAvailability === "unavailable" ? "self" : "realtor")
   );
 
   // Animated slider for segmented control

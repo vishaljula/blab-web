@@ -135,8 +135,14 @@ export default function WizardShell({ heading, hint, children, cta }: WizardShel
             backgroundColor: C.card,
             maxWidth: MAX_CARD_WIDTH,
             width: isWide ? MAX_CARD_WIDTH : "100%",
-            shadowColor: isDark ? "#000" : "#1A1A1A",
-          },
+            // 3D pop effect — inline so React Native Web picks it up
+            boxShadow:
+              "0 2px 4px rgba(0,0,0,0.12), " +    // crisp near edge
+              "0 8px 20px rgba(0,0,0,0.18), " +   // mid lift
+              "0 40px 80px rgba(0,0,0,0.15)",     // large ambient
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,0.09)",
+          } as any,
         ]}>
           {/* Heading */}
           <Text style={[s.heading, { color: C.foreground }]}>{heading}</Text>
@@ -224,11 +230,9 @@ const s = StyleSheet.create({
   // ── Content scroll
   scroll: { flexGrow: 1, paddingTop: 28 },
 
-  // ── Card
+  // ── Card (boxShadow applied inline on the View for RN Web compatibility)
   card: {
     borderRadius: 18, padding: 40, marginBottom: 16,
-    shadowOpacity: 0.07, shadowRadius: 24,
-    shadowOffset: { width: 0, height: 6 }, elevation: 5,
   },
   heading: {
     fontSize: 36, fontWeight: "900", lineHeight: 44,
