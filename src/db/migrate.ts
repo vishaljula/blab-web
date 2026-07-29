@@ -621,6 +621,10 @@ async function run() {
     await sql`CREATE INDEX IF NOT EXISTS idx_reviews_realtor ON realtor_reviews (realtor_id, created_at DESC);`;
     console.log("✔ realtor_reviews table ready");
 
+    // ── total_deals column (realtor credibility metric, set at signup + auto-incr on closings) ──
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS total_deals INTEGER DEFAULT 0;`;
+    console.log("✔ total_deals column ready");
+
     // ════════════════════════════════════════════════════════════════════════
     console.log("Migration completed successfully!");
 

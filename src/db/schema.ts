@@ -74,6 +74,8 @@ export const users = pgTable(
     photoUrl: text("photo_url"),
     bio: text("bio"),
     yearsExperience: smallint("years_experience"),
+    /** Lifetime completed deals — manually set at signup, auto-incremented on realtor_closings insert. */
+    totalDeals: integer("total_deals").default(0),
     languagesSpoken: jsonb("languages_spoken"),  // string[]
     areasServed: jsonb("areas_served"),           // string[] — display-only, not used for routing
 

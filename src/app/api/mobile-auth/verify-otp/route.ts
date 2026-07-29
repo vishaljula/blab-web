@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { hashString, encrypt, decrypt } from "@/lib/crypto";
+import { redis, OTP_RATE_LIMIT_TTL, OTP_MAX_ATTEMPTS } from "@/lib/redis";
 
 export async function POST(request: Request) {
   try {
@@ -22,6 +23,31 @@ export async function POST(request: Request) {
       process.env.NODE_ENV !== "production" &&
       process.env.DEV_OTP_BYPASS === "true" &&
       code === "123456";
+
+    // ── OTP brute-force rate limiting ─────────────────────────────────────────
+    // Max OTP_MAX_ATTEMPTS verify attempts per phone per hour.
+    // Skipped in dev-bypass mode. Fails open if Redis is unavailable (never
+    // block legit users due to a Redis outage).
+    if (!isDevBypass && redis) {
+      try {
+        const phoneHash = hashString(phone);
+        const rateLimitKey = `otp:rate:${phoneHash}`;
+        const attempts = await redis.incr(rateLimitKey);
+        if (attempts === 1) {
+          // First attempt this window — arm the TTL
+          await redis.expire(rateLimitKey, OTP_RATE_LIMIT_TTL);
+        }
+        if (attempts > OTP_MAX_ATTEMPTS) {
+          return NextResponse.json(
+            { success: false, error: "Too many attempts. Please wait 1 hour before trying again." },
+            { status: 429 }
+          );
+        }
+      } catch (redisErr) {
+        // Fail open — log and continue without rate limiting
+        console.warn("[verify-otp] Redis rate-limit check failed, skipping:", redisErr);
+      }
+    }
 
     const isVerified = isDevBypass || (await verifyOTP(phone, code));
     if (!isVerified) {

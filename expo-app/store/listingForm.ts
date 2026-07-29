@@ -21,10 +21,23 @@ export type ListingPath = "self" | "realtor";
 export interface RealtorOption {
   id: string;
   name: string;
-  photoUrl?: string;
-  dealsCount: number;
-  avgResponseHours: number;
-  isVerified: boolean;
+  // Rich profile fields from the DB
+  photoUrl?: string | null;
+  companyName?: string | null;
+  reraNumber?: string | null;
+  bio?: string | null;
+  yearsExperience?: number | null;
+  areasServed?: string[] | null;
+  languagesSpoken?: string[] | null;
+  scoreResponseRate?: number | null;
+  distanceM?: number | null;
+  totalDeals?: number | null;
+  activeListingCount?: number | null;
+  maxListingCapacity?: number | null;
+  // Legacy fields kept for any remaining references
+  dealsCount?: number;
+  avgResponseHours?: number;
+  isVerified?: boolean;
 }
 
 // Step counts per path

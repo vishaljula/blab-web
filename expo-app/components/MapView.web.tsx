@@ -16,6 +16,7 @@ import Map, {
   type ViewStateChangeEvent,
 } from "react-map-gl/mapbox";
 import { useDebouncedCallback } from "use-debounce";
+import { useFocusEffect } from "expo-router";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useColorScheme } from "@/components/useColorScheme";
@@ -100,6 +101,23 @@ export default function MapViewWeb() {
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
   const mapRef = useRef<MapRef>(null);
+  // Tracks whether a Marker was just clicked so the Map's onClick (which
+  // always fires after) doesn't immediately clear the selection.
+  const markerClickedRef = useRef(false);
+
+  // ── Resize on focus ────────────────────────────────────────────────────────
+  // Mapbox GL JS does not auto-detect DOM container size changes.
+  // When returning from the listing wizard modal (or any overlay), the map
+  // container may have stale dimensions. resize() forces Mapbox to
+  // recalculate and fill its container correctly.
+  useFocusEffect(
+    useCallback(() => {
+      const timer = setTimeout(() => {
+        mapRef.current?.getMap()?.resize();
+      }, 100); // small delay lets the layout paint settle first
+      return () => clearTimeout(timer);
+    }, [])
+  );
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isDrawingSession, setIsDrawingSession] = useState(false);
   const [committedGeoJSON, setCommittedGeoJSON] = useState<GeoJSON.FeatureCollection>(EMPTY_FC);
@@ -519,7 +537,15 @@ export default function MapViewWeb() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onClick={() => setSelectedListing(null)}
+        onClick={() => {
+          // If a marker was clicked, skip clearing — the marker's handler already
+          // set the selection and the Map onClick fires right after it.
+          if (markerClickedRef.current) {
+            markerClickedRef.current = false;
+            return;
+          }
+          setSelectedListing(null);
+        }}
         attributionControl={false}
         reuseMaps
       >
@@ -551,7 +577,10 @@ export default function MapViewWeb() {
           const bg = isActive ? colors.markerBgActive : colors.markerBg;
           return (
             <Marker key={listing.id} longitude={listing.longitude} latitude={listing.latitude} anchor="bottom"
-              onClick={(e: any) => { e.originalEvent?.stopPropagation(); setSelectedListing(listing); }}>
+              onClick={(e: any) => {
+                markerClickedRef.current = true;
+                setSelectedListing(listing);
+              }}>
               <div style={{ position: "relative", cursor: "pointer" }}>
                 <div style={{
                   padding: "4px 10px",
