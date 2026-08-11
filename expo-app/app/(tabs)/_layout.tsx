@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, View } from "react-native";
 import { useState, useEffect } from "react";
@@ -14,8 +14,16 @@ export default function TabLayout() {
   const [isDesktop, setIsDesktop] = useState(false);
   const insets = useSafeAreaInsets();
   const { user } = useListingsStore();
+  const router = useRouter();
 
   const isRealtor = user?.role === "realtor";
+
+  // Redirect shutterbugs away from the consumer app
+  useEffect(() => {
+    if (user?.role === "shutterbug") {
+      router.replace("/shutterbug/jobs" as any);
+    }
+  }, [user?.role]);
 
   // Detect desktop on web — hide bottom tabs
   useEffect(() => {

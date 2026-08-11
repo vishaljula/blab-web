@@ -21,7 +21,7 @@ import Animated, {
   FadeOutLeft,
   FadeOutRight,
 } from "react-native-reanimated";
-import { COLORS } from "@/lib/theme";
+import { COLORS, API_BASE_URL } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
 import { sendOtp, verifyOtp, completeOnboarding } from "@/lib/api";
 import { useListingsStore, saveStoredAuth } from "@/store/listings";
@@ -54,7 +54,7 @@ export default function LoginScreen() {
 
   // Onboarding
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"buyer" | "owner" | "broker" | "developer">("owner");
+  const [role, setRole] = useState<"buyer" | "owner" | "realtor" | "developer" | "shutterbug">("owner");
 
   const otpInputRef = useRef<TextInput>(null);
 
@@ -153,7 +153,29 @@ export default function LoginScreen() {
         const updatedUser = { ...currentUser, name, role };
         await saveStoredAuth(token, updatedUser);
         useListingsStore.getState().setAuth(token, updatedUser);
-        router.back();
+
+        if (role === "shutterbug") {
+          // Register Expo push token so the server can dispatch jobs to this device
+          try {
+            const { default: Notifications } = await import("expo-notifications");
+            const { status } = await Notifications.requestPermissionsAsync();
+            if (status === "granted") {
+              const pushToken = await Notifications.getExpoPushTokenAsync();
+              await fetch(`${API_BASE_URL}/api/users/push-token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ pushToken: pushToken.data }),
+              });
+            }
+          } catch (pushErr) {
+            console.warn("Push token registration failed:", pushErr);
+          }
+          router.replace("/shutterbug/jobs" as any);
+        } else if (role === "realtor") {
+          router.replace("/onboarding/realtor" as any);
+        } else {
+          router.back();
+        }
       } else {
         Alert.alert("Onboarding Failed", res.error || "Failed to complete onboarding");
       }
@@ -387,10 +409,11 @@ export default function LoginScreen() {
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>WHO ARE YOU?</Text>
               <View style={styles.roleGrid}>
                 {[
-                  { id: "owner", label: "Property Owner", desc: "Selling / renting out" },
-                  { id: "buyer", label: "Buyer / Renter", desc: "Finding properties" },
-                  { id: "broker", label: "Agent / Broker", desc: "Listing properties" },
-                  { id: "developer", label: "Developer", desc: "New projects builder" },
+                  { id: "owner",      label: "Property Owner", desc: "Selling / renting out" },
+                  { id: "buyer",      label: "Buyer / Renter",  desc: "Finding properties" },
+                  { id: "realtor",    label: "Realtor",          desc: "Listing properties" },
+                  { id: "developer",  label: "Developer",        desc: "New projects builder" },
+                  { id: "shutterbug", label: "📸 Shutterbug",    desc: "Blab field photographer" },
                 ].map((item) => (
                   <Pressable
                     key={item.id}

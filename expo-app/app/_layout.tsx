@@ -84,6 +84,20 @@ function RootLayoutNav() {
               gestureEnabled: false,
             }}
           />
+          <Stack.Screen
+            name="shutterbug"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="tracking/[id]"
+            options={{
+              headerShown: true,
+              headerTitle: "Live Tracking",
+              headerStyle: { backgroundColor: "#0F0F0F" },
+              headerTintColor: "#F5F5F3",
+              presentation: "card",
+            }}
+          />
         </Stack>
       </GestureHandlerRootView>
     </SafeAreaProvider>
