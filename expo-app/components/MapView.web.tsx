@@ -452,6 +452,84 @@ export default function MapViewWeb() {
       setViewportBounds(b);
       fetchListingsForBounds(b);
     }
+
+    // ── Service Zone Fog Overlay ─────────────────────────────────────────────
+    // Draw a semi-transparent dark mask over the entire world, with a circular
+    // "hole" punched out over the active service zone (L.B. Nagar, 5km radius).
+    // Points outside the hole are greyed out — they are outside service coverage.
+    const raw = map.getMap();
+    if (!raw.getSource("service-zone-fog")) {
+      const centerLat = 17.3496;
+      const centerLng = 78.5521;
+      const radiusKm = 5;
+      // Approximate a circle with 64 points (more than enough for visual quality)
+      const n = 64;
+      const EARTH_KM = 6371;
+      const circle: [number, number][] = [];
+      for (let i = 0; i <= n; i++) {
+        const angle = (2 * Math.PI * i) / n;
+        const dLat = (radiusKm / EARTH_KM) * (180 / Math.PI);
+        const dLng = (radiusKm / EARTH_KM) * (180 / Math.PI) / Math.cos((centerLat * Math.PI) / 180);
+        circle.push([
+          centerLng + dLng * Math.sin(angle),
+          centerLat + dLat * Math.cos(angle),
+        ]);
+      }
+
+      // GeoJSON Polygon: outer ring = world, inner ring = service circle (the "hole")
+      const fogGeoJSON: GeoJSON.Feature = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            // Outer ring: covers the entire world
+            [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]],
+            // Inner ring (reversed winding = hole): service zone circle
+            circle,
+          ],
+        },
+      };
+
+      raw.addSource("service-zone-fog", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [fogGeoJSON] },
+      });
+
+      raw.addLayer({
+        id: "service-zone-fog-fill",
+        type: "fill",
+        source: "service-zone-fog",
+        paint: {
+          "fill-color": "#0a0a0a",
+          "fill-opacity": 0.45,
+        },
+      });
+
+      // Subtle border ring around the service zone
+      raw.addSource("service-zone-ring", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Polygon",
+            coordinates: [circle],
+          },
+        },
+      });
+      raw.addLayer({
+        id: "service-zone-ring-line",
+        type: "line",
+        source: "service-zone-ring",
+        paint: {
+          "line-color": "#6366F1",
+          "line-width": 2,
+          "line-dasharray": [4, 3],
+          "line-opacity": 0.7,
+        },
+      });
+    }
   }, [setViewportBounds, setCurrentZoom]);
 
 

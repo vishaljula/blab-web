@@ -41,7 +41,7 @@ export interface RealtorOption {
 }
 
 // Step counts per path
-export const SELF_TOTAL_STEPS = 5;    // Type → Location → Path → Details+Price → Review
+export const SELF_TOTAL_STEPS = 6;    // Type → Location → Path → Details+Price → Review → Schedule
 export const REALTOR_TOTAL_STEPS = 4; // Type → Location → Path → RealtorList
 
 // ─── Store shape ───────────────────────────────────────────────────────────────
@@ -78,6 +78,8 @@ interface ListingFormState {
 
   // Step 4 (self) — description (optional) + review
   description: string;
+  /** UUID of the listing created on Step 4 Review submit — passed to Step 5 Schedule. */
+  createdListingId: string | null;
 
   // Step 3 (realtor) — contact
   contactName: string;
@@ -120,6 +122,7 @@ interface ListingFormState {
     availableFrom?: string | null;
   }) => void;
   setDescription: (description: string) => void;
+  setCreatedListingId: (id: string) => void;
   setRealtorContact: (data: {
     contactName: string;
     contactPhone: string;
@@ -137,7 +140,7 @@ interface ListingFormState {
 const INITIAL: Omit<
   ListingFormState,
   | "setStep1" | "setStep2" | "confirmLocation"
-  | "setStep3Self" | "setDescription" | "setRealtorContact"
+  | "setStep3Self" | "setDescription" | "setCreatedListingId" | "setRealtorContact"
   | "setListingPath" | "setRealtorAvailability"
   | "goNext" | "goBack" | "goToStep" | "reset"
 > = {
@@ -165,6 +168,7 @@ const INITIAL: Omit<
   preferredTenant: null,
   availableFrom: null,
   description: "",
+  createdListingId: null,
   contactName: "",
   contactPhone: "",
   assignedRealtorId: null,
@@ -225,6 +229,8 @@ export const useListingFormStore = create<ListingFormState>((set) => ({
     })),
 
   setDescription: (description) => set({ description }),
+
+  setCreatedListingId: (id) => set({ createdListingId: id }),
 
   setRealtorContact: ({ contactName, contactPhone, assignedRealtorId }) =>
     set({ contactName, contactPhone, assignedRealtorId: assignedRealtorId ?? null }),

@@ -16,8 +16,8 @@ import {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-/** Every person on Blab — buyer, seller, realtor, or developer. */
-export const userRoleEnum = pgEnum("user_role", ["buyer", "owner", "realtor", "developer"]);
+/** Every person on Blab — buyer, seller, realtor, developer, or shutterbug (field photographer). */
+export const userRoleEnum = pgEnum("user_role", ["buyer", "owner", "realtor", "developer", "shutterbug"]);
 
 /**
  * Realtor subscription tiers.
@@ -130,6 +130,14 @@ export const users = pgTable(
      *  Trial: 2 | SoftCap: 1 | Pro: LEAST(10, 5 + FLOOR(score_response_rate/50))
      *  Pro+: LEAST(15, 8 + FLOOR(score_response_rate/50)) */
     maxListingCapacity: smallint("max_listing_capacity").default(2),
+
+    // ── Shutterbug (field photographer) ─────────────────────────────────────
+    /** Expo push notification token — used for round-robin job dispatch. */
+    pushToken: text("push_token"),
+    /** Timestamp of last job dispatch — used for round-robin fairness (LRU ordering). */
+    lastDispatchedAt: timestamp("last_dispatched_at"),
+    /** H3 res7 cell this shutterbug primarily operates in (null = city-wide). */
+    operatingH3Cell: text("operating_h3_cell"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -358,3 +366,142 @@ export type RealtorClosingRow = typeof realtorClosings.$inferSelect;
 export type NewRealtorClosing = typeof realtorClosings.$inferInsert;
 export type RealtorReviewRow = typeof realtorReviews.$inferSelect;
 export type NewRealtorReview = typeof realtorReviews.$inferInsert;
+
+// ─── Service Config ───────────────────────────────────────────────────────────
+
+/**
+ * Single-row table storing the active service zone and time window config.
+ * Only one row (id = 'default') should ever exist.
+ * Editable by admin — changing radius or center instantly affects availability.
+ */
+export const serviceConfig = pgTable("service_config", {
+  id: varchar("id", { length: 20 }).primaryKey().default("default"),
+
+  /** L.B. Nagar service zone center. */
+  zoneCenterLat:  doublePrecision("zone_center_lat").notNull().default(17.3496),
+  zoneCenterLng:  doublePrecision("zone_center_lng").notNull().default(78.5521),
+  /** Service zone radius in kilometres. */
+  zoneRadiusKm:   doublePrecision("zone_radius_km").notNull().default(5),
+
+  /**
+   * Time windows as a JSON array of { id, label, startHour, startMin, endHour, endMin }.
+   * Default: 4 windows covering 9 AM – 7 PM.
+   */
+  timeWindows: jsonb("time_windows").notNull().default(
+    JSON.parse(JSON.stringify([
+      { id: "A", label: "Morning",       startHour: 9,  startMin: 0,  endHour: 11, endMin: 0  },
+      { id: "B", label: "Late Morning",  startHour: 11, startMin: 30, endHour: 13, endMin: 30 },
+      { id: "C", label: "Afternoon",     startHour: 14, startMin: 30, endHour: 16, endMin: 30 },
+      { id: "D", label: "Evening",       startHour: 17, startMin: 0,  endHour: 19, endMin: 0  },
+    ]))
+  ),
+
+  /** Minimum hours notice before a slot can be booked (prevents same-hour bookings). */
+  minLeadTimeHours: integer("min_lead_time_hours").notNull().default(3),
+  /** How many days into the future slots are shown. */
+  bookingWindowDays: integer("booking_window_days").notNull().default(10),
+
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type ServiceConfig = typeof serviceConfig.$inferSelect;
+
+// ─── Photography Bookings ─────────────────────────────────────────────────────
+
+/**
+ * One row per confirmed photography shoot booking.
+ * Status lifecycle: pending → confirmed → en_route → completed | cancelled | no_show
+ */
+export const photographyBookings = pgTable(
+  "photography_bookings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    listingId:  uuid("listing_id").references(() => listings.id).notNull(),
+    customerId: uuid("customer_id").references(() => users.id).notNull(),
+
+    /** ISO date string YYYY-MM-DD of the booked shoot. */
+    slotDate:   varchar("slot_date", { length: 10 }).notNull(),
+    /** Time window identifier: A | B | C | D. */
+    slotWindow: varchar("slot_window", { length: 1 }).notNull(),
+
+    /**
+     * pending    — booked, awaiting admin confirmation
+     * confirmed  — admin confirmed, shutterbug assigned
+     * en_route   — shutterbug tapped "I'm heading there"
+     * completed  — shoot finished
+     * cancelled  — customer or admin cancelled
+     * no_show    — customer was not home
+     */
+    status: varchar("status", { length: 20 }).notNull().default("pending"),
+
+    /** Assigned after admin reviews the booking. */
+    assignedShutterbugId: uuid("assigned_shutterbug_id").references(() => users.id),
+
+    /** Optional notes from customer (gate code, parking, access instructions). */
+    customerNotes: text("customer_notes"),
+
+    /** H3 res7 cell of the property — used for zone-aware capacity queries. */
+    propertyH3Cell: text("property_h3_cell"),
+
+    /** 'marketing' | 'organic' — for supply analytics. */
+    bookingSource: varchar("booking_source", { length: 20 }).default("organic"),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_photo_bookings_slot").on(table.slotDate, table.slotWindow),
+    index("idx_photo_bookings_listing").on(table.listingId),
+    index("idx_photo_bookings_shutterbug").on(table.assignedShutterbugId, table.slotDate),
+  ]
+);
+
+export type PhotographyBookingRow = typeof photographyBookings.$inferSelect;
+export type NewPhotographyBooking = typeof photographyBookings.$inferInsert;
+
+// ─── Photography Waitlist ─────────────────────────────────────────────────────
+
+/**
+ * Captures requests from customers whose property is outside the active service zone.
+ * When the zone expands or a shutterbug is added in their area, they are notified.
+ */
+export const photographyWaitlist = pgTable(
+  "photography_waitlist",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    listingId:  uuid("listing_id").references(() => listings.id),
+    customerId: uuid("customer_id").references(() => users.id).notNull(),
+
+    /** Human-readable address for admin dashboard. */
+    propertyAddress: text("property_address"),
+    propertyLat: doublePrecision("property_lat"),
+    propertyLng: doublePrecision("property_lng"),
+    /** H3 res7 cell — used to group waitlisted demand by zone for expansion decisions. */
+    propertyH3Cell: text("property_h3_cell"),
+
+    /** Queue position within this H3 cell (1-indexed). Set at insert time. */
+    queuePosition: integer("queue_position"),
+
+    /**
+     * waiting   — in queue, not yet notified
+     * notified  — we sent them a "zone now available" message
+     * booked    — converted to a photography_booking
+     * expired   — never converted (listing closed/expired)
+     */
+    status: varchar("status", { length: 20 }).notNull().default("waiting"),
+
+    /** Set when we notify them that their zone is now served. */
+    notifiedAt: timestamp("notified_at"),
+    /** Set when they convert to an actual booking. */
+    convertedBookingId: uuid("converted_booking_id"),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_waitlist_h3").on(table.propertyH3Cell, table.status),
+    index("idx_waitlist_customer").on(table.customerId),
+  ]
+);
+
+export type PhotographyWaitlistRow = typeof photographyWaitlist.$inferSelect;
+export type NewPhotographyWaitlistEntry = typeof photographyWaitlist.$inferInsert;

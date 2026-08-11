@@ -11,16 +11,17 @@ import Step3Path      from "@/components/listing-steps/Step2PathChoice"; // NOW 
 // Self-list path
 import Step4Details   from "@/components/listing-steps/Step3DetailsPrice";
 import Step5Review    from "@/components/listing-steps/Step4Review";
+import Step6Schedule  from "@/components/listing-steps/Step5Schedule";
 
 // Realtor path
 import Step4Realtors  from "@/components/listing-steps/Step4RealtorList";
 
 /**
  * New flow:
- *   Self-list  (5 steps): Type → Location → PathChoice → Details+Price → Review
+ *   Self-list  (6 steps): Type → Location → PathChoice → Details+Price → Review → Schedule
  *   Realtor    (4 steps): Type → Location → PathChoice → RealtorList
  */
-const SELF_STEPS    = [Step1Type, Step2Location, Step3Path, Step4Details, Step5Review];
+const SELF_STEPS    = [Step1Type, Step2Location, Step3Path, Step4Details, Step5Review, Step6Schedule];
 const REALTOR_STEPS = [Step1Type, Step2Location, Step3Path, Step4Realtors];
 
 export default function ListWizard() {

@@ -700,6 +700,51 @@ export default function MapView() {
               </Mapbox.MarkerView>
             );
           })}
+
+          {/* ── Service Zone Fog Overlay ──────────────────────────────────────
+              Semi-transparent dark mask over the world, with a circular hole
+              over L.B. Nagar (5km radius). Greyed-out areas = unserved.       */}
+          {(() => {
+            const centerLat = 17.3496, centerLng = 78.5521, radiusKm = 5;
+            const n = 64, EARTH_KM = 6371;
+            const circle: [number, number][] = [];
+            for (let i = 0; i <= n; i++) {
+              const angle = (2 * Math.PI * i) / n;
+              const dLat = (radiusKm / EARTH_KM) * (180 / Math.PI);
+              const dLng = (radiusKm / EARTH_KM) * (180 / Math.PI) / Math.cos((centerLat * Math.PI) / 180);
+              circle.push([centerLng + dLng * Math.sin(angle), centerLat + dLat * Math.cos(angle)]);
+            }
+            const fogShape: GeoJSON.Feature = {
+              type: "Feature", properties: {},
+              geometry: {
+                type: "Polygon",
+                coordinates: [
+                  [[-180,-90],[180,-90],[180,90],[-180,90],[-180,-90]],
+                  circle,
+                ],
+              },
+            };
+            const ringShape: GeoJSON.Feature = {
+              type: "Feature", properties: {},
+              geometry: { type: "Polygon", coordinates: [circle] },
+            };
+            return (
+              <>
+                <Mapbox.ShapeSource id="service-zone-fog" shape={fogShape}>
+                  <Mapbox.FillLayer
+                    id="service-zone-fog-fill"
+                    style={{ fillColor: "#0a0a0a", fillOpacity: 0.45 }}
+                  />
+                </Mapbox.ShapeSource>
+                <Mapbox.ShapeSource id="service-zone-ring" shape={ringShape}>
+                  <Mapbox.LineLayer
+                    id="service-zone-ring-line"
+                    style={{ lineColor: "#6366F1", lineWidth: 2, lineDasharray: [4, 3], lineOpacity: 0.7 }}
+                  />
+                </Mapbox.ShapeSource>
+              </>
+            );
+          })()}
       </Mapbox.MapView>
 
       {/* Compass — tap to reset bearing + pitch to north-up */}

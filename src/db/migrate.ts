@@ -625,6 +625,112 @@ async function run() {
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS total_deals INTEGER DEFAULT 0;`;
     console.log("✔ total_deals column ready");
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // Shutterbug Scheduling System — MVP1
+    // All blocks are idempotent (IF NOT EXISTS / DO $$ ... END $$).
+    // ══════════════════════════════════════════════════════════════════════════
+
+    // ── Add 'shutterbug' to user_role enum ───────────────────────────────────
+    await sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_enum
+          WHERE enumlabel = 'shutterbug'
+            AND enumtypid = 'user_role'::regtype
+        ) THEN
+          ALTER TYPE user_role ADD VALUE 'shutterbug';
+        END IF;
+      END
+      $$;
+    `;
+    console.log("✔ 'shutterbug' added to user_role enum");
+
+    // ── Shutterbug columns on users ──────────────────────────────────────────
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS push_token           text;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_dispatched_at   timestamptz;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS operating_h3_cell    text;`;
+    console.log("✔ Shutterbug columns added to users");
+
+    // Partial index for round-robin: active shutterbugs ordered by last dispatch time
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_users_shutterbug_dispatch
+        ON users (last_dispatched_at ASC NULLS FIRST)
+        WHERE role = 'shutterbug' AND push_token IS NOT NULL;
+    `;
+    console.log("✔ Shutterbug dispatch index ready");
+
+    // ── service_config table ─────────────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS service_config (
+        id                  varchar(20) PRIMARY KEY DEFAULT 'default',
+        zone_center_lat     double precision NOT NULL DEFAULT 17.3496,
+        zone_center_lng     double precision NOT NULL DEFAULT 78.5521,
+        zone_radius_km      double precision NOT NULL DEFAULT 5,
+        time_windows        jsonb NOT NULL DEFAULT '[
+          {"id":"A","label":"Morning","startHour":9,"startMin":0,"endHour":11,"endMin":0},
+          {"id":"B","label":"Late Morning","startHour":11,"startMin":30,"endHour":13,"endMin":30},
+          {"id":"C","label":"Afternoon","startHour":14,"startMin":30,"endHour":16,"endMin":30},
+          {"id":"D","label":"Evening","startHour":17,"startMin":0,"endHour":19,"endMin":0}
+        ]'::jsonb,
+        min_lead_time_hours  integer NOT NULL DEFAULT 3,
+        booking_window_days  integer NOT NULL DEFAULT 10,
+        updated_at           timestamptz DEFAULT NOW() NOT NULL
+      );
+    `;
+    // Seed the single config row if it doesn't exist
+    await sql`
+      INSERT INTO service_config (id) VALUES ('default')
+      ON CONFLICT (id) DO NOTHING;
+    `;
+    console.log("✔ service_config table ready with default L.B. Nagar zone");
+
+    // ── photography_bookings table ───────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS photography_bookings (
+        id                      uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        listing_id              uuid NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+        customer_id             uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        slot_date               varchar(10) NOT NULL,
+        slot_window             varchar(1) NOT NULL CHECK (slot_window IN ('A','B','C','D')),
+        status                  varchar(20) NOT NULL DEFAULT 'pending'
+                                CHECK (status IN ('pending','confirmed','en_route','completed','cancelled','no_show')),
+        assigned_shutterbug_id  uuid REFERENCES users(id) ON DELETE SET NULL,
+        customer_notes          text,
+        property_h3_cell        text,
+        booking_source          varchar(20) DEFAULT 'organic',
+        created_at              timestamptz DEFAULT NOW() NOT NULL,
+        updated_at              timestamptz DEFAULT NOW() NOT NULL
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_photo_bookings_slot       ON photography_bookings (slot_date, slot_window) WHERE status != 'cancelled';`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_photo_bookings_listing    ON photography_bookings (listing_id);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_photo_bookings_shutterbug ON photography_bookings (assigned_shutterbug_id, slot_date) WHERE status NOT IN ('cancelled','completed');`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_photo_bookings_customer   ON photography_bookings (customer_id, created_at DESC);`;
+    console.log("✔ photography_bookings table ready");
+
+    // ── photography_waitlist table ───────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS photography_waitlist (
+        id                    uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        listing_id            uuid REFERENCES listings(id) ON DELETE SET NULL,
+        customer_id           uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        property_address      text,
+        property_lat          double precision,
+        property_lng          double precision,
+        property_h3_cell      text,
+        queue_position        integer,
+        status                varchar(20) NOT NULL DEFAULT 'waiting'
+                              CHECK (status IN ('waiting','notified','booked','expired')),
+        notified_at           timestamptz,
+        converted_booking_id  uuid,
+        created_at            timestamptz DEFAULT NOW() NOT NULL
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_waitlist_h3       ON photography_waitlist (property_h3_cell, status);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_waitlist_customer ON photography_waitlist (customer_id);`;
+    console.log("✔ photography_waitlist table ready");
+
     // ════════════════════════════════════════════════════════════════════════
     console.log("Migration completed successfully!");
 

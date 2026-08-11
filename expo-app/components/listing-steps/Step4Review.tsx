@@ -64,7 +64,6 @@ export default function Step4Review() {
   const [description, setDescription] = useState(store.description || "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   const listingFee = store.listingType === "rent" ? 499 : 999;
 
@@ -80,31 +79,18 @@ export default function Step4Review() {
         body: JSON.stringify(payload),
         credentials: "include",
       });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Failed");
-      setDone(true);
-      store.reset();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      // Save listing ID so Step 5 (Schedule) can create the booking against it
+      if (data.id) store.setCreatedListingId(data.id);
+      // Advance to Step 5 — Schedule shoot
+      store.goNext();
     } catch (e: any) {
       setError(e.message ?? "Something went wrong");
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (done) {
-    return (
-      <View style={[s.successWrap, { backgroundColor: C.background }]}>
-        <Text style={s.successIcon}>🎉</Text>
-        <Text style={[s.successTitle, { color: C.foreground }]}>Listing submitted!</Text>
-        <Text style={[s.successDesc, { color: C.mutedForeground }]}>
-          Our photographer will contact you within 24 hours to schedule the shoot.
-          Your property goes live after photography.
-        </Text>
-        <Pressable onPress={() => router.replace("/(tabs)")} style={[s.successCta, { backgroundColor: C.primary }]}>
-          <Text style={{ color: C.primaryForeground, fontSize: 15, fontWeight: "800" }}>Back to map</Text>
-        </Pressable>
-      </View>
-    );
-  }
 
   return (
     <WizardShell
