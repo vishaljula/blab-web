@@ -41,5 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # local test utilities
-/scripts/
+# /scripts/ — test/simulation scripts are tracked
 scratch/
