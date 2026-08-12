@@ -106,7 +106,10 @@ interface ListingsState {
   bumpMapRefresh: () => void;
   setDetailModalId: (id: string | null) => void;
   setCurrentZoom: (zoom: number) => void;
+  activeBookingId: string | null;
+  setActiveBookingId: (id: string | null) => void;
 }
+
 
 export const useListingsStore = create<ListingsState>((set) => ({
   listings: [],
@@ -123,7 +126,9 @@ export const useListingsStore = create<ListingsState>((set) => ({
   authModalOpen: false,
   token: null,
   user: null,
+  activeBookingId: null,
  
+
   // Reset total alongside listings so stale total never shows while new listings load.
   setListings: (listings) => set({ listings, total: 0 }),
   setTotal: (total) => set({ total }),
@@ -150,7 +155,20 @@ export const useListingsStore = create<ListingsState>((set) => ({
   bumpMapRefresh: () => set((state) => ({ mapRefreshTick: state.mapRefreshTick + 1 })),
   setDetailModalId: (id) => set({ detailModalId: id }),
   setCurrentZoom: (zoom) => set({ currentZoom: zoom }),
+  setActiveBookingId: (id) => {
+    set({ activeBookingId: id });
+    try {
+      if (Platform.OS === "web") {
+        if (id) localStorage.setItem("active_booking_id", id);
+        else localStorage.removeItem("active_booking_id");
+      } else {
+        if (id) SecureStore.setItemAsync("active_booking_id", id).catch(() => {});
+        else SecureStore.deleteItemAsync("active_booking_id").catch(() => {});
+      }
+    } catch {}
+  },
 }));
+
 
 // Load initial auth credentials asynchronously
 getStoredAuth().then(({ token, user }) => {

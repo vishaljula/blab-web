@@ -20,7 +20,8 @@ export default function MapScreen() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
 
-  const { selectedListing, setSelectedListing, setDetailModalId } = useListingsStore();
+  const { selectedListing, setSelectedListing, setDetailModalId, activeBookingId } = useListingsStore();
+
 
   const openDetail = (id: string) => {
     if (Platform.OS === "web") {
@@ -43,6 +44,19 @@ export default function MapScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
+
+      {/* Active booking banner — tap to track without going through wizard again */}
+      {activeBookingId && (
+        <Pressable
+          style={[styles.trackingBanner, { backgroundColor: "#6366F1" }]}
+          onPress={() => router.push({ pathname: "/tracking/[id]", params: { id: activeBookingId } } as any)}
+        >
+          <Ionicons name="navigate" size={16} color="#fff" />
+          <Text style={styles.trackingBannerText}>📸 Shutterbug tracking active — tap to view</Text>
+          <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.7)" />
+        </Pressable>
+      )}
+
       <ControlBar hideDraw={!isDesktop && viewMode === "list"} />
 
       {isDesktop ? (
@@ -160,5 +174,18 @@ const styles = StyleSheet.create({
   floatingToggleText: {
     fontSize: 14,
     fontWeight: "700",
+  },
+  trackingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  trackingBannerText: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
   },
 });

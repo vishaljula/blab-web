@@ -87,6 +87,8 @@ export default function Step5Schedule() {
 
   const router = useRouter();
   const token = useListingsStore((s) => s.token);
+  const setActiveBookingId = useListingsStore((s) => s.setActiveBookingId);
+
   const formState = useListingFormStore((s) => s);
   const listingId = formState.createdListingId;
 
@@ -189,7 +191,9 @@ export default function Step5Schedule() {
       const data = await res.json();
       if (data.success) {
         setBookingId(data.bookingId);
+        setActiveBookingId(data.bookingId); // persist to store for tracking entry point
         setBooked(true);
+
         // In dev mode, kick off simulation automatically after a short delay
         if (isDevMode && data.bookingId) {
           setTimeout(() => {
