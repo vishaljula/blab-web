@@ -108,9 +108,26 @@ export default function Step5Schedule() {
   // Success state
   const [booked, setBooked] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(5);
 
   // Dev mode: auto-start simulation after booking
   const isDevMode = process.env.NODE_ENV !== "production";
+
+  // Auto-navigate to tracking screen after booking confirmed
+  useEffect(() => {
+    if (!booked || !bookingId) return;
+    let secs = 5;
+    setCountdown(secs);
+    const tick = setInterval(() => {
+      secs -= 1;
+      setCountdown(secs);
+      if (secs <= 0) {
+        clearInterval(tick);
+        router.push({ pathname: "/tracking/[id]", params: { id: bookingId } } as any);
+      }
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [booked, bookingId]);
 
   // ── Fetch availability ───────────────────────────────────────────────────
   useEffect(() => {
@@ -299,30 +316,12 @@ export default function Step5Schedule() {
             </Text>
           </View>
 
-          {/* Dev mode: simulation note */}
-          {isDevMode && bookingId && (
-            <View style={{ width: "100%", gap: 8 }}>
-              <Pressable
-                style={[styles.devBanner, { borderColor: "#6366F1" }]}
-                onPress={() => {
-                  if (Platform.OS === "web") {
-                    // Most reliable on web — direct navigation
-                    (window as any).location.href = `/tracking/${bookingId}`;
-                  } else {
-                    router.push({ pathname: "/tracking/[id]", params: { id: bookingId } } as any);
-                  }
-                }}
-              >
-                <Ionicons name="bug-outline" size={16} color="#6366F1" />
-                <Text style={[styles.devText, { color: "#6366F1" }]}>
-                  DEV: Tap to open tracking map →
-                </Text>
-              </Pressable>
-              <Text
-                selectable
-                style={{ fontSize: 11, color: "#6366F1", textAlign: "center", opacity: 0.7 }}
-              >
-                or open: localhost:8081/tracking/{bookingId}
+          {/* Auto-navigate countdown */}
+          {bookingId && (
+            <View style={[styles.devBanner, { borderColor: "#6366F1", width: "100%" }]}>
+              <Ionicons name="navigate-outline" size={16} color="#6366F1" />
+              <Text style={[styles.devText, { color: "#6366F1" }]}>
+                Opening tracking in {countdown}s…
               </Text>
             </View>
           )}
