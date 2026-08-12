@@ -247,8 +247,8 @@ export default function Header() {
               router.push("/login");
               return;
             }
-            if (user?.role === "buyer") {
-              alert("Buyers cannot create listings. Please edit your role in your profile to Owner, Broker, or Developer.");
+            if (user?.role === "shutterbug") {
+              router.push("/shutterbug/jobs" as any);
               return;
             }
             router.push("/list");
