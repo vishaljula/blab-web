@@ -732,7 +732,34 @@ async function run() {
     console.log("✔ photography_waitlist table ready");
 
     // ════════════════════════════════════════════════════════════════════════
+    // ── Migration: add 'user' to user_role enum (unified regular-user role) ──────
+    // buyer/owner/developer roles are kept for backwards compat with existing rows.
+    // New signups default to 'user' — can browse AND list without role friction.
+    await sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_enum
+          WHERE enumlabel = 'user'
+            AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'user_role')
+        ) THEN
+          ALTER TYPE user_role ADD VALUE 'user';
+        END IF;
+      END$$;
+    `;
+    console.log("✓ Added 'user' value to user_role enum");
+
+    // Migrate buyer + owner → 'user'.  Developer stays as 'developer' —
+    // it is a separate B2B product segment (project listings, not individual units).
+    await sql`
+      UPDATE users
+      SET role = 'user'
+      WHERE role IN ('buyer', 'owner')
+    `;
+    console.log("✓ Migrated buyer/owner → 'user' role (developer unchanged)");
+
     console.log("Migration completed successfully!");
+
 
 
 

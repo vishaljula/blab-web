@@ -17,7 +17,13 @@ import {
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 /** Every person on Blab — buyer, seller, realtor, developer, or shutterbug (field photographer). */
-export const userRoleEnum = pgEnum("user_role", ["buyer", "owner", "realtor", "developer", "shutterbug"]);
+// Role architecture:
+//   user      — any regular person: can browse AND list their own property (replaces buyer+owner)
+//   developer — B2B builder/developer (MyHome, Prestige etc.) — project-level listings, Phase 2 product
+//   realtor   — licensed agent listing on behalf of owners, has dashboard + quota
+//   shutterbug — Blab field photographer, receives job dispatch notifications
+// buyer/owner kept in enum for backwards compat with existing rows only.
+export const userRoleEnum = pgEnum("user_role", ["user", "buyer", "owner", "realtor", "developer", "shutterbug"]);
 
 /**
  * Realtor subscription tiers.
@@ -54,7 +60,7 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    role: userRoleEnum("role").default("buyer").notNull(),
+    role: userRoleEnum("role").default("user").notNull(),
 
     // PII — hashed for index lookup
     phoneHash: varchar("phone_hash", { length: 64 }).unique(),

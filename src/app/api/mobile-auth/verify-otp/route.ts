@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         .values({
           phoneHash,
           encryptedPhone: encrypt(phone),
-          role: "buyer",
+          role: "user",
         })
         .returning();
       user = newUser;

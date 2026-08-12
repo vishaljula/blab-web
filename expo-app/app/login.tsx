@@ -54,7 +54,7 @@ export default function LoginScreen() {
 
   // Onboarding
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"buyer" | "owner" | "realtor" | "developer" | "shutterbug">("owner");
+  const [role, setRole] = useState<"user" | "realtor" | "developer" | "shutterbug">("user");
 
   const otpInputRef = useRef<TextInput>(null);
 
@@ -409,11 +409,26 @@ export default function LoginScreen() {
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>WHO ARE YOU?</Text>
               <View style={styles.roleGrid}>
                 {[
-                  { id: "owner",      label: "Property Owner", desc: "Selling / renting out" },
-                  { id: "buyer",      label: "Buyer / Renter",  desc: "Finding properties" },
-                  { id: "realtor",    label: "Realtor",          desc: "Listing properties" },
-                  { id: "developer",  label: "Developer",        desc: "New projects builder" },
-                  { id: "shutterbug", label: "📸 Shutterbug",    desc: "Blab field photographer" },
+                  {
+                    id: "user",
+                    label: "Regular User",
+                    desc: "Browse listings or sell your property",
+                  },
+                  {
+                    id: "developer",
+                    label: "Builder / Developer",
+                    desc: "MyHome, Prestige, Lodha etc.",
+                  },
+                  {
+                    id: "realtor",
+                    label: "Realtor",
+                    desc: "Licensed agent listing on behalf of owners",
+                  },
+                  {
+                    id: "shutterbug",
+                    label: "\ud83d\udcf8 Shutterbug",
+                    desc: "Blab field photographer",
+                  },
                 ].map((item) => (
                   <Pressable
                     key={item.id}

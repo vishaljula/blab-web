@@ -33,8 +33,10 @@ export default function ListWizard() {
     router.replace("/login");
     return null;
   }
-  if (user?.role === "buyer") {
-    router.back();
+  // Shutterbugs have their own screen — redirect them away from the listing wizard.
+  // Everyone else (user, developer, realtor) can list.
+  if (user?.role === "shutterbug") {
+    router.replace("/shutterbug/jobs" as any);
     return null;
   }
 
