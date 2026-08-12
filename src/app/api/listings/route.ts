@@ -18,13 +18,53 @@ import { neon } from "@neondatabase/serverless";
  * fields are coerced to null/undefined if missing so the DB insert is clean.
  */
 export async function POST(request: NextRequest) {
-  // ── Auth gate ──────────────────────────────────────────────────────────────
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // ── Auth gate — accepts mobile Bearer token OR NextAuth session cookie ────
+  let userId: string | null = null;
+
+  const authHeader = request.headers.get("Authorization") ?? "";
+  const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+
+  if (bearerToken) {
+    // Mobile app path: decrypt the encrypted session token
+    try {
+      const { decrypt } = await import("@/lib/crypto");
+      const payload = JSON.parse(decrypt(bearerToken));
+      if (!payload.userId || payload.expiry < Date.now()) {
+        return NextResponse.json({ error: "Token expired — please log in again" }, { status: 401 });
+      }
+      userId = payload.userId;
+    } catch {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+  } else {
+    // Web path: NextAuth session cookie
+    const session = await auth();
+    if (session?.user) userId = (session.user as any).id as string;
   }
 
-  const userId = (session.user as any).id as string;
+  if (!userId) {
+    return NextResponse.json({ error: "Sign in to list a property" }, { status: 401 });
+  }
+
+  // ── Profile-complete guard: user must have set their name ─────────────────
+  // Search is open to everyone; posting requires a real profile.
+  {
+    const sql = neon(process.env.DATABASE_URL!);
+    const [u] = await sql`
+      SELECT role, encrypted_name FROM users WHERE id = ${userId} LIMIT 1
+    `;
+    if (!u) return NextResponse.json({ error: "User not found" }, { status: 401 });
+    if (!u.encrypted_name) {
+      return NextResponse.json(
+        { error: "Complete your profile before listing a property" },
+        { status: 403 }
+      );
+    }
+    // Shutterbugs cannot list properties
+    if (u.role === "shutterbug") {
+      return NextResponse.json({ error: "Shutterbugs cannot create listings" }, { status: 403 });
+    }
+  }
 
   // ── Parse body ─────────────────────────────────────────────────────────────
   let body: Record<string, unknown>;

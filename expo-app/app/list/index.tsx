@@ -33,6 +33,14 @@ export default function ListWizard() {
     router.replace("/login");
     return null;
   }
+
+  // Profile must be complete before listing.
+  // Search is free and open — this gate only applies to the listing wizard.
+  if (!user?.name) {
+    router.replace("/login");
+    return null;
+  }
+
   // Shutterbugs have their own screen — redirect them away from the listing wizard.
   // Everyone else (user, developer, realtor) can list.
   if (user?.role === "shutterbug") {
