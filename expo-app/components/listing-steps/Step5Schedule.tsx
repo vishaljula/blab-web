@@ -301,15 +301,30 @@ export default function Step5Schedule() {
 
           {/* Dev mode: simulation note */}
           {isDevMode && bookingId && (
-            <Pressable
-              style={[styles.devBanner, { borderColor: "#6366F1" }]}
-              onPress={() => router.push(`/tracking/${bookingId}` as any)}
-            >
-              <Ionicons name="bug-outline" size={16} color="#6366F1" />
-              <Text style={[styles.devText, { color: "#6366F1" }]}>
-                DEV: Simulation starting in ~3s → tap to open tracking
+            <View style={{ width: "100%", gap: 8 }}>
+              <Pressable
+                style={[styles.devBanner, { borderColor: "#6366F1" }]}
+                onPress={() => {
+                  if (Platform.OS === "web") {
+                    // Most reliable on web — direct navigation
+                    (window as any).location.href = `/tracking/${bookingId}`;
+                  } else {
+                    router.push({ pathname: "/tracking/[id]", params: { id: bookingId } } as any);
+                  }
+                }}
+              >
+                <Ionicons name="bug-outline" size={16} color="#6366F1" />
+                <Text style={[styles.devText, { color: "#6366F1" }]}>
+                  DEV: Tap to open tracking map →
+                </Text>
+              </Pressable>
+              <Text
+                selectable
+                style={{ fontSize: 11, color: "#6366F1", textAlign: "center", opacity: 0.7 }}
+              >
+                or open: localhost:8081/tracking/{bookingId}
               </Text>
-            </Pressable>
+            </View>
           )}
 
           <Pressable
