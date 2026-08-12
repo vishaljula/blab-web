@@ -19,6 +19,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import { COLORS, API_BASE_URL } from "@/lib/theme";
 import { useListingsStore } from "@/store/listings";
@@ -60,7 +61,7 @@ interface AvailabilityResponse {
 
 function formatDate(iso: string): string {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+  return d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
 }
 
 function pad2(n: number) {
@@ -68,7 +69,12 @@ function pad2(n: number) {
 }
 
 function windowTimeLabel(w: TimeWindow) {
-  return `${pad2(w.startHour)}:${pad2(w.startMin)} – ${pad2(w.endHour)}:${pad2(w.endMin)}`;
+  const fmtHour = (h: number) => {
+    const ampm = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12} ${ampm}`;
+  };
+  return `${fmtHour(w.startHour)} – ${fmtHour(w.endHour)}`;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -77,6 +83,7 @@ export default function Step5Schedule() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
+  const insets = useSafeAreaInsets();
 
   const router = useRouter();
   const token = useListingsStore((s) => s.token);
@@ -101,6 +108,9 @@ export default function Step5Schedule() {
   // Success state
   const [booked, setBooked] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+
+  // Dev mode: auto-start simulation after booking
+  const isDevMode = process.env.NODE_ENV !== "production";
 
   // ── Fetch availability ───────────────────────────────────────────────────
   useEffect(() => {
@@ -163,8 +173,16 @@ export default function Step5Schedule() {
       if (data.success) {
         setBookingId(data.bookingId);
         setBooked(true);
+        // In dev mode, kick off simulation automatically after a short delay
+        if (isDevMode && data.bookingId) {
+          setTimeout(() => {
+            fetch(`${API_BASE_URL}/api/dev/simulate-booking/${data.bookingId}`, {
+              method: "POST",
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }).catch(() => {}); // best-effort
+          }, 3000);
+        }
       } else if (data.error === "slot_full") {
-        // Refresh availability — another customer snagged the slot
         await fetchAvailability();
         setSelectedWindow(null);
         alert("That slot just filled up. Please pick another.");
@@ -176,7 +194,7 @@ export default function Step5Schedule() {
     } finally {
       setSubmitting(false);
     }
-  }, [selectedDate, selectedWindow, listingId, notes, token, availability, fetchAvailability]);
+  }, [selectedDate, selectedWindow, listingId, notes, token, availability, fetchAvailability, isDevMode]);
 
   // ── Submit waitlist ───────────────────────────────────────────────────────
   const handleWaitlist = useCallback(async () => {
@@ -220,38 +238,80 @@ export default function Step5Schedule() {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={styles.successContainer}
+        contentContainerStyle={[styles.successContainer, { paddingTop: insets.top + 24 }]}
       >
         <View style={[styles.successCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles.successIcon}>
-            <Ionicons name="checkmark-circle" size={64} color="#22C55E" />
+          {/* Header */}
+          <View style={[styles.successBadge, { backgroundColor: "#22C55E15" }]}>
+            <Ionicons name="checkmark-circle" size={52} color="#22C55E" />
           </View>
-          <Text style={[styles.successTitle, { color: colors.foreground }]}>You're booked!</Text>
+          <Text style={[styles.successTitle, { color: colors.foreground }]}>Shoot booked!</Text>
+
+          {/* Slot detail */}
           {selDay && selectedWindow && (
-            <>
-              <Text style={[styles.successDate, { color: colors.foreground }]}>
-                {formatDate(selectedDate!)}
-              </Text>
-              <View style={[styles.successWindowPill, { backgroundColor: colors.primary + "20" }]}>
-                <Ionicons name="time-outline" size={16} color={colors.primary} />
-                <Text style={[styles.successWindowText, { color: colors.primary }]}>
+            <View style={[styles.slotDetail, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+              <View style={styles.slotRow}>
+                <Ionicons name="calendar-outline" size={18} color={colors.primary} />
+                <Text style={[styles.slotText, { color: colors.foreground }]}>
+                  {formatDate(selectedDate!)}
+                </Text>
+              </View>
+              <View style={[styles.slotDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.slotRow}>
+                <Ionicons name="time-outline" size={18} color={colors.primary} />
+                <Text style={[styles.slotText, { color: colors.foreground }]}>
                   {selectedWindow.label} · {windowTimeLabel(selectedWindow)}
                 </Text>
               </View>
-            </>
+            </View>
           )}
-          <View style={[styles.successNote, { backgroundColor: colors.muted }]}>
-            <Ionicons name="phone-portrait-outline" size={16} color={colors.mutedForeground} />
-            <Text style={[styles.successNoteText, { color: colors.mutedForeground }]}>
-              Your Shutterbug will WhatsApp you 30 minutes before arrival.
+
+          {/* What happens next */}
+          <Text style={[styles.nextLabel, { color: colors.mutedForeground }]}>WHAT HAPPENS NEXT</Text>
+
+          {[
+            {
+              icon: "notifications-outline" as const,
+              text: "You'll get a notification the moment your Shutterbug is heading your way.",
+            },
+            {
+              icon: "map-outline" as const,
+              text: "Tap the notification to track them live on the map.",
+            },
+            {
+              icon: "images-outline" as const,
+              text: "Your listing goes live on the map within 24 hrs of the shoot.",
+            },
+          ].map((item, i) => (
+            <View key={i} style={[styles.nextStep, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
+              <View style={[styles.nextIconBox, { backgroundColor: colors.primary + "15" }]}>
+                <Ionicons name={item.icon} size={18} color={colors.primary} />
+              </View>
+              <Text style={[styles.nextText, { color: colors.mutedForeground }]}>{item.text}</Text>
+            </View>
+          ))}
+
+          {/* Prep tip */}
+          <View style={[styles.tipBox, { backgroundColor: "#F59E0B10", borderColor: "#F59E0B30" }]}>
+            <Text style={styles.tipEmoji}>💡</Text>
+            <Text style={[styles.tipText, { color: colors.mutedForeground }]}>
+              Have the lights on and the space tidy. Our Shutterbugs capture in natural + indoor light.
             </Text>
           </View>
-          <View style={[styles.successNote, { backgroundColor: colors.muted }]}>
-            <Ionicons name="bulb-outline" size={16} color={colors.mutedForeground} />
-            <Text style={[styles.successNoteText, { color: colors.mutedForeground }]}>
-              Keep lights on and the property tidy for the best photos.
-            </Text>
-          </View>
+
+          {/* Dev mode: simulation note */}
+          {isDevMode && bookingId && (
+            <Pressable
+              style={[styles.devBanner, { borderColor: "#6366F1" }]}
+              onPress={() => router.push(`/tracking/${bookingId}` as any)}
+            >
+              <Ionicons name="bug-outline" size={16} color="#6366F1" />
+              <Text style={[styles.devText, { color: "#6366F1" }]}>
+                DEV: Simulation starting in ~3s → tap to open tracking
+              </Text>
+            </Pressable>
+          )}
+
           <Pressable
             style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
             onPress={handleDone}
@@ -268,13 +328,13 @@ export default function Step5Schedule() {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={styles.successContainer}
+        contentContainerStyle={[styles.successContainer, { paddingTop: insets.top + 24 }]}
       >
         <View style={[styles.successCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={{ fontSize: 48, textAlign: "center", marginBottom: 8 }}>📬</Text>
           <Text style={[styles.successTitle, { color: colors.foreground }]}>You're on the list!</Text>
-          <Text style={[styles.successSubtitle, { color: colors.mutedForeground }]}>
-            We're expanding fast. We'll notify you the moment our Shutterbugs reach your area.
+          <Text style={[styles.subtitle, { color: colors.mutedForeground, textAlign: "center" }]}>
+            We're expanding fast. The moment our Shutterbugs reach your area, you'll be first to know.
           </Text>
           <View style={[styles.queuePill, { backgroundColor: colors.primary + "20" }]}>
             <Text style={[styles.queueText, { color: colors.primary }]}>
@@ -297,13 +357,13 @@ export default function Step5Schedule() {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + 16 }]}
       >
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={{ fontSize: 48, textAlign: "center", marginBottom: 12 }}>📍</Text>
           <Text style={[styles.title, { color: colors.foreground }]}>Coming to your area soon!</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            Your Blab Shutterbug team is currently serving the L.B. Nagar area. We're expanding fast — your listing is saved and live on the map now.
+            Our Shutterbug team currently serves L.B. Nagar. Your listing is saved — we'll notify you when we expand to your area.
           </Text>
           <View style={[styles.queuePill, { backgroundColor: colors.primary + "20" }]}>
             <Text style={[styles.queueText, { color: colors.primary }]}>
@@ -335,10 +395,14 @@ export default function Step5Schedule() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Text style={[styles.title, { color: colors.foreground }]}>Schedule your shoot</Text>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + 16 }]}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Header */}
+        <Text style={[styles.title, { color: colors.foreground }]}>Book your shoot</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-          A Blab Shutterbug will photograph your property professionally. Takes ~45 minutes.
+          Your listing goes live after the shoot — usually within 24 hours.
         </Text>
 
         {/* Date strip */}
@@ -346,6 +410,7 @@ export default function Step5Schedule() {
           {days.map((day) => {
             const isSelected = day.date === selectedDate;
             const isFull = !day.hasAnySlot;
+            const d = new Date(day.date + "T00:00:00");
             return (
               <Pressable
                 key={day.date}
@@ -361,10 +426,10 @@ export default function Step5Schedule() {
                 disabled={isFull}
               >
                 <Text style={[styles.dateChipDay, { color: isSelected ? "#fff" : colors.mutedForeground }]}>
-                  {new Date(day.date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short" }).toUpperCase()}
+                  {d.toLocaleDateString("en-IN", { weekday: "short" }).toUpperCase()}
                 </Text>
                 <Text style={[styles.dateChipNum, { color: isSelected ? "#fff" : colors.foreground }]}>
-                  {new Date(day.date + "T00:00:00").getDate()}
+                  {d.getDate()}
                 </Text>
                 {isFull && (
                   <Text style={[styles.dateChipFull, { color: isSelected ? "#fff" : colors.mutedForeground }]}>
@@ -394,7 +459,7 @@ export default function Step5Schedule() {
                   style={[
                     styles.windowRow,
                     {
-                      backgroundColor: isSelected ? colors.primary + "15" : colors.card,
+                      backgroundColor: isSelected ? colors.primary + "12" : colors.card,
                       borderColor: isSelected ? colors.primary : colors.border,
                       opacity: disabled ? 0.45 : 1,
                     },
@@ -443,7 +508,8 @@ export default function Step5Schedule() {
         {selectedWindow && (
           <View style={styles.notesContainer}>
             <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
-              Notes for your Shutterbug <Text style={{ fontWeight: "400" }}>(optional)</Text>
+              Notes for your Shutterbug{" "}
+              <Text style={{ fontWeight: "400", textTransform: "none" }}>(optional)</Text>
             </Text>
             <TextInput
               style={[
@@ -466,7 +532,7 @@ export default function Step5Schedule() {
             styles.primaryBtn,
             {
               backgroundColor: selectedWindow ? colors.primary : colors.border,
-              marginTop: 8,
+              marginTop: 12,
             },
           ]}
           onPress={handleBook}
@@ -476,13 +542,13 @@ export default function Step5Schedule() {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.primaryBtnText}>
-              {selectedWindow ? "Confirm Shoot Time" : "Select a time window above"}
+              {selectedWindow ? "Confirm booking" : "Select a time above"}
             </Text>
           )}
         </Pressable>
 
         <Text style={[styles.footerNote, { color: colors.mutedForeground }]}>
-          We'll WhatsApp you 30 minutes before your Shutterbug arrives.
+          You'll get a notification the moment your Shutterbug is on the way. ~45 min shoot.
         </Text>
       </ScrollView>
     </View>
@@ -494,52 +560,78 @@ export default function Step5Schedule() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
   loadingText: { fontSize: 14 },
-  container: { padding: 20, paddingBottom: 40 },
+  container: { padding: 20, paddingBottom: 48 },
   card: {
     borderRadius: 20, borderWidth: 1, padding: 24, alignItems: "center", gap: 16,
   },
-  title: { fontSize: 22, fontWeight: "700", textAlign: "center" },
-  subtitle: { fontSize: 14, lineHeight: 20, textAlign: "center" },
-  successContainer: { padding: 20, paddingBottom: 40 },
+  title: { fontSize: 24, fontWeight: "800", marginBottom: 4 },
+  subtitle: { fontSize: 14, lineHeight: 20, marginBottom: 8, color: "#888" },
+  successContainer: { padding: 20, paddingBottom: 48 },
   successCard: {
-    borderRadius: 20, borderWidth: 1, padding: 28, alignItems: "center", gap: 16,
+    borderRadius: 24, borderWidth: 1, padding: 28, alignItems: "center", gap: 16,
   },
-  successIcon: { marginBottom: 4 },
+  successBadge: {
+    width: 80, height: 80, borderRadius: 40,
+    justifyContent: "center", alignItems: "center",
+    marginBottom: 4,
+  },
   successTitle: { fontSize: 26, fontWeight: "800", textAlign: "center" },
-  successDate: { fontSize: 18, fontWeight: "600", textAlign: "center" },
-  successWindowPill: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+  slotDetail: {
+    width: "100%", borderRadius: 14, borderWidth: 1, overflow: "hidden",
   },
-  successWindowText: { fontSize: 14, fontWeight: "600" },
-  successNote: {
-    flexDirection: "row", alignItems: "flex-start", gap: 8,
-    padding: 12, borderRadius: 12, width: "100%",
+  slotRow: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    paddingHorizontal: 16, paddingVertical: 14,
   },
-  successNoteText: { fontSize: 13, lineHeight: 18, flex: 1 },
+  slotDivider: { height: 1, marginHorizontal: 16 },
+  slotText: { fontSize: 15, fontWeight: "600" },
+  nextLabel: {
+    fontSize: 11, fontWeight: "700", letterSpacing: 1.2,
+    textTransform: "uppercase", alignSelf: "flex-start", marginTop: 4,
+  },
+  nextStep: {
+    width: "100%", flexDirection: "row", alignItems: "flex-start", gap: 12,
+    borderRadius: 12, borderWidth: 1, padding: 14,
+  },
+  nextIconBox: {
+    width: 36, height: 36, borderRadius: 10,
+    justifyContent: "center", alignItems: "center", flexShrink: 0,
+  },
+  nextText: { fontSize: 13, lineHeight: 19, flex: 1 },
+  tipBox: {
+    width: "100%", flexDirection: "row", alignItems: "flex-start", gap: 10,
+    borderRadius: 12, borderWidth: 1, padding: 14,
+  },
+  tipEmoji: { fontSize: 18 },
+  tipText: { fontSize: 13, lineHeight: 19, flex: 1 },
+  devBanner: {
+    width: "100%", flexDirection: "row", alignItems: "center", gap: 8,
+    borderWidth: 1.5, borderRadius: 12, padding: 12, borderStyle: "dashed",
+  },
+  devText: { fontSize: 13, fontWeight: "600", flex: 1 },
   successSubtitle: { fontSize: 14, lineHeight: 20, textAlign: "center" },
   queuePill: {
     paddingHorizontal: 18, paddingVertical: 10, borderRadius: 24,
   },
   queueText: { fontSize: 16, fontWeight: "700" },
   primaryBtn: {
-    width: "100%", height: 52, borderRadius: 14,
+    width: "100%", height: 54, borderRadius: 14,
     justifyContent: "center", alignItems: "center",
     marginTop: 4,
   },
   primaryBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
   skipBtn: { paddingVertical: 12 },
   skipText: { fontSize: 14 },
-  dateStrip: { marginVertical: 12 },
+  dateStrip: { marginVertical: 14 },
   dateChip: {
-    width: 60, marginRight: 10, borderRadius: 14, borderWidth: 1.5,
-    paddingVertical: 10, alignItems: "center", gap: 2,
+    width: 62, marginRight: 10, borderRadius: 16, borderWidth: 1.5,
+    paddingVertical: 12, alignItems: "center", gap: 2,
   },
-  dateChipDay: { fontSize: 11, fontWeight: "600" },
-  dateChipNum: { fontSize: 20, fontWeight: "800" },
+  dateChipDay: { fontSize: 11, fontWeight: "700" },
+  dateChipNum: { fontSize: 22, fontWeight: "800" },
   dateChipFull: { fontSize: 9, fontWeight: "700" },
   windowsContainer: { gap: 10, marginTop: 4 },
-  sectionLabel: { fontSize: 13, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 },
+  sectionLabel: { fontSize: 12, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 },
   windowRow: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     borderRadius: 14, borderWidth: 1.5, padding: 16,
@@ -554,7 +646,7 @@ const styles = StyleSheet.create({
   notesContainer: { marginTop: 16, gap: 8 },
   notesInput: {
     borderWidth: 1.5, borderRadius: 12, padding: 14,
-    fontSize: 14, minHeight: 72, textAlignVertical: "top",
+    fontSize: 14, minHeight: 80, textAlignVertical: "top",
   },
   footerNote: { fontSize: 12, textAlign: "center", marginTop: 16, lineHeight: 18 },
 });
