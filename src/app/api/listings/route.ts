@@ -46,22 +46,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Sign in to list a property" }, { status: 401 });
   }
 
-  // ── Profile-complete guard: user must have set their name ─────────────────
-  // Search is open to everyone; posting requires a real profile.
+  // Shutterbugs cannot create listings — they have their own job screen.
   {
     const sql = neon(process.env.DATABASE_URL!);
-    const [u] = await sql`
-      SELECT role, encrypted_name FROM users WHERE id = ${userId} LIMIT 1
-    `;
-    if (!u) return NextResponse.json({ error: "User not found" }, { status: 401 });
-    if (!u.encrypted_name) {
-      return NextResponse.json(
-        { error: "Complete your profile before listing a property" },
-        { status: 403 }
-      );
-    }
-    // Shutterbugs cannot list properties
-    if (u.role === "shutterbug") {
+    const [u] = await sql`SELECT role FROM users WHERE id = ${userId} LIMIT 1`;
+    if (u?.role === "shutterbug") {
       return NextResponse.json({ error: "Shutterbugs cannot create listings" }, { status: 403 });
     }
   }
