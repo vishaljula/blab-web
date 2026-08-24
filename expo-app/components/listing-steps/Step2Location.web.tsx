@@ -199,22 +199,22 @@ export default function Step2Location() {
         floorNumber:  floor       ? parseInt(floor, 10)       : null,
         totalFloors:  totalFloors ? parseInt(totalFloors, 10) : null,
       });
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/realtors/available`);
-        if (res.ok) {
-          const data = await res.json();
-          setRealtorAvailability(Array.isArray(data) && data.length > 0 ? "available" : "unavailable");
-        } else {
-          setRealtorAvailability("unknown");
-        }
-      } catch {
-        setRealtorAvailability("unknown");
-      }
+      // Navigate immediately — don't block on the realtor availability check
       goNext();
+      // Fire realtor check in background
+      fetch(`${API_BASE_URL}/api/realtors/available`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          setRealtorAvailability(
+            Array.isArray(data) && data.length > 0 ? "available" : "unavailable"
+          );
+        })
+        .catch(() => setRealtorAvailability("unknown"));
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const stepLabels = listingPath === "realtor"
     ? ["Type", "Location", "Path", "Realtor"]
