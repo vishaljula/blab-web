@@ -7,7 +7,8 @@
  *
  * Native stays full-screen — this card treatment is web-only.
  */
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+
 import {
   View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator,
   useWindowDimensions,
@@ -79,18 +80,23 @@ export default function Step2Location() {
   const [isWaitlisting, setIsWaitlisting] = useState(false);
 
   const checkZone = useCallback(async (lat: number, lng: number) => {
-
     setZoneStatus('checking');
     try {
       const res = await fetch(
         `${API_BASE_URL}/api/photography/availability?lat=${lat}&lng=${lng}&days=1`
       );
-      if (!res.ok) { setZoneStatus(null); return; }
+      if (!res.ok) { setZoneStatus('out'); return; }
       const data = await res.json();
       setZoneStatus(data.inServiceZone ? 'in' : 'out');
     } catch {
-      setZoneStatus(null);
+      setZoneStatus('out');
     }
+  }, []);
+
+  // Fire zone check on mount with initial viewport coords
+  useEffect(() => {
+    checkZone(viewport.latitude, viewport.longitude);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Reverse geocode ──────────────────────────────────────────────
@@ -220,7 +226,9 @@ export default function Step2Location() {
     ? ["Type", "Location", "Path", "Realtor"]
     : ["Type", "Location", "Path", "Details", "Review"];
 
-  const canConfirm = !!resolvedAddress && !isMoving && !isResolving && !isSubmitting;
+  const zoneKnown = zoneStatus === 'in' || zoneStatus === 'out';
+  const canConfirm = !!resolvedAddress && !isMoving && !isResolving && !isSubmitting && zoneKnown;
+
 
   return (
     <View style={[s.root, { backgroundColor: isDark ? C.muted : "#EDEBE7" }]}>
@@ -475,12 +483,10 @@ export default function Step2Location() {
                   ? (
                     <Pressable
                       onPress={handleWaitlist}
-                      disabled={!canConfirm || isWaitlisting}
-                      style={[s.confirmBtn, { backgroundColor: canConfirm ? '#F59E0B' : C.muted }]}
+                      disabled={isWaitlisting}
+                      style={[s.confirmBtn, { backgroundColor: '#F59E0B' }]}
                     >
-                      <Text style={[s.confirmBtnText, {
-                        color: canConfirm ? '#fff' : C.mutedForeground,
-                      }]}>
+                      <Text style={[s.confirmBtnText, { color: '#fff' }]}>
                         {isWaitlisting ? 'Joining…' : 'Join Waitlist for this area →'}
                       </Text>
                     </Pressable>
@@ -494,7 +500,9 @@ export default function Step2Location() {
                       <Text style={[s.confirmBtnText, {
                         color: canConfirm ? C.primaryForeground : C.mutedForeground,
                       }]}>
-                        Use This Location →
+                        {(!zoneStatus || zoneStatus === 'checking')
+                          ? '⏳ Checking coverage…'
+                          : 'Use This Location →'}
                       </Text>
                     </Pressable>
                   )

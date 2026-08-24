@@ -9,7 +9,8 @@
  *  - Search bar floats at the top; suggestions dropdown under it
  *  - Bottom sheet: resolved address + optional fields + "Use This Location" button
  */
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+
 import {
   View, Text, Pressable, TextInput, StyleSheet,
   ActivityIndicator, Platform, Keyboard,
@@ -70,17 +71,29 @@ export default function Step2Location() {
   const checkZone = useCallback(async (lat: number, lng: number) => {
     setZoneStatus('checking');
     try {
+      // AbortSignal.timeout() is NOT supported in React Native — use a manual race
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
       const res = await fetch(
         `${API_BASE_URL}/api/photography/availability?lat=${lat}&lng=${lng}&days=1`,
-        { signal: AbortSignal.timeout(6000) }
+        { signal: controller.signal }
       );
-      if (!res.ok) { setZoneStatus(null); return; }
+      clearTimeout(timer);
+      if (!res.ok) { setZoneStatus('out'); return; } // fail-safe: block if API error
       const data = await res.json();
       setZoneStatus(data.inServiceZone ? 'in' : 'out');
     } catch {
-      setZoneStatus(null);
+      // Network error or timeout — fail-safe: block rather than let user waste time
+      setZoneStatus('out');
     }
   }, []);
+
+  // Fire zone check immediately on mount with the initial map center
+  useEffect(() => {
+    checkZone(center.lat, center.lng);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally only on mount
+
 
   // ── Waitlist join (out-of-zone) ─────────────────────────────────
   const handleWaitlist = useCallback(async () => {
@@ -246,7 +259,10 @@ export default function Step2Location() {
     ? ["Type", "Location", "Path", "Realtor"]
     : ["Type", "Location", "Path", "Details", "Review"];
 
-  const canConfirm = !!resolvedAddress && !isMoving && !isResolving && !isSubmitting;
+  // Button enabled only once zone is confirmed (null/checking = still checking)
+  const zoneKnown = zoneStatus === 'in' || zoneStatus === 'out';
+  const canConfirm = !!resolvedAddress && !isMoving && !isResolving && !isSubmitting && zoneKnown;
+
 
   return (
     <View style={[s.root, { backgroundColor: C.background }]}>
@@ -519,20 +535,16 @@ export default function Step2Location() {
             </View>
           )}
 
-          {/* CTA: in zone → Use This Location, out of zone → Join Waitlist */}
+          {/* CTA: in zone → Use This Location, out of zone → Join Waitlist, checking → disabled */}
           {!waitlistDone && (
             zoneStatus === 'out'
               ? (
                 <Pressable
                   onPress={handleWaitlist}
-                  disabled={!canConfirm || isWaitlisting}
-                  style={[s.confirmBtn, {
-                    backgroundColor: canConfirm ? '#F59E0B' : C.muted,
-                  }]}
+                  disabled={isWaitlisting}
+                  style={[s.confirmBtn, { backgroundColor: '#F59E0B' }]}
                 >
-                  <Text style={[s.confirmBtnText, {
-                    color: canConfirm ? '#fff' : C.mutedForeground,
-                  }]}>
+                  <Text style={[s.confirmBtnText, { color: '#fff' }]}>
                     {isWaitlisting ? 'Joining…' : 'Join Waitlist for this area →'}
                   </Text>
                 </Pressable>
@@ -546,11 +558,14 @@ export default function Step2Location() {
                   <Text style={[s.confirmBtnText, {
                     color: canConfirm ? C.primaryForeground : C.mutedForeground,
                   }]}>
-                    Use This Location →
+                    {(!zoneStatus || zoneStatus === 'checking')
+                      ? '⏳ Checking coverage…'
+                      : 'Use This Location →'}
                   </Text>
                 </Pressable>
               )
           )}
+
         </View>
 
       </View>
