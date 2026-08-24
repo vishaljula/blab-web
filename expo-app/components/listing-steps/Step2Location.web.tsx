@@ -79,19 +79,11 @@ export default function Step2Location() {
   const [waitlistDone, setWaitlistDone] = useState(false);
   const [isWaitlisting, setIsWaitlisting] = useState(false);
 
-  const checkZone = useCallback(async (lat: number, lng: number) => {
-    setZoneStatus('checking');
-    try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/photography/availability?lat=${lat}&lng=${lng}&days=1`
-      );
-      if (!res.ok) { setZoneStatus('out'); return; }
-      const data = await res.json();
-      setZoneStatus(data.inServiceZone ? 'in' : 'out');
-    } catch {
-      setZoneStatus('out');
-    }
+  const checkZone = useCallback(async (_lat: number, _lng: number) => {
+    // TODO: re-enable zone check — temporarily bypassed
+    setZoneStatus('in');
   }, []);
+
 
   // Fire zone check on mount with initial viewport coords
   useEffect(() => {

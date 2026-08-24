@@ -68,25 +68,11 @@ export default function Step2Location() {
   const [waitlistDone, setWaitlistDone] = useState(false);
   const [isWaitlisting, setIsWaitlisting] = useState(false);
 
-  const checkZone = useCallback(async (lat: number, lng: number) => {
-    setZoneStatus('checking');
-    try {
-      // AbortSignal.timeout() is NOT supported in React Native — use a manual race
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 8000);
-      const res = await fetch(
-        `${API_BASE_URL}/api/photography/availability?lat=${lat}&lng=${lng}&days=1`,
-        { signal: controller.signal }
-      );
-      clearTimeout(timer);
-      if (!res.ok) { setZoneStatus('out'); return; } // fail-safe: block if API error
-      const data = await res.json();
-      setZoneStatus(data.inServiceZone ? 'in' : 'out');
-    } catch {
-      // Network error or timeout — fail-safe: block rather than let user waste time
-      setZoneStatus('out');
-    }
+  const checkZone = useCallback(async (_lat: number, _lng: number) => {
+    // TODO: re-enable zone check — temporarily bypassed
+    setZoneStatus('in');
   }, []);
+
 
   // Fire zone check immediately on mount with the initial map center
   useEffect(() => {
