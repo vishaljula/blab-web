@@ -1,27 +1,27 @@
 /**
  * POST /api/dev/simulate-booking/[id]
  *
- * DEV ONLY — auto-simulates a shutterbug GPS journey for a given booking.
- * Called automatically by Step5Schedule after booking is confirmed (dev mode).
+ * DEV ONLY — simulates a shutterbug GPS journey for a given booking.
+ * Self-contained: no shutterbug needs to be assigned. Updates DB + Redis directly.
  *
- * What it does:
- *  1. Verifies the booking exists and is assigned to a shutterbug
- *  2. Flips booking status → en_route
- *  3. Streams 15 GPS waypoints from LB Nagar toward the property
- *     (one every 8 seconds in background, non-blocking)
- *  4. Returns immediately so the UI doesn't wait
- *
- * This is ONLY active when NODE_ENV !== 'production'.
+ * Flow:
+ *  1. Reads property lat/lng from the booking's listing
+ *  2. Sets booking status → en_route
+ *  3. Streams 15 GPS waypoints into Redis (key: location:[bookingId])
+ *     every 8 seconds in the background
+ *  4. Sets booking status → completed when done
+ *  5. Returns immediately (non-blocking)
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { redis } from "@/lib/redis";
 
-// LB Nagar start positions
+// LB Nagar start positions (Hyderabad)
 const START_POINTS = [
-  { lat: 17.3442, lng: 78.5520 }, // LB Nagar Bus Depot
-  { lat: 17.3350, lng: 78.5610 }, // Saroornagar Junction
-  { lat: 17.3530, lng: 78.5465 }, // Chaitanyapuri X-roads
+  { lat: 17.3442, lng: 78.5520 },
+  { lat: 17.3350, lng: 78.5610 },
+  { lat: 17.3530, lng: 78.5465 },
 ];
 
 function lerp(a: number, b: number, t: number) {
@@ -39,21 +39,14 @@ function bearing(lat1: number, lng1: number, lat2: number, lng2: number) {
   return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
-async function runSimulation(
-  bookingId: string,
-  shutterbugId: string,
-  shutterbugToken: string,
-  propLat: number,
-  propLng: number,
-  baseUrl: string
-) {
+async function runSimulation(bookingId: string, propLat: number, propLng: number) {
+  const sql = neon(process.env.DATABASE_URL!);
   const STEPS = 15;
-  const INTERVAL_MS = 8000;
+  const INTERVAL_MS = 8_000;
 
-  // Pick furthest start point
   const start = START_POINTS[Math.floor(Math.random() * START_POINTS.length)];
 
-  // Build waypoints with via-points
+  // Build waypoints: start → 35% → 70% → property
   const via = [
     { lat: start.lat, lng: start.lng },
     { lat: jitter(lerp(start.lat, propLat, 0.35), 0.002), lng: jitter(lerp(start.lng, propLng, 0.35), 0.002) },
@@ -77,28 +70,37 @@ async function runSimulation(
   }
   waypoints.push({ lat: propLat, lng: propLng });
 
+  // Set booking en_route immediately
+  await sql`
+    UPDATE photography_bookings
+    SET status = 'en_route', updated_at = NOW()
+    WHERE id = ${bookingId}
+  `;
+  console.log(`[sim] booking ${bookingId} → en_route, streaming ${waypoints.length} waypoints`);
+
   for (let i = 0; i < waypoints.length; i++) {
     const wp = waypoints[i];
     const next = waypoints[Math.min(i + 1, waypoints.length - 1)];
     const head = bearing(wp.lat, wp.lng, next.lat, next.lng);
 
-    try {
-      await fetch(`${baseUrl}/api/shutterbug/location`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${shutterbugToken}`,
-        },
-        body: JSON.stringify({
-          bookingId,
-          lat: wp.lat,
-          lng: wp.lng,
-          heading: head,
-          speed: 25 + Math.random() * 10,
-        }),
-      });
-    } catch {
-      // Ignore errors in simulation
+    const locationPayload = {
+      lat: wp.lat,
+      lng: wp.lng,
+      heading: head,
+      speed: 25 + Math.random() * 10,
+      ts: Date.now(),
+    };
+
+    // Write directly to Redis — no shutterbug auth token needed
+    if (redis) {
+      try {
+        await redis.set(`location:${bookingId}`, JSON.stringify(locationPayload), { ex: 3600 });
+        console.log(`[sim] waypoint ${i + 1}/${waypoints.length}: lat=${wp.lat.toFixed(4)}, lng=${wp.lng.toFixed(4)}`);
+      } catch (e) {
+        console.warn(`[sim] Redis write failed at step ${i}:`, e);
+      }
+    } else {
+      console.warn(`[sim] Redis not available — location updates won't be visible`);
     }
 
     if (i < waypoints.length - 1) {
@@ -107,19 +109,18 @@ async function runSimulation(
   }
 
   // Mark complete
-  const sql = neon(process.env.DATABASE_URL!);
   await sql`
     UPDATE photography_bookings
     SET status = 'completed', updated_at = NOW()
     WHERE id = ${bookingId}
   `;
+  console.log(`[sim] booking ${bookingId} → completed`);
 }
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Hard-gate: never run in production
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not available in production" }, { status: 404 });
   }
@@ -127,14 +128,13 @@ export async function POST(
   const { id: bookingId } = await params;
   const sql = neon(process.env.DATABASE_URL!);
 
-  // Fetch booking + shutterbug token
+  // Fetch booking + property coords — no shutterbug assignment required
   const [booking] = await sql`
-    SELECT pb.id, pb.status, pb.assigned_shutterbug_id,
-           l.latitude AS prop_lat, l.longitude AS prop_lng,
-           u.push_token AS shutterbug_push_token
+    SELECT pb.id, pb.status,
+           l.latitude  AS prop_lat,
+           l.longitude AS prop_lng
     FROM photography_bookings pb
     JOIN listings l ON l.id = pb.listing_id
-    LEFT JOIN users u ON u.id = pb.assigned_shutterbug_id
     WHERE pb.id = ${bookingId}
     LIMIT 1
   `;
@@ -142,36 +142,22 @@ export async function POST(
   if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
-  if (!booking.assigned_shutterbug_id) {
-    return NextResponse.json({ error: "No shutterbug assigned to this booking" }, { status: 400 });
+
+  const propLat = parseFloat(booking.prop_lat);
+  const propLng = parseFloat(booking.prop_lng);
+
+  if (!propLat || !propLng) {
+    return NextResponse.json({ error: "Booking has no property coordinates" }, { status: 400 });
   }
 
-  // Generate a token for the virtual shutterbug to call /api/shutterbug/location
-  const { encrypt } = await import("@/lib/crypto");
-  const shutterbugToken = encrypt(JSON.stringify({
-    userId: booking.assigned_shutterbug_id,
-    expiry: Date.now() + 60 * 60 * 1000, // 1 hour
-  }));
-
-  // Determine base URL for internal API calls
-  const host = request.headers.get("host") ?? "localhost:3000";
-  const proto = host.startsWith("localhost") ? "http" : "https";
-  const baseUrl = `${proto}://${host}`;
-
-  // Run simulation in background (don't await — return immediately)
-  runSimulation(
-    bookingId,
-    booking.assigned_shutterbug_id,
-    shutterbugToken,
-    parseFloat(booking.prop_lat),
-    parseFloat(booking.prop_lng),
-    baseUrl
-  ).catch(console.error);
+  // Run simulation in background — return immediately
+  runSimulation(bookingId, propLat, propLng).catch(console.error);
 
   return NextResponse.json({
     success: true,
-    message: "Simulation started — shutterbug will begin moving in ~8 seconds",
+    message: "Simulation started — watch /tracking/" + bookingId,
     bookingId,
-    trackingUrl: `/tracking/${bookingId}`,
+    propLat,
+    propLng,
   });
 }

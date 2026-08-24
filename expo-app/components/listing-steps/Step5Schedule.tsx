@@ -125,7 +125,8 @@ export default function Step5Schedule() {
       setCountdown(secs);
       if (secs <= 0) {
         clearInterval(tick);
-        router.push({ pathname: "/tracking/[id]", params: { id: bookingId } } as any);
+        router.push(`/tracking/${bookingId}` as any);
+
       }
     }, 1000);
     return () => clearInterval(tick);

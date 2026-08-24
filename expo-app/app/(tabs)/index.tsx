@@ -49,7 +49,8 @@ export default function MapScreen() {
       {activeBookingId && (
         <Pressable
           style={[styles.trackingBanner, { backgroundColor: "#6366F1" }]}
-          onPress={() => router.push({ pathname: "/tracking/[id]", params: { id: activeBookingId } } as any)}
+          onPress={() => router.push(`/tracking/${activeBookingId}` as any)}
+
         >
           <Ionicons name="navigate" size={16} color="#fff" />
           <Text style={styles.trackingBannerText}>📸 Shutterbug tracking active — tap to view</Text>
