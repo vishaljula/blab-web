@@ -60,6 +60,26 @@ export default function Step2Location() {
   const [isMoving, setIsMoving]               = useState(false);
   const [isSubmitting, setIsSubmitting]       = useState(false);
 
+  // ── Service zone check ──────────────────────────────────────────────
+  // null = not checked yet, 'checking' = in flight, 'in' = in zone, 'out' = out of zone
+  const [zoneStatus, setZoneStatus] = useState<null | 'checking' | 'in' | 'out'>(null);
+  const zoneDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const checkZone = useCallback(async (lat: number, lng: number) => {
+    setZoneStatus('checking');
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/photography/availability?lat=${lat}&lng=${lng}&days=1`,
+        { signal: AbortSignal.timeout(6000) }
+      );
+      if (!res.ok) { setZoneStatus(null); return; }
+      const data = await res.json();
+      setZoneStatus(data.inServiceZone ? 'in' : 'out');
+    } catch {
+      setZoneStatus(null);
+    }
+  }, []);
+
   // Search UI
   const [searchQuery, setSearchQuery]   = useState("");
   const [suggestions, setSuggestions]   = useState<{ place_name: string; center: [number, number] }[]>([]);
@@ -97,10 +117,15 @@ export default function Step2Location() {
       const [lng, lat] = c;
       if (z != null) currentZoomRef.current = z;
       setCenter({ lat, lng });
+      // Reverse geocode
       if (reverseDebounceRef.current) clearTimeout(reverseDebounceRef.current);
       reverseDebounceRef.current = setTimeout(() => reverseGeocode(lat, lng), 200);
+      // Zone check — debounced slightly longer so it fires after geocode
+      if (zoneDebounceRef.current) clearTimeout(zoneDebounceRef.current);
+      zoneDebounceRef.current = setTimeout(() => checkZone(lat, lng), 800);
     } catch {}
-  }, [reverseGeocode]);
+  }, [reverseGeocode, checkZone]);
+
 
   // ── Camera moving: mark both moving + resolving immediately ───────────────
   // Setting isResolving=true here ensures the disabled/spinner state is
@@ -417,6 +442,34 @@ export default function Step2Location() {
             </View>
           )}
 
+          {/* Zone status badge */}
+          {zoneStatus && (
+            <View style={[
+              s.zoneBadge,
+              {
+                backgroundColor:
+                  zoneStatus === 'in'       ? '#22C55E18' :
+                  zoneStatus === 'out'      ? '#F59E0B18' :
+                                              C.muted,
+                borderColor:
+                  zoneStatus === 'in'       ? '#22C55E40' :
+                  zoneStatus === 'out'      ? '#F59E0B40' :
+                                              C.border,
+              },
+            ]}>
+              <Text style={[s.zoneBadgeText, {
+                color:
+                  zoneStatus === 'in'  ? '#16A34A' :
+                  zoneStatus === 'out' ? '#B45309' :
+                                         C.mutedForeground,
+              }]}>
+                {zoneStatus === 'checking' && '⏳ Checking Shutterbug availability…'}
+                {zoneStatus === 'in'       && '📸 Shoot available here'}
+                {zoneStatus === 'out'      && '⚠️ No Shutterbug coverage here yet — you can still list'}
+              </Text>
+            </View>
+          )}
+
           {/* Confirm CTA — disabled while moving or geocoding, text never changes */}
           <Pressable
             onPress={handleConfirm}
@@ -435,6 +488,7 @@ export default function Step2Location() {
     </View>
   );
 }
+
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -575,4 +629,10 @@ const s = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   confirmBtnText: { fontSize: 15, fontWeight: "800", letterSpacing: 0.2 },
+  zoneBadge: {
+    borderRadius: 10, borderWidth: 1,
+    paddingHorizontal: 12, paddingVertical: 8,
+    marginBottom: 10,
+  },
+  zoneBadgeText: { fontSize: 12, fontWeight: "600", lineHeight: 17 },
 });
