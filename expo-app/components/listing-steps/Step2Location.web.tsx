@@ -75,8 +75,11 @@ export default function Step2Location() {
 
   // ── Service zone check ──────────────────────────────────────────────
   const [zoneStatus, setZoneStatus] = useState<null | 'checking' | 'in' | 'out'>(null);
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [isWaitlisting, setIsWaitlisting] = useState(false);
 
   const checkZone = useCallback(async (lat: number, lng: number) => {
+
     setZoneStatus('checking');
     try {
       const res = await fetch(
@@ -119,6 +122,38 @@ export default function Step2Location() {
     zoneDebounceRef.current = setTimeout(() => checkZone(latitude, longitude), 800);
   }, [reverseGeocode, checkZone]);
 
+  // ── Waitlist join (out-of-zone) ──────────────────────────────────────────────
+  const handleWaitlist = useCallback(async () => {
+    setIsWaitlisting(true);
+    try {
+      setStep2({
+        address: resolvedAddress,
+        latitude: viewport.latitude,
+        longitude: viewport.longitude,
+        locationConfirmed: false,
+        floorNumber: null,
+        totalFloors: null,
+      });
+      const token = store.token;
+      await fetch(`${API_BASE_URL}/api/photography/waitlist`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          propertyAddress: resolvedAddress,
+          propertyLat: viewport.latitude,
+          propertyLng: viewport.longitude,
+        }),
+      });
+      setWaitlistDone(true);
+    } catch {
+      alert('Failed to join waitlist. Please try again.');
+    } finally {
+      setIsWaitlisting(false);
+    }
+  }, [resolvedAddress, viewport, store.token, setStep2]);
 
   // ── Address search ─────────────────────────────────────────────────────────
   const searchAddress = (q: string) => {
@@ -146,7 +181,10 @@ export default function Step2Location() {
     setSuggestions([]);
     setShowSearch(false);
     setViewport((v) => ({ ...v, latitude: lat, longitude: lng, zoom: PRECISION_ZOOM }));
+    setZoneStatus(null);
+    setWaitlistDone(false);
   };
+
 
   // ── Confirm ────────────────────────────────────────────────────────────────
   const handleConfirm = async () => {
@@ -274,6 +312,8 @@ export default function Step2Location() {
               onMove={(e) => setViewport(e.viewState)}
               onMoveStart={handleMoveStart}
               onMoveEnd={handleMoveEnd}
+              dragPan={{ inertia: 0 } as any}
+
               maxZoom={PRECISION_ZOOM}
               style={{ position: "absolute", inset: 0 } as any}
               dragRotate={false}
@@ -402,36 +442,63 @@ export default function Step2Location() {
                   {
                     backgroundColor:
                       zoneStatus === 'in'  ? '#22C55E18' :
-                      zoneStatus === 'out' ? '#F59E0B18' : C.muted,
+                      zoneStatus === 'out' ? '#EF444418' : C.muted,
                     borderColor:
                       zoneStatus === 'in'  ? '#22C55E40' :
-                      zoneStatus === 'out' ? '#F59E0B40' : C.border,
+                      zoneStatus === 'out' ? '#EF444440' : C.border,
                   },
                 ]}>
                   <Text style={[s.zoneBadgeText, {
                     color:
                       zoneStatus === 'in'  ? '#16A34A' :
-                      zoneStatus === 'out' ? '#B45309'  : C.mutedForeground,
+                      zoneStatus === 'out' ? '#DC2626'  : C.mutedForeground,
                   }]}>
-                    {zoneStatus === 'checking' && '⏳ Checking Shutterbug availability…'}
-                    {zoneStatus === 'in'       && '📸 Shoot available here'}
-                    {zoneStatus === 'out'      && '⚠️ No Shutterbug coverage here yet — you can still list'}
+                    {zoneStatus === 'checking' && '⏳ Checking availability…'}
+                    {zoneStatus === 'in'       && '📸 Shoots available here — your listing will be live!'}
+                    {zoneStatus === 'out'      && '🚧 No Shutterbug coverage here — listings require a professional shoot'}
                   </Text>
                 </View>
               )}
 
-              {/* Confirm CTA */}
-              <Pressable
-                onPress={handleConfirm}
-                disabled={!canConfirm}
-                style={[s.confirmBtn, { backgroundColor: canConfirm ? C.primary : C.muted }]}
-              >
-                <Text style={[s.confirmBtnText, {
-                  color: canConfirm ? C.primaryForeground : C.mutedForeground,
-                }]}>
-                  Use This Location →
-                </Text>
-              </Pressable>
+              {/* Waitlisted success */}
+              {waitlistDone && (
+                <View style={[s.zoneBadge, { backgroundColor: '#22C55E18', borderColor: '#22C55E40' }]}>
+                  <Text style={[s.zoneBadgeText, { color: '#16A34A' }]}>
+                    ✅ You're on the list! We'll notify you when Shutterbugs reach your area.
+                  </Text>
+                </View>
+              )}
+
+              {/* CTA: in zone → Use This Location, out of zone → Join Waitlist */}
+              {!waitlistDone && (
+                zoneStatus === 'out'
+                  ? (
+                    <Pressable
+                      onPress={handleWaitlist}
+                      disabled={!canConfirm || isWaitlisting}
+                      style={[s.confirmBtn, { backgroundColor: canConfirm ? '#F59E0B' : C.muted }]}
+                    >
+                      <Text style={[s.confirmBtnText, {
+                        color: canConfirm ? '#fff' : C.mutedForeground,
+                      }]}>
+                        {isWaitlisting ? 'Joining…' : 'Join Waitlist for this area →'}
+                      </Text>
+                    </Pressable>
+                  )
+                  : (
+                    <Pressable
+                      onPress={handleConfirm}
+                      disabled={!canConfirm}
+                      style={[s.confirmBtn, { backgroundColor: canConfirm ? C.primary : C.muted }]}
+                    >
+                      <Text style={[s.confirmBtnText, {
+                        color: canConfirm ? C.primaryForeground : C.mutedForeground,
+                      }]}>
+                        Use This Location →
+                      </Text>
+                    </Pressable>
+                  )
+              )}
             </View>
 
           </View>
