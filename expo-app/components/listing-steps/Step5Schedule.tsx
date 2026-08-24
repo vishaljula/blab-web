@@ -118,19 +118,25 @@ export default function Step5Schedule() {
   // Auto-navigate to tracking screen after booking confirmed
   useEffect(() => {
     if (!booked || !bookingId) return;
-    let secs = 5;
+    let secs = 3;
+
     setCountdown(secs);
     const tick = setInterval(() => {
       secs -= 1;
       setCountdown(secs);
       if (secs <= 0) {
         clearInterval(tick);
-        router.push(`/tracking/${bookingId}` as any);
-
+        // Must dismiss the modal stack first, then navigate to root-level screen
+        router.dismissAll();
+        // Small delay so dismissAll completes before pushing new route
+        setTimeout(() => {
+          router.navigate(`/tracking/${bookingId}` as any);
+        }, 150);
       }
     }, 1000);
     return () => clearInterval(tick);
   }, [booked, bookingId]);
+
 
   // ── Fetch availability ───────────────────────────────────────────────────
   useEffect(() => {
@@ -200,9 +206,9 @@ export default function Step5Schedule() {
           setTimeout(() => {
             fetch(`${API_BASE_URL}/api/dev/simulate-booking/${data.bookingId}`, {
               method: "POST",
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            }).catch(() => {}); // best-effort
-          }, 3000);
+            }).then(r => r.json()).then(d => console.log("[DEV] sim:", d)).catch(() => {});
+          }, 1000); // fire quickly so GPS is already updating when tracking screen opens
+
         }
       } else if (data.error === "slot_full") {
         await fetchAvailability();
