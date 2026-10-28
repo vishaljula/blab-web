@@ -40,6 +40,12 @@
       ],
       "expo-image",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Blab uses your location to show your position on the map and share it with your client while you are on the way to a shoot."
+        }
+      ],
+      [
         "@rnmapbox/maps",
         {
           "RNMapboxMapsImpl": "mapbox"
