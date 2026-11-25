@@ -5,7 +5,8 @@
  *  ┌─ Sticky top ────────────────────────────────────────┐
  *  │  Hero (greeting + score + tier badge)               │
  *  │  3 stat pills (buyer contacts / new 7d / properties)│
- *  │  (free_trial) trial quota bar                       │
+ *  │  (Starter: free_trial + soft_cap) Option-B cap bars │
+ *  │  (pro / pro_plus) compact Pro confirmation strip    │
  *  │  [My Properties] [Site Visits] [Buyer Contacts]     │  ← tab bar
  *  └─────────────────────────────────────────────────────┘
  *  ┌─ Scrollable content ────────────────────────────────┐
@@ -37,6 +38,8 @@ import { useRouter } from "expo-router";
 import { COLORS, TIER_COLORS, API_BASE_URL } from "@/lib/theme";
 import {
   useRealtorStore,
+  deriveCapState,
+  overflowLabel,
   ManagedListing,
   Enquiry,
   ViewingSlot,
@@ -643,12 +646,21 @@ export default function RealtorDashboard({ token }: Props) {
     );
   }
 
-  const { realtor, stats, myListings } = dashboard;
+  const { realtor, foundingProgram, stats, myListings } = dashboard;
   const tierMeta  = TIER_COLORS[realtor.subscriptionTier] ?? TIER_COLORS.free_trial;
   const hour      = new Date().getHours();
   const greeting  = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = realtor.name.split(" ")[0];
-  const isTrial   = realtor.subscriptionTier === "free_trial";
+
+  // ── Server-authoritative Option-B cap state (Protected Surface #4) ────────
+  // Every cap number below comes from the server via `deriveCapState`; nothing
+  // is re-computed here and `myListings.length` is never used as an active-count
+  // proxy (AUDIT-001 / E1, E2). See `store/realtorCaps.ts` for the full contract.
+  const {
+    isPaidPro, listingCap, handoffCap,
+    activeListings, activeHandoffs, overflowCount,
+    listingFill, handoffFill,
+  } = deriveCapState(realtor);
 
   // ── Flatten data for the two flat tabs ───────────────────────────────────
   const allSiteVisits: FlatSiteVisit[] = myListings
@@ -742,13 +754,13 @@ export default function RealtorDashboard({ token }: Props) {
         <StatPill label="My Properties"             value={myListings.length}                                      icon="home-outline"      color={colors.primary} isDark={isDark} />
       </View>
 
-      {/* Starter Tier / Founding 500 Pro Banner */}
-      {isTrial ? (
+      {/* Starter Tier / Founding 500 Pro Banner — gated on server capacity, not tier */}
+      {!isPaidPro ? (
         <View style={[s.trialRow, { borderColor: "#1E293B", backgroundColor: "#0F172A" }]}>
           <View style={s.trialHeader}>
             <Ionicons name="flash" size={13} color="#F97316" />
             <Text style={[s.trialTitle, { color: "rgba(255,255,255,0.95)" }]}>
-              Starter Tier (2 Active · 1 Handoff Cap)
+              Starter Tier ({listingCap} Active · {handoffCap} Handoff Cap)
             </Text>
             <Pressable
               style={[s.upgradeChip, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
@@ -772,24 +784,30 @@ export default function RealtorDashboard({ token }: Props) {
             <View style={s.trialBarGroup}>
               <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Active Map Listings</Text>
               <View style={[s.trialBarTrack, { backgroundColor: "rgba(255,255,255,0.12)" }]}>
-                <View style={[s.trialBarFill, { width: `${Math.min(myListings.length / 2, 1) * 100}%`, backgroundColor: "#F97316" }]} />
+                <View style={[s.trialBarFill, { width: `${listingFill * 100}%`, backgroundColor: "#F97316" }]} />
               </View>
               <Text style={[s.trialBarCount, { color: "#fff" }]}>
-                {Math.min(myListings.length, 2)} of 2 Free Cap ({myListings.length > 2 ? `${myListings.length - 2} in Owner Fallback` : "0 overflow"})
+                {activeListings} of {listingCap} Free Cap ({overflowLabel(overflowCount)})
               </Text>
             </View>
             <View style={[s.trialBarGroup, { marginLeft: 16 }]}>
               <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Seller Handoff Slot</Text>
               <View style={[s.trialBarTrack, { backgroundColor: "rgba(255,255,255,0.12)" }]}>
-                <View style={[s.trialBarFill, { width: `${Math.min(myListings.length, 1) * 100}%`, backgroundColor: "#3B82F6" }]} />
+                <View style={[s.trialBarFill, { width: `${handoffFill * 100}%`, backgroundColor: "#3B82F6" }]} />
               </View>
               <Text style={[s.trialBarCount, { color: "#fff" }]}>
-                {Math.min(myListings.length, 1)} of 1 Active · 🔥 4 nearby handoffs this week
+                {activeHandoffs} of {handoffCap} Active
+                {/* D3: live 14-day count, not the hardcoded "🔥 4 … this week" literal */}
+                {foundingProgram
+                  ? ` · ${foundingProgram.nearbyHandoffs14d} nearby handoffs in the last 14 days`
+                  : ""}
               </Text>
             </View>
           </View>
         </View>
       ) : (
+        /* Reachable only for `pro` / `pro_plus` (999/999 server capacity).
+           "Unlimited" may never be asserted for free_trial or soft_cap — CEO D1. */
         <View style={[s.trialRow, { borderColor: "#065F46", backgroundColor: "#064E3B", paddingVertical: 10 }]}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
