@@ -1,0 +1,11 @@
+auth -> Harish Sharma / realtor
+
+PASS  A1_no_nested_button
+PASS  A2_no_dom_nesting_console_error
+PASS  A3_active_dashboard_tab_announces_selected
+PASS  A4_accordion_exposes_expanded_and_flips
+PASS  A5_radio_checked_not_selected
+
+==============================================================================
+PASS
+wrote /Users/adi/Projects/blab-web-agents/qa-baselines/audit-001/t3-qa-layer2/t3-aria-state.json

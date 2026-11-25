@@ -29,6 +29,7 @@ import {
   TextInput,
   TextInputProps,
   AccessibilityRole,
+  AccessibilityState,
   PressableStateCallbackType,
   StyleProp,
   ViewStyle,
@@ -53,6 +54,62 @@ function withHitFloor(style: StyleProp<ViewStyle>): StyleProp<ViewStyle> {
   const minWidth = typeof flat.minWidth === "number" ? Math.max(HIT, flat.minWidth) : HIT;
   const minHeight = typeof flat.minHeight === "number" ? Math.max(HIT, flat.minHeight) : HIT;
   return [webCursor, style, { minWidth, minHeight }];
+}
+
+/**
+ * `accessibilityState` -> `aria-*`, web only. BLA-12 Layer-2 QA, FAIL #2.
+ *
+ * react-native-web 0.21.2 does NOT forward the `accessibilityState` *object*. Its
+ * `modules/forwardedProps` allowlist carries only the flattened `aria-selected` /
+ * `aria-expanded` / `aria-busy` / `aria-checked` / `aria-disabled` props, and
+ * `accessibilityState` appears nowhere outside `TouchableWithoutFeedback`'s own prop list.
+ * Measured consequence in Chromium's computed AX tree before this fix: the active dashboard
+ * tab announced `selected=false`, the accordion header exposed no `expanded` at all, and
+ * `busy` was never announced while publishing. The props are silently dropped — no warning.
+ *
+ * Native iOS/Android consume `accessibilityState` correctly, so we pass BOTH and let each
+ * platform read the one it understands. Translating here rather than at the ~6 call sites is
+ * the point: a new control gets correct web semantics without the author knowing this quirk.
+ *
+ * Role-gated on purpose. `aria-selected` is only valid on a closed set of roles (WAI-ARIA 1.2
+ * §6.6.8); `profile.tsx:241` sets `{ selected, checked }` on `accessibilityRole="radio"`,
+ * where `aria-checked` is the correct attribute and `aria-selected` would be invalid ARIA.
+ * Emitting it anyway would trade one defect for another.
+ */
+const ARIA_SELECTED_ROLES: ReadonlySet<string> = new Set([
+  "tab",
+  "option",
+  "row",
+  "gridcell",
+  "columnheader",
+  "rowheader",
+  "treeitem",
+]);
+
+type AriaStateProps = {
+  "aria-disabled"?: boolean;
+  "aria-selected"?: boolean;
+  "aria-checked"?: boolean | "mixed";
+  "aria-busy"?: boolean;
+  "aria-expanded"?: boolean;
+};
+
+function ariaFromState(
+  state: AccessibilityState | undefined,
+  role: AccessibilityRole
+): AriaStateProps {
+  if (Platform.OS !== "web" || !state) return {};
+  const aria: AriaStateProps = {};
+  // `disabled` and `busy` are global ARIA attributes — valid on any role.
+  if (state.disabled !== undefined) aria["aria-disabled"] = state.disabled;
+  if (state.busy !== undefined) aria["aria-busy"] = state.busy;
+  // `aria-expanded` is valid on button and on every composite/disclosure role we use.
+  if (state.expanded !== undefined) aria["aria-expanded"] = state.expanded;
+  if (state.checked !== undefined) aria["aria-checked"] = state.checked;
+  if (state.selected !== undefined && ARIA_SELECTED_ROLES.has(role)) {
+    aria["aria-selected"] = state.selected;
+  }
+  return aria;
 }
 
 type A11yContract = {
@@ -81,6 +138,7 @@ export type A11yPressableProps = Omit<
 export function A11yPressable({
   accessibilityLabel,
   accessibilityRole,
+  accessibilityState,
   style,
   ...rest
 }: A11yPressableProps) {
@@ -101,8 +159,11 @@ export function A11yPressable({
     <Pressable
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={accessibilityRole}
+      accessibilityState={accessibilityState}
       style={styleWithFloor}
       {...rest}
+      // Spread last so a call site cannot accidentally shadow the translated state.
+      {...ariaFromState(accessibilityState, accessibilityRole)}
     />
   );
 }

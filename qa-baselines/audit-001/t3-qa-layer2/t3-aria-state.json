@@ -1,0 +1,156 @@
+{
+  "generatedFor": "BLA-5 / T3 — remedy proof for BLA-12 FAIL #1 and FAIL #2",
+  "checks": {
+    "A1_no_nested_button": {
+      "pass": true,
+      "nestedButtonCount": 0,
+      "nestedRoleButtonCount": 0,
+      "offenders": []
+    },
+    "A2_no_dom_nesting_console_error": {
+      "pass": true,
+      "nestingErrors": [],
+      "allConsoleErrors": []
+    },
+    "A3_active_dashboard_tab_announces_selected": {
+      "pass": true,
+      "note": "Read from the computed AX tree, not from the prop we set. Scoped to the dashboard tablist.",
+      "expectedTabCount": 3,
+      "axTabCount": 3,
+      "axSelectedTabCount": 1,
+      "selectedTabName": "My Properties, 5 items",
+      "axTabs": [
+        {
+          "role": "tab",
+          "name": "My Properties, 5 items",
+          "ignored": false,
+          "selected": true
+        },
+        {
+          "role": "tab",
+          "name": "Site Visits, 3 items",
+          "ignored": false,
+          "selected": false
+        },
+        {
+          "role": "tab",
+          "name": "Buyer Contacts, 2 items",
+          "ignored": false,
+          "selected": false
+        }
+      ],
+      "tabsDom": [
+        {
+          "label": "My Properties, 5 items",
+          "ariaSelected": "true"
+        },
+        {
+          "label": "Site Visits, 3 items",
+          "ariaSelected": "false"
+        },
+        {
+          "label": "Buyer Contacts, 2 items",
+          "ariaSelected": "false"
+        }
+      ]
+    },
+    "A4_accordion_exposes_expanded_and_flips": {
+      "pass": true,
+      "domNodesWithAriaExpanded": 4,
+      "axNodesWithExpanded": 4,
+      "axNodesExpandedTrueAfterActivate": 1,
+      "expandedBefore": [
+        {
+          "label": "Pocharam, Hyderabad, ₹2.4Cr, For Sale. ",
+          "expanded": "false"
+        },
+        {
+          "label": "Bibinagar, Hyderabad, ₹2.5Cr, For Sale. 2 buyer contacts, 2 ",
+          "expanded": "false"
+        },
+        {
+          "label": "Falaknuma, Hyderabad, ₹7.0Cr, For Sale. ",
+          "expanded": "false"
+        },
+        {
+          "label": "Narsingi, Hyderabad, ₹1.0Cr, For Sale. ",
+          "expanded": "false"
+        }
+      ],
+      "expandedAfter": [
+        {
+          "label": "Pocharam, Hyderabad, ₹2.4Cr, For Sale. ",
+          "expanded": "true"
+        },
+        {
+          "label": "Bibinagar, Hyderabad, ₹2.5Cr, For Sale. 2 buyer contacts, 2 ",
+          "expanded": "false"
+        },
+        {
+          "label": "Falaknuma, Hyderabad, ₹7.0Cr, For Sale. ",
+          "expanded": "false"
+        },
+        {
+          "label": "Narsingi, Hyderabad, ₹1.0Cr, For Sale. ",
+          "expanded": "false"
+        }
+      ]
+    },
+    "A5_radio_checked_not_selected": {
+      "pass": true,
+      "note": "Proves the aria mapping is role-gated: checked is emitted, selected is suppressed.",
+      "radioCount": 4,
+      "axCheckedPresent": true,
+      "leakedAriaSelectedCount": 0,
+      "radios": [
+        {
+          "label": "Member mode — Buy · Rent · Sell",
+          "ariaChecked": "false",
+          "ariaSelected": null
+        },
+        {
+          "label": "Realtor mode — Founding 500 · ₹10k/yr, free for 3 ",
+          "ariaChecked": "true",
+          "ariaSelected": null
+        },
+        {
+          "label": "Builder mode — Projects & Towers, free for 3 month",
+          "ariaChecked": "false",
+          "ariaSelected": null
+        },
+        {
+          "label": "Shutterbug mode — Field Shoot Queue",
+          "ariaChecked": "false",
+          "ariaSelected": null
+        }
+      ],
+      "axRadios": [
+        {
+          "role": "radio",
+          "name": "Member mode — Buy · Rent · Sell",
+          "ignored": false,
+          "checked": "false"
+        },
+        {
+          "role": "radio",
+          "name": "Realtor mode — Founding 500 · ₹10k/yr, free for 3 months",
+          "ignored": false,
+          "checked": "true"
+        },
+        {
+          "role": "radio",
+          "name": "Builder mode — Projects & Towers, free for 3 months",
+          "ignored": false,
+          "checked": "false"
+        },
+        {
+          "role": "radio",
+          "name": "Shutterbug mode — Field Shoot Queue",
+          "ignored": false,
+          "checked": "false"
+        }
+      ]
+    }
+  },
+  "verdict": "PASS"
+}
