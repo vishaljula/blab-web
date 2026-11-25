@@ -1,0 +1,290 @@
+[
+  {
+    "file": "dashboard-free_trial-web1440-dark.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 10.6,
+    "changedBandY": [
+      671,
+      1799
+    ],
+    "status": "CHANGED"
+  },
+  {
+    "file": "dashboard-free_trial-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 10.58,
+    "changedBandY": [
+      671,
+      1799
+    ],
+    "status": "CHANGED"
+  },
+  {
+    "file": "dashboard-free_trial-web390-dark.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 14.58,
+    "changedBandY": [
+      723,
+      1559
+    ],
+    "status": "CHANGED"
+  },
+  {
+    "file": "dashboard-free_trial-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 14.5,
+    "changedBandY": [
+      723,
+      1559
+    ],
+    "status": "CHANGED"
+  },
+  {
+    "file": "dashboard-pro-buyercontacts-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-buyercontacts-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-properties-draft-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-properties-draft-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-sitevisits-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-sitevisits-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro_plus-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-pro_plus-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "dashboard-soft_cap-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 17.45,
+    "changedBandY": [
+      464,
+      1032
+    ],
+    "status": "CHANGED"
+  },
+  {
+    "file": "dashboard-soft_cap-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 26.3,
+    "changedBandY": [
+      464,
+      1132
+    ],
+    "status": "CHANGED"
+  },
+  {
+    "file": "profile-empty-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-empty-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-member-listings-web1440-dark.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-member-listings-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-member-listings-web390-dark.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-member-listings-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-realtor-rera-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-realtor-rera-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-shoots-gatecode-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-shoots-gatecode-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-signedout-web1440-dark.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-signedout-web1440-light.png",
+    "baselineSize": "2880x1800",
+    "recaptureSize": "2880x1800",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-signedout-web390-dark.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  },
+  {
+    "file": "profile-signedout-web390-light.png",
+    "baselineSize": "780x1688",
+    "recaptureSize": "780x1688",
+    "heightDeltaPx": 0,
+    "changedPixelPct": 0,
+    "changedBandY": null,
+    "status": "IDENTICAL"
+  }
+]

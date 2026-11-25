@@ -1,0 +1,166 @@
+{
+  "data": {
+    "allRows": [
+      {
+        "id": "dd9e7c6a-044a-4ed4-8c3f-43eaec61ee5f",
+        "status": "draft",
+        "contactName": null,
+        "contactPhone": null,
+        "enquiries": 0
+      },
+      {
+        "id": "2d0d8926-b3e3-4cd3-b20a-449ecb05b559",
+        "status": "active",
+        "contactName": "Srinivas Patel",
+        "contactPhone": "+917906722855",
+        "enquiries": 0
+      },
+      {
+        "id": "8172ff82-8dd3-4808-ad99-ae4a8531994e",
+        "status": "active",
+        "contactName": "Suresh Kumar",
+        "contactPhone": "+918907027233",
+        "enquiries": 2
+      },
+      {
+        "id": "bef13d03-724c-4908-9f48-0da5892204c4",
+        "status": "active",
+        "contactName": "Venkat Singh",
+        "contactPhone": "+916559620123",
+        "enquiries": 0
+      },
+      {
+        "id": "14181a1c-e4bb-453e-95a0-2ea7e7413a16",
+        "status": "active",
+        "contactName": "Divya Murthy",
+        "contactPhone": "+917707791833",
+        "enquiries": 0
+      }
+    ],
+    "activeCount": 4,
+    "activeMissingContact": [],
+    "keysPerRowPreserved": true
+  },
+  "device": {
+    "before": {
+      "expandedCards": 0,
+      "propertiesTab": {
+        "signature": {
+          "len": 665,
+          "hasForSaleBadge": true,
+          "hasVisitStatus": false,
+          "head": "Good morning Harish 👋  5,442 pts Pro  2 Buyer Contacts  0 New Contacts (7 days)  5 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 5  Site Visits 3  Buyer Contacts 2 Ps 119",
+          "tail": "r Hyderabad · ₹2.5Cr For Sale House  2 contacts (2 new)  Falaknuma Hyderabad · ₹7.0Cr For Sale Villa  Narsingi Hyderabad · ₹1.0Cr For Sale Apartment    Explore   Post   Dashboard   Profile"
+        },
+        "contactControls": 0,
+        "controls": []
+      },
+      "buyerContactsTab": {
+        "clicked": true,
+        "switched": true,
+        "signature": {
+          "len": 410,
+          "hasForSaleBadge": true,
+          "hasVisitStatus": false,
+          "head": "Good morning Harish 👋  5,442 pts Pro  2 Buyer Contacts  0 New Contacts (7 days)  5 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 5  Site Visits 3  Buyer Contacts 2 For Sa",
+          "tail": "erties 5  Site Visits 3  Buyer Contacts 2 For Sale Bibinagar Hyderabad VR Vikram Rao 19 Jul   For Sale Bibinagar Hyderabad DT Divya Thomas 11 Jul     Explore   Post   Dashboard   Profile"
+        },
+        "contactControls": 4,
+        "controls": [
+          {
+            "w": 30,
+            "h": 30,
+            "y": 452,
+            "glyph": "U+F425",
+            "bg": "rgb(240, 255, 244)",
+            "meetsHit44": false
+          },
+          {
+            "w": 30,
+            "h": 30,
+            "y": 452,
+            "glyph": "U+F1D9",
+            "bg": "rgba(0, 0, 0, 0)",
+            "meetsHit44": false
+          },
+          {
+            "w": 30,
+            "h": 30,
+            "y": 593,
+            "glyph": "U+F425",
+            "bg": "rgb(240, 255, 244)",
+            "meetsHit44": false
+          },
+          {
+            "w": 30,
+            "h": 30,
+            "y": 593,
+            "glyph": "U+F1D9",
+            "bg": "rgba(0, 0, 0, 0)",
+            "meetsHit44": false
+          }
+        ]
+      }
+    },
+    "after": {
+      "expandedCards": 0,
+      "propertiesTab": {
+        "signature": {
+          "len": 665,
+          "hasForSaleBadge": true,
+          "hasVisitStatus": false,
+          "head": "Good morning Harish 👋  5,442 pts Pro  2 Buyer Contacts  0 New Contacts (7 days)  5 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 5  Site Visits 3  Buyer Contacts 2 Ps 119",
+          "tail": "r Hyderabad · ₹2.5Cr For Sale House  2 contacts (2 new)  Falaknuma Hyderabad · ₹7.0Cr For Sale Villa  Narsingi Hyderabad · ₹1.0Cr For Sale Apartment    Explore   Post   Dashboard   Profile"
+        },
+        "contactControls": 0,
+        "controls": []
+      },
+      "buyerContactsTab": {
+        "clicked": true,
+        "switched": true,
+        "signature": {
+          "len": 410,
+          "hasForSaleBadge": true,
+          "hasVisitStatus": false,
+          "head": "Good morning Harish 👋  5,442 pts Pro  2 Buyer Contacts  0 New Contacts (7 days)  5 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 5  Site Visits 3  Buyer Contacts 2 For Sa",
+          "tail": "erties 5  Site Visits 3  Buyer Contacts 2 For Sale Bibinagar Hyderabad VR Vikram Rao 19 Jul   For Sale Bibinagar Hyderabad DT Divya Thomas 11 Jul     Explore   Post   Dashboard   Profile"
+        },
+        "contactControls": 4,
+        "controls": [
+          {
+            "w": 30,
+            "h": 30,
+            "y": 452,
+            "glyph": "U+F425",
+            "bg": "rgb(240, 255, 244)",
+            "meetsHit44": false
+          },
+          {
+            "w": 30,
+            "h": 30,
+            "y": 452,
+            "glyph": "U+F1D9",
+            "bg": "rgba(0, 0, 0, 0)",
+            "meetsHit44": false
+          },
+          {
+            "w": 30,
+            "h": 30,
+            "y": 593,
+            "glyph": "U+F425",
+            "bg": "rgb(240, 255, 244)",
+            "meetsHit44": false
+          },
+          {
+            "w": 30,
+            "h": 30,
+            "y": 593,
+            "glyph": "U+F1D9",
+            "bg": "rgba(0, 0, 0, 0)",
+            "meetsHit44": false
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,1985 @@
+{
+  "meta": {
+    "ticket": "BLA-15 [AUDIT-001 / T1] Layer-2 QA",
+    "beforeWeb": "http://localhost:8082",
+    "afterWeb": "http://localhost:8084",
+    "blabEnv": "uat",
+    "hitTargetPt": 44
+  },
+  "livePayloads": {
+    "realtor_free_trial": {
+      "name": "Priya Kumar",
+      "tier": "free_trial",
+      "activeListingCount": 5,
+      "maxListingCapacity": 2,
+      "maxHandoffCapacity": 1,
+      "starterOverflowCount": 3,
+      "myListingsLength": 5,
+      "listingStatuses": {
+        "active": 5
+      },
+      "nearbyHandoffs14d": 8,
+      "claimedCount": 63,
+      "hasActiveHandoffCount": false,
+      "raw": {
+        "realtor": {
+          "id": "32c3490c-5525-4c73-ac4c-fea098131908",
+          "name": "Priya Kumar",
+          "companyName": "Independent",
+          "photoUrl": "https://randomuser.me/api/portraits/women/8.jpg",
+          "subscriptionTier": "free_trial",
+          "realtorScore": 1127,
+          "scoreTierBase": 1000,
+          "trialSaleLeadsUsed": 3,
+          "trialRentalLeadsUsed": 2,
+          "trialSaleLeadsMax": 3,
+          "trialRentalLeadsMax": 3,
+          "activeListingCount": 5,
+          "maxListingCapacity": 2,
+          "maxHandoffCapacity": 1,
+          "starterOverflowCount": 3
+        },
+        "foundingProgram": {
+          "totalCap": 500,
+          "claimedCount": 63,
+          "annualPriceInr": 10000,
+          "standardMonthlyInr": 3000,
+          "freeTrialThrough": "2027-03-31",
+          "freeShootsIncluded": 5,
+          "nearbyHandoffs14d": 8
+        },
+        "stats": {
+          "openEnquiries": 2,
+          "newEnquiries7d": 0,
+          "upcomingViewings": 0,
+          "activeListings": 5
+        },
+        "myListings": [
+          {
+            "id": "1a2ef63f-8b5c-4a83-afe4-b4496aedee27",
+            "address": "Rethi Bowli",
+            "city": "Hyderabad",
+            "price": 17000000,
+            "propertyType": "villa",
+            "listingType": "sale",
+            "bedrooms": 3,
+            "imageUrl": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Kiran Singh",
+            "contactPhone": "+919371287568",
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 1,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": [
+              {
+                "id": "d55d1b39-fd6d-4e2a-8a86-293085590847",
+                "scheduledAt": "2026-07-29T11:45:07.881+00:00",
+                "status": "pending",
+                "durationMins": 45,
+                "buyerName": null
+              }
+            ]
+          },
+          {
+            "id": "80b7a9b7-453f-4be5-9da0-39115ada8d6f",
+            "address": "Kapra",
+            "city": "Hyderabad",
+            "price": 44000000,
+            "propertyType": "commercial",
+            "listingType": "sale",
+            "bedrooms": null,
+            "imageUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Naresh Reddy",
+            "contactPhone": "+917354583280",
+            "enquiryCount": 1,
+            "openEnquiryCount": 1,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [
+              {
+                "id": "83a4b4f5-e020-4a79-a96d-c7426a57c9c8",
+                "requesterName": "Sunita Bose",
+                "requesterPhone": "+919200000007",
+                "createdAt": "2026-07-19T05:45:06.325+00:00",
+                "respondedAt": null,
+                "responseChannel": null
+              }
+            ],
+            "viewings": []
+          },
+          {
+            "id": "f57f30ea-15aa-4bb3-9b17-61e26deec244",
+            "address": "Kompally",
+            "city": "Hyderabad",
+            "price": 39500,
+            "propertyType": "apartment",
+            "listingType": "rent",
+            "bedrooms": 2,
+            "imageUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Krishna Gupta",
+            "contactPhone": "+917588626710",
+            "enquiryCount": 1,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [
+              {
+                "id": "2b41d0d2-3626-4b38-8984-c12e32a28631",
+                "requesterName": "Arjun Patel",
+                "requesterPhone": "+919200000008",
+                "createdAt": "2026-07-08T12:45:06.377+00:00",
+                "respondedAt": "2026-07-09T04:45:06.377+00:00",
+                "responseChannel": "call"
+              }
+            ],
+            "viewings": []
+          },
+          {
+            "id": "b1cd6315-b878-4692-af6f-60fa0748b8d6",
+            "address": "Financial District",
+            "city": "Hyderabad",
+            "price": 18600000,
+            "propertyType": "apartment",
+            "listingType": "sale",
+            "bedrooms": 4,
+            "imageUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Sravani Shetty",
+            "contactPhone": "+916884533444",
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 1,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": [
+              {
+                "id": "2424636e-1b43-48b3-9825-c2b815d755c1",
+                "scheduledAt": "2026-07-26T07:45:07.831+00:00",
+                "status": "confirmed",
+                "durationMins": 30,
+                "buyerName": null
+              }
+            ]
+          },
+          {
+            "id": "f5af8b69-8058-4e12-bb1b-7a8c1cb36ffe",
+            "address": "Hi-Tec City",
+            "city": "Hyderabad",
+            "price": 89000,
+            "propertyType": "apartment",
+            "listingType": "rent",
+            "bedrooms": 3,
+            "imageUrl": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Naresh Chowdary",
+            "contactPhone": "+916528775158",
+            "enquiryCount": 1,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [
+              {
+                "id": "ab61dbca-0b6d-4013-a800-432a273ffe16",
+                "requesterName": "Vikram Rao",
+                "requesterPhone": "+919200000006",
+                "createdAt": "2026-07-17T06:45:06.274+00:00",
+                "respondedAt": "2026-07-17T13:45:06.274+00:00",
+                "responseChannel": "call"
+              }
+            ],
+            "viewings": []
+          }
+        ]
+      }
+    },
+    "realtor_soft_cap": {
+      "name": "Vikram Iyer",
+      "tier": "soft_cap",
+      "activeListingCount": 1,
+      "maxListingCapacity": 2,
+      "maxHandoffCapacity": 1,
+      "starterOverflowCount": 0,
+      "myListingsLength": 1,
+      "listingStatuses": {
+        "active": 1
+      },
+      "nearbyHandoffs14d": 8,
+      "claimedCount": 63,
+      "hasActiveHandoffCount": false,
+      "raw": {
+        "realtor": {
+          "id": "6e8039f4-535c-412f-bc18-c4e62fbc5677",
+          "name": "Vikram Iyer",
+          "companyName": "Independent",
+          "photoUrl": "https://randomuser.me/api/portraits/men/21.jpg",
+          "subscriptionTier": "soft_cap",
+          "realtorScore": 0,
+          "scoreTierBase": 0,
+          "trialSaleLeadsUsed": 0,
+          "trialRentalLeadsUsed": 1,
+          "trialSaleLeadsMax": 3,
+          "trialRentalLeadsMax": 3,
+          "activeListingCount": 1,
+          "maxListingCapacity": 2,
+          "maxHandoffCapacity": 1,
+          "starterOverflowCount": 0
+        },
+        "foundingProgram": {
+          "totalCap": 500,
+          "claimedCount": 63,
+          "annualPriceInr": 10000,
+          "standardMonthlyInr": 3000,
+          "freeTrialThrough": "2027-03-31",
+          "freeShootsIncluded": 5,
+          "nearbyHandoffs14d": 8
+        },
+        "stats": {
+          "openEnquiries": 2,
+          "newEnquiries7d": 0,
+          "upcomingViewings": 0,
+          "activeListings": 1
+        },
+        "myListings": [
+          {
+            "id": "205a4b2b-b7bf-4a4f-a987-ac33ff8c83dc",
+            "address": "Somajiguda",
+            "city": "Hyderabad",
+            "price": 30000,
+            "propertyType": "apartment",
+            "listingType": "rent",
+            "bedrooms": 1,
+            "imageUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Ramesh Gupta",
+            "contactPhone": "+919911212229",
+            "enquiryCount": 1,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [
+              {
+                "id": "2b780ce3-0e38-4c92-a1cc-61fbd4c5c104",
+                "requesterName": "Meena Reddy",
+                "requesterPhone": "+919200000015",
+                "createdAt": "2026-07-08T07:45:07.481+00:00",
+                "respondedAt": "2026-07-08T13:45:07.481+00:00",
+                "responseChannel": "call"
+              }
+            ],
+            "viewings": []
+          }
+        ]
+      }
+    },
+    "realtor_pro": {
+      "name": "Harish Sharma",
+      "tier": "pro",
+      "activeListingCount": 4,
+      "maxListingCapacity": 999,
+      "maxHandoffCapacity": 999,
+      "starterOverflowCount": 0,
+      "myListingsLength": 5,
+      "listingStatuses": {
+        "draft": 1,
+        "active": 4
+      },
+      "nearbyHandoffs14d": 8,
+      "claimedCount": 63,
+      "hasActiveHandoffCount": false,
+      "raw": {
+        "realtor": {
+          "id": "f83a1de4-eea5-40ee-b95b-47b1d1f16121",
+          "name": "Harish Sharma",
+          "companyName": "Sharma Infra",
+          "photoUrl": "https://randomuser.me/api/portraits/men/24.jpg",
+          "subscriptionTier": "pro",
+          "realtorScore": 5442,
+          "scoreTierBase": 5000,
+          "trialSaleLeadsUsed": 4,
+          "trialRentalLeadsUsed": 0,
+          "trialSaleLeadsMax": 3,
+          "trialRentalLeadsMax": 3,
+          "activeListingCount": 4,
+          "maxListingCapacity": 999,
+          "maxHandoffCapacity": 999,
+          "starterOverflowCount": 0
+        },
+        "foundingProgram": {
+          "totalCap": 500,
+          "claimedCount": 63,
+          "annualPriceInr": 10000,
+          "standardMonthlyInr": 3000,
+          "freeTrialThrough": "2027-03-31",
+          "freeShootsIncluded": 5,
+          "nearbyHandoffs14d": 8
+        },
+        "stats": {
+          "openEnquiries": 2,
+          "newEnquiries7d": 0,
+          "upcomingViewings": 0,
+          "activeListings": 4
+        },
+        "myListings": [
+          {
+            "id": "dd9e7c6a-044a-4ed4-8c3f-43eaec61ee5f",
+            "address": "Ps 1194، 500027 Hyderabad، India",
+            "city": "Ps 1194، 500027 Hyderabad، India",
+            "price": 0,
+            "propertyType": "villa",
+            "listingType": "sale",
+            "bedrooms": null,
+            "imageUrl": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=70",
+            "status": "draft",
+            "contactName": null,
+            "contactPhone": null,
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": []
+          },
+          {
+            "id": "2d0d8926-b3e3-4cd3-b20a-449ecb05b559",
+            "address": "Pocharam",
+            "city": "Hyderabad",
+            "price": 23500000,
+            "propertyType": "house",
+            "listingType": "sale",
+            "bedrooms": 3,
+            "imageUrl": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Srinivas Patel",
+            "contactPhone": "+917906722855",
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 1,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": [
+              {
+                "id": "0ad24988-0e01-4d41-8edb-086e0fdfeb80",
+                "scheduledAt": "2026-07-27T05:45:08.479+00:00",
+                "status": "pending",
+                "durationMins": 30,
+                "buyerName": null
+              }
+            ]
+          },
+          {
+            "id": "8172ff82-8dd3-4808-ad99-ae4a8531994e",
+            "address": "Bibinagar",
+            "city": "Hyderabad",
+            "price": 25000000,
+            "propertyType": "house",
+            "listingType": "sale",
+            "bedrooms": 3,
+            "imageUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Suresh Kumar",
+            "contactPhone": "+918907027233",
+            "enquiryCount": 2,
+            "openEnquiryCount": 2,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [
+              {
+                "id": "cf05057f-357c-42c7-8393-dc2efd7279da",
+                "requesterName": "Vikram Rao",
+                "requesterPhone": "+919200000006",
+                "createdAt": "2026-07-20T01:45:07.032+00:00",
+                "respondedAt": null,
+                "responseChannel": null
+              },
+              {
+                "id": "60610740-5f92-4146-9dca-9c62ece8932e",
+                "requesterName": "Divya Thomas",
+                "requesterPhone": "+919200000009",
+                "createdAt": "2026-07-11T17:45:07.179+00:00",
+                "respondedAt": null,
+                "responseChannel": null
+              }
+            ],
+            "viewings": []
+          },
+          {
+            "id": "bef13d03-724c-4908-9f48-0da5892204c4",
+            "address": "Falaknuma",
+            "city": "Hyderabad",
+            "price": 70500000,
+            "propertyType": "villa",
+            "listingType": "sale",
+            "bedrooms": 5,
+            "imageUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Venkat Singh",
+            "contactPhone": "+916559620123",
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 1,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": [
+              {
+                "id": "7f9378be-4cf7-4b03-8072-9a0efc3399ac",
+                "scheduledAt": "2026-07-25T08:45:08.429+00:00",
+                "status": "confirmed",
+                "durationMins": 45,
+                "buyerName": null
+              }
+            ]
+          },
+          {
+            "id": "14181a1c-e4bb-453e-95a0-2ea7e7413a16",
+            "address": "Narsingi",
+            "city": "Hyderabad",
+            "price": 10300000,
+            "propertyType": "apartment",
+            "listingType": "sale",
+            "bedrooms": 3,
+            "imageUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=70",
+            "status": "active",
+            "contactName": "Divya Murthy",
+            "contactPhone": "+917707791833",
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 1,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": [
+              {
+                "id": "ca425742-d883-4861-9491-317ea44d0776",
+                "scheduledAt": "2026-07-27T05:45:08.379+00:00",
+                "status": "confirmed",
+                "durationMins": 30,
+                "buyerName": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "realtor_pro_plus": {
+      "name": "Ravi Chowdary",
+      "tier": "pro_plus",
+      "activeListingCount": 0,
+      "maxListingCapacity": 999,
+      "maxHandoffCapacity": 999,
+      "starterOverflowCount": 0,
+      "myListingsLength": 1,
+      "listingStatuses": {
+        "draft": 1
+      },
+      "nearbyHandoffs14d": 7,
+      "claimedCount": 63,
+      "hasActiveHandoffCount": false,
+      "raw": {
+        "realtor": {
+          "id": "0261b0bd-5fbf-472d-a5ee-0b1e69094a84",
+          "name": "Ravi Chowdary",
+          "companyName": "Chowdary Associates",
+          "photoUrl": "https://randomuser.me/api/portraits/men/27.jpg",
+          "subscriptionTier": "pro_plus",
+          "realtorScore": 10879,
+          "scoreTierBase": 10000,
+          "trialSaleLeadsUsed": 0,
+          "trialRentalLeadsUsed": 0,
+          "trialSaleLeadsMax": 3,
+          "trialRentalLeadsMax": 3,
+          "activeListingCount": 0,
+          "maxListingCapacity": 999,
+          "maxHandoffCapacity": 999,
+          "starterOverflowCount": 0
+        },
+        "foundingProgram": {
+          "totalCap": 500,
+          "claimedCount": 63,
+          "annualPriceInr": 10000,
+          "standardMonthlyInr": 3000,
+          "freeTrialThrough": "2027-03-31",
+          "freeShootsIncluded": 5,
+          "nearbyHandoffs14d": 7
+        },
+        "stats": {
+          "openEnquiries": 0,
+          "newEnquiries7d": 0,
+          "upcomingViewings": 0,
+          "activeListings": 0
+        },
+        "myListings": [
+          {
+            "id": "8da65fd7-1746-4cc7-a4d9-af36a533dc7b",
+            "address": "Main Road 64, Hyderabad, 500095, India",
+            "city": "500095",
+            "price": 0,
+            "propertyType": "villa",
+            "listingType": "sale",
+            "bedrooms": null,
+            "imageUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=70",
+            "status": "draft",
+            "contactName": null,
+            "contactPhone": null,
+            "enquiryCount": 0,
+            "openEnquiryCount": 0,
+            "upcomingViewingCount": 0,
+            "totalViewingCount": 0,
+            "nextViewingAt": null,
+            "recentEnquiries": [],
+            "viewings": []
+          }
+        ]
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "id": "S1-starter-with-drafts",
+      "why": "The E2 defect's exact shape, unreachable from seeded data: a Starter realtor whose only listing is a draft. T0 counts myListings.length (1); T1 counts activeListingCount (0). This is the ticket's pre-authorised delta #2.",
+      "fixture": "realtor_free_trial",
+      "renders": {
+        "before": {
+          "intercepted": 1,
+          "capLine": "1 of 2 Free Cap (0 overflow)",
+          "handoffLine": "1 of 1 Active · 🔥 4 nearby handoffs this week  My Properties 1  Site Visi",
+          "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Priya 👋  1,127 pts Trial  0 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 1 of 2 Free Cap (0 o"
+        },
+        "after": {
+          "intercepted": 1,
+          "capLine": "0 of 2 Free Cap (0 overflow)",
+          "handoffLine": "0 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si",
+          "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Priya 👋  1,127 pts Trial  0 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 0 of 2 Free Cap (0 o"
+        }
+      },
+      "checks": [
+        {
+          "kind": "expect-after",
+          "needle": "0 of 2 Free Cap (0 overflow)",
+          "pass": true
+        },
+        {
+          "kind": "expect-after",
+          "needle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "pass": true
+        },
+        {
+          "kind": "expect-before",
+          "needle": "1 of 2 Free Cap (0 overflow)",
+          "pass": true
+        }
+      ],
+      "afterBlob": "0 of 2 Free Cap (0 overflow) \u0000 0 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si \u0000 Starter Tier (2 Active · 1 Handoff Cap) \u0000 Good morning Priya 👋  1,127 pts Trial  0 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 0 of 2 Free Cap (0 o",
+      "beforeBlob": "1 of 2 Free Cap (0 overflow) \u0000 1 of 1 Active · 🔥 4 nearby handoffs this week  My Properties 1  Site Visi \u0000 Starter Tier (2 Active · 1 Handoff Cap) \u0000 Good morning Priya 👋  1,127 pts Trial  0 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 1 of 2 Free Cap (0 o"
+    },
+    {
+      "id": "S2-soft-cap-gate",
+      "why": "CEO D1: soft_cap is permanent Starter 2/1 and may never be told 'unlimited'. Pre-authorised delta #1.",
+      "fixture": "realtor_soft_cap",
+      "renders": {
+        "before": {
+          "intercepted": 1,
+          "capLine": null,
+          "handoffLine": null,
+          "starterTitle": null,
+          "saysUnlimited": true,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 1  Site Visits  Buyer Contacts 1 Somajiguda Hyderabad · ₹30K For Rent Apartment  1 contact    Explor"
+        },
+        "after": {
+          "intercepted": 1,
+          "capLine": "1 of 2 Free Cap (0 overflow)",
+          "handoffLine": "1 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si",
+          "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 1 of 2 Free Cap (0 overf"
+        }
+      },
+      "checks": [
+        {
+          "kind": "expect-after",
+          "needle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "pass": true
+        },
+        {
+          "kind": "expect-after",
+          "needle": "1 of 2 Free Cap (0 overflow)",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "Unlimited Listings & Handoffs",
+          "pass": true
+        },
+        {
+          "kind": "expect-before",
+          "needle": "Unlimited Listings & Handoffs",
+          "pass": true
+        }
+      ],
+      "afterBlob": "1 of 2 Free Cap (0 overflow) \u0000 1 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si \u0000 Starter Tier (2 Active · 1 Handoff Cap) \u0000 Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 1 of 2 Free Cap (0 overf",
+      "beforeBlob": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 1  Site Visits  Buyer Contacts 1 Somajiguda Hyderabad · ₹30K For Rent Apartment  1 contact    Explor \u0000 Unlimited Listings & Handoffs"
+    },
+    {
+      "id": "S3-malformed-caps",
+      "why": "Degradation contract: a missing/malformed capacity grant must fall back to Starter-safe 2/1 and must NEVER fall back to an unlimited entitlement.",
+      "fixture": "realtor_soft_cap",
+      "renders": {
+        "before": {
+          "intercepted": 1,
+          "capLine": null,
+          "handoffLine": null,
+          "starterTitle": null,
+          "saysUnlimited": true,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 1  Site Visits  Buyer Contacts 1 Somajiguda Hyderabad · ₹30K For Rent Apartment  1 contact    Explor"
+        },
+        "after": {
+          "intercepted": 1,
+          "capLine": "0 of 1 Free Cap (0 overflow)",
+          "handoffLine": "0 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si",
+          "starterTitle": "Starter Tier (1 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (1 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 0 of 1 Free Cap (0 overf"
+        }
+      },
+      "checks": [
+        {
+          "kind": "expect-after",
+          "needle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "pass": false
+        },
+        {
+          "kind": "expect-after",
+          "needle": "0 of 2 Free Cap (0 overflow)",
+          "pass": false
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "Unlimited",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "NaN",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "undefined",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "Infinity",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "null",
+          "pass": true
+        }
+      ],
+      "afterBlob": "0 of 1 Free Cap (0 overflow) \u0000 0 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si \u0000 Starter Tier (1 Active · 1 Handoff Cap) \u0000 Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (1 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 0 of 1 Free Cap (0 overf",
+      "beforeBlob": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 1  Site Visits  Buyer Contacts 1 Somajiguda Hyderabad · ₹30K For Rent Apartment  1 contact    Explor \u0000 Unlimited Listings & Handoffs"
+    },
+    {
+      "id": "S4-no-founding-program",
+      "why": "foundingProgram degrades to null -> the handoff caption must simply end, not print 'undefined nearby handoffs' and not resurrect the hardcoded literal.",
+      "fixture": "realtor_soft_cap",
+      "renders": {
+        "before": {
+          "intercepted": 1,
+          "capLine": null,
+          "handoffLine": null,
+          "starterTitle": null,
+          "saysUnlimited": true,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 1  Site Visits  Buyer Contacts 1 Somajiguda Hyderabad · ₹30K For Rent Apartment  1 contact    Explor"
+        },
+        "after": {
+          "intercepted": 1,
+          "capLine": "1 of 2 Free Cap (0 overflow)",
+          "handoffLine": "1 of 1 Active",
+          "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 1 of 2 Free Cap (0 overf"
+        }
+      },
+      "checks": [
+        {
+          "kind": "expect-after",
+          "needle": "1 of 1 Active",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "undefined",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "NaN",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "nearby handoffs",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "this week",
+          "pass": true
+        }
+      ],
+      "afterBlob": "1 of 2 Free Cap (0 overflow) \u0000 1 of 1 Active \u0000 Starter Tier (2 Active · 1 Handoff Cap) \u0000 Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 1 of 2 Free Cap (0 overf",
+      "beforeBlob": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 1  Site Visits  Buyer Contacts 1 Somajiguda Hyderabad · ₹30K For Rent Apartment  1 contact    Explor \u0000 Unlimited Listings & Handoffs"
+    },
+    {
+      "id": "S5-non-dashboard-response",
+      "why": "normalizeDashboard returns null for a non-dashboard body -> the store throws and the existing 'Couldn't load dashboard' retry state must appear. This branch is new in T1, so it is reachable for the first time and must be confirmed on device.",
+      "fixture": "realtor_soft_cap",
+      "renders": {
+        "before": {
+          "intercepted": 1,
+          "capLine": null,
+          "handoffLine": null,
+          "starterTitle": null,
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Something went wrong Error: Cannot read properties of undefined (reading 'subscriptionTier') Sitemap Retry"
+        },
+        "after": {
+          "intercepted": 1,
+          "capLine": null,
+          "handoffLine": null,
+          "starterTitle": null,
+          "saysUnlimited": false,
+          "errorState": true,
+          "pageErrors": [],
+          "textHead": " Couldn't load dashboard Retry   Explore   Post   Dashboard   Profile"
+        }
+      },
+      "checks": [
+        {
+          "kind": "expect-after",
+          "needle": "Couldn't load dashboard",
+          "pass": true
+        },
+        {
+          "kind": "expect-after",
+          "needle": "Retry",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "NaN",
+          "pass": true
+        },
+        {
+          "kind": "forbid-after",
+          "needle": "undefined",
+          "pass": true
+        }
+      ],
+      "retryRecovered": true,
+      "retryTextHead": "Good morning Vikram 👋  0 pts Free  1 Buyer Contacts  0 New Contacts (7 days)  1 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Ma",
+      "afterBlob": " Couldn't load dashboard Retry   Explore   Post   Dashboard   Profile",
+      "beforeBlob": "Something went wrong Error: Cannot read properties of undefined (reading 'subscriptionTier') Sitemap Retry"
+    },
+    {
+      "id": "S6-cap-string-999",
+      "why": "Scope item 5: the cap string is variable-length for the first time. 999/1 is the longest string that still renders the Starter panel (999/999 flips isPaidPro and hides the chip entirely), so it is the true worst case for the upgrade chip.",
+      "fixture": "realtor_free_trial",
+      "renders": {
+        "before": {
+          "intercepted": 1,
+          "capLine": "2 of 2 Free Cap (3 in Owner Fallback)",
+          "handoffLine": "1 of 1 Active · 🔥 4 nearby handoffs this week  My Properties 5  Site Visi",
+          "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Priya 👋  1,127 pts Trial  3 Buyer Contacts  0 New Contacts (7 days)  5 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 2 of 2 Free Cap (3 i"
+        },
+        "after": {
+          "intercepted": 1,
+          "capLine": "999 of 999 Free Cap (999 in Owner Fallback)",
+          "handoffLine": "1 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 5  Si",
+          "starterTitle": "Starter Tier (999 Active · 1 Handoff Cap)",
+          "saysUnlimited": false,
+          "errorState": false,
+          "pageErrors": [],
+          "textHead": "Good morning Priya 👋  1,127 pts Trial  3 Buyer Contacts  0 New Contacts (7 days)  5 My Properties  Starter Tier (999 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 999 of 999 Free Ca"
+        }
+      },
+      "checks": [
+        {
+          "kind": "expect-after",
+          "needle": "Starter Tier (999 Active · 1 Handoff Cap)",
+          "pass": true
+        },
+        {
+          "kind": "expect-after",
+          "needle": "999 of 999 Free Cap (999 in Owner Fallback)",
+          "pass": true
+        }
+      ],
+      "afterBlob": "999 of 999 Free Cap (999 in Owner Fallback) \u0000 1 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 5  Si \u0000 Starter Tier (999 Active · 1 Handoff Cap) \u0000 Good morning Priya 👋  1,127 pts Trial  3 Buyer Contacts  0 New Contacts (7 days)  5 My Properties  Starter Tier (999 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 999 of 999 Free Ca",
+      "beforeBlob": "2 of 2 Free Cap (3 in Owner Fallback) \u0000 1 of 1 Active · 🔥 4 nearby handoffs this week  My Properties 5  Site Visi \u0000 Starter Tier (2 Active · 1 Handoff Cap) \u0000 Good morning Priya 👋  1,127 pts Trial  3 Buyer Contacts  0 New Contacts (7 days)  5 My Properties  Starter Tier (2 Active · 1 Handoff Cap) 👑 Founding 500 · ₹0 till Mar 31 First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots. Active Map Listings 2 of 2 Free Cap (3 i"
+    }
+  ],
+  "chipSweep": [
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 320,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 320,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 320,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 320,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 360,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 360,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 360,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 360,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 390,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 390,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 390,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "before",
+      "width": 390,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 320,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 320,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 320,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 320,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 360,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 360,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 360,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 360,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 390,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 390,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 390,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-2-1",
+      "note": "T0's fixed-length string, the pre-T1 control",
+      "build": "after",
+      "width": 390,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 320,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 320,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 320,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 320,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 360,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 360,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 360,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 360,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 390,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 390,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 390,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "before",
+      "width": 390,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (2 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 320,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 320,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 320,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 320,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 360,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 360,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 360,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 360,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 390,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "chip": {
+        "w": 219.2,
+        "h": 32
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": false,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 390,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "chip": {
+        "w": 275.2,
+        "h": 38
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": false
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 390,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "chip": {
+        "w": 434.6,
+        "h": 49
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    },
+    {
+      "capCase": "cap-999-1",
+      "note": "longest string that still renders the Starter panel",
+      "build": "after",
+      "width": 390,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "chip": {
+        "w": 561.5,
+        "h": 61
+      },
+      "textOverflowsChip": false,
+      "chipOverflowsRow": true,
+      "textTruncated": false,
+      "chipText": "Founding 500 · ₹0 till Mar 31",
+      "titleText": "Starter Tier (999 Active · 1 Handoff Cap)",
+      "titleTruncated": false,
+      "meetsHit": true
+    }
+  ],
+  "invariant1": {
+    "serverListingKeys": [
+      "address",
+      "bedrooms",
+      "city",
+      "contactName",
+      "contactPhone",
+      "enquiryCount",
+      "id",
+      "imageUrl",
+      "listingType",
+      "nextViewingAt",
+      "openEnquiryCount",
+      "price",
+      "propertyType",
+      "recentEnquiries",
+      "status",
+      "totalViewingCount",
+      "upcomingViewingCount",
+      "viewings"
+    ],
+    "serverContactFields": [
+      {
+        "id": "dd9e7c6a-044a-4ed4-8c3f-43eaec61ee5f",
+        "status": "draft",
+        "contactName": null,
+        "contactPhone": null
+      },
+      {
+        "id": "2d0d8926-b3e3-4cd3-b20a-449ecb05b559",
+        "status": "active",
+        "contactName": "Srinivas Patel",
+        "contactPhone": "+917906722855"
+      },
+      {
+        "id": "8172ff82-8dd3-4808-ad99-ae4a8531994e",
+        "status": "active",
+        "contactName": "Suresh Kumar",
+        "contactPhone": "+918907027233"
+      },
+      {
+        "id": "bef13d03-724c-4908-9f48-0da5892204c4",
+        "status": "active",
+        "contactName": "Venkat Singh",
+        "contactPhone": "+916559620123"
+      },
+      {
+        "id": "14181a1c-e4bb-453e-95a0-2ea7e7413a16",
+        "status": "active",
+        "contactName": "Divya Murthy",
+        "contactPhone": "+917707791833"
+      }
+    ],
+    "activeRowsMissingContact": [],
+    "before": {
+      "callCount": 0,
+      "whatsappCount": 0,
+      "phoneLike": [],
+      "pageErrors": [],
+      "textHead": "Good morning Harish 👋  5,442 pts Pro  2 Buyer Contacts  0 New Contacts (7 days)  5 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 5  Site Visits 3  Buyer Contacts 2 For Sale Bibinagar Hyderabad VR Vikram Rao 19 Jul   For Sale Bib"
+    },
+    "after": {
+      "callCount": 0,
+      "whatsappCount": 0,
+      "phoneLike": [],
+      "pageErrors": [],
+      "textHead": "Good morning Harish 👋  5,442 pts Pro  2 Buyer Contacts  0 New Contacts (7 days)  5 My Properties 👑 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked) Unlimited Listings & Handoffs  My Properties 5  Site Visits 3  Buyer Contacts 2 For Sale Bibinagar Hyderabad VR Vikram Rao 19 Jul   For Sale Bib"
+    }
+  },
+  "tierMatrix": [
+    {
+      "fixture": "realtor_free_trial",
+      "tier": "free_trial",
+      "before": {
+        "saysUnlimited": false,
+        "starterPanel": true,
+        "capBarVisible": true,
+        "capLine": "2 of 2 Free Cap (3 in Owner Fallback)",
+        "handoffLine": "1 of 1 Active · 🔥 4 nearby handoffs this week  My Properties 5  Site Visi",
+        "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+        "pageErrors": []
+      },
+      "after": {
+        "saysUnlimited": false,
+        "starterPanel": true,
+        "capBarVisible": true,
+        "capLine": "2 of 2 Free Cap (3 in Owner Fallback)",
+        "handoffLine": "1 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 5  Si",
+        "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+        "pageErrors": []
+      }
+    },
+    {
+      "fixture": "realtor_soft_cap",
+      "tier": "soft_cap",
+      "before": {
+        "saysUnlimited": true,
+        "starterPanel": false,
+        "capBarVisible": false,
+        "capLine": null,
+        "handoffLine": null,
+        "starterTitle": null,
+        "pageErrors": []
+      },
+      "after": {
+        "saysUnlimited": false,
+        "starterPanel": true,
+        "capBarVisible": true,
+        "capLine": "1 of 2 Free Cap (0 overflow)",
+        "handoffLine": "1 of 1 Active · 8 nearby handoffs in the last 14 days  My Properties 1  Si",
+        "starterTitle": "Starter Tier (2 Active · 1 Handoff Cap)",
+        "pageErrors": []
+      }
+    },
+    {
+      "fixture": "realtor_pro",
+      "tier": "pro",
+      "before": {
+        "saysUnlimited": true,
+        "starterPanel": false,
+        "capBarVisible": false,
+        "capLine": null,
+        "handoffLine": null,
+        "starterTitle": null,
+        "pageErrors": []
+      },
+      "after": {
+        "saysUnlimited": true,
+        "starterPanel": false,
+        "capBarVisible": false,
+        "capLine": null,
+        "handoffLine": null,
+        "starterTitle": null,
+        "pageErrors": []
+      }
+    },
+    {
+      "fixture": "realtor_pro_plus",
+      "tier": "pro_plus",
+      "before": {
+        "saysUnlimited": true,
+        "starterPanel": false,
+        "capBarVisible": false,
+        "capLine": null,
+        "handoffLine": null,
+        "starterTitle": null,
+        "pageErrors": []
+      },
+      "after": {
+        "saysUnlimited": true,
+        "starterPanel": false,
+        "capBarVisible": false,
+        "capLine": null,
+        "handoffLine": null,
+        "starterTitle": null,
+        "pageErrors": []
+      }
+    }
+  ]
+}
