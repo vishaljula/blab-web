@@ -27,6 +27,12 @@ jobs:
         working-directory: expo-app
         run: npx tsc --noEmit
 
+      # AUDIT-001 / T3 — structural accessibility guard. Fails if a guarded Flow #1 file
+      # adds a control without a label and a role, or reaches past the accessible wrappers
+      # for a raw Pressable / TouchableOpacity / TextInput.
+      - name: Run Accessibility Structural Guard
+        run: node scripts/a11y-guard.mjs
+
       - name: Verify Protected Governance Files Exist
         run: |
           test -f CLAUDE.md
