@@ -9,7 +9,7 @@ import ListView from "@/components/ListView";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyDetailModal from "@/components/PropertyDetailModal";
 import { useListingsStore } from "@/store/listings";
-import { COLORS } from "@/lib/theme";
+import { COLORS, API_BASE_URL } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
 
 export default function MapScreen() {
@@ -20,7 +20,32 @@ export default function MapScreen() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
 
-  const { selectedListing, setSelectedListing, setDetailModalId, activeBookingId } = useListingsStore();
+  const { selectedListing, setSelectedListing, setDetailModalId, activeBookingId, setActiveBookingId, setPreloadedTrack } = useListingsStore();
+  const [simBusy, setSimBusy] = useState(false);
+
+  // DEV: one tap → start a simulated Shutterbug ride and open live tracking
+  const startQuickSim = async () => {
+    if (simBusy) return;
+    setSimBusy(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/dev/quick-simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error ?? "failed");
+      if (data.initialTrack) {
+        setPreloadedTrack(data.bookingId, data.initialTrack);
+      }
+      setActiveBookingId(data.bookingId);
+      router.push(`/tracking/${data.bookingId}?run=${Date.now()}` as any);
+    } catch (e: any) {
+      alert(`Simulation failed: ${e?.message ?? e}`);
+    } finally {
+      setSimBusy(false);
+    }
+  };
 
 
   const openDetail = (id: string) => {
@@ -44,6 +69,19 @@ export default function MapScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
+
+      {__DEV__ && (
+        <Pressable
+          style={[styles.trackingBanner, { backgroundColor: "#111827" }, Platform.OS === "web" ? ({ cursor: "pointer" } as any) : null]}
+          onPress={startQuickSim}
+        >
+          <Ionicons name="bicycle" size={16} color="#fff" />
+          <Text style={styles.trackingBannerText}>
+            {simBusy ? "Starting…" : "DEV · Simulate Shutterbug arriving"}
+          </Text>
+          <Ionicons name="play" size={14} color="rgba(255,255,255,0.7)" />
+        </Pressable>
+      )}
 
       {/* Active booking banner — tap to track without going through wizard again */}
       {activeBookingId && (

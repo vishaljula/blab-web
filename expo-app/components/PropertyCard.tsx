@@ -99,8 +99,8 @@ export default function PropertyCard({ listing, onPress, onClose, selected }: Pr
     }
   }, [listing]);
 
-  const listerType = listing.listerType || "broker";
-  const listerColor = LISTER_COLORS[listerType as keyof typeof LISTER_COLORS] || LISTER_COLORS.broker;
+  const listerType = listing.listerType || "realtor";
+  const listerColor = LISTER_COLORS[listerType as keyof typeof LISTER_COLORS] || LISTER_COLORS.realtor;
   const badgeColors = isDark ? listerColor.dark : listerColor.light;
 
   return (

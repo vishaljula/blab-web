@@ -141,6 +141,7 @@ export async function POST(request: NextRequest) {
         contactName: (body.contactName as string) ?? null,
         contactPhone: (body.contactPhone as string) ?? null,
         features: (body.features as any) ?? null,
+        propertySpecs: (body.propertySpecs as any) ?? {},
         yearBuilt: (body.yearBuilt as number) ?? null,
       })
       .returning({ id: listings.id, status: listings.status });

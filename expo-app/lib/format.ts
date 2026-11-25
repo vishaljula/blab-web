@@ -45,21 +45,35 @@ export function formatArea(sqft: number): string {
 export function formatSpecs(listing: {
   bedrooms?: number;
   builtUpArea?: number;
+  carpetArea?: number;
   plotArea?: number;
   propertyType: string;
+  societyName?: string | null;
+  propertySpecs?: Record<string, any> | null;
 }): string {
   const parts: string[] = [];
+  const specs = listing.propertySpecs || {};
 
   if (listing.bedrooms) {
     parts.push(`${listing.bedrooms} BHK`);
+  } else if (specs.capRatePct) {
+    parts.push(`${specs.capRatePct} Cap`);
+  } else if (specs.ceilingHeightFt) {
+    parts.push(`${specs.ceilingHeightFt} Ht`);
+  } else if (specs.acres) {
+    parts.push(String(specs.acres));
   }
 
-  const area = listing.builtUpArea || listing.plotArea;
-  if (area) {
+  const area = listing.builtUpArea || listing.carpetArea || listing.plotArea;
+  if (area && !specs.acres) {
     parts.push(formatArea(area));
   }
 
-  parts.push(capitalizeFirst(listing.propertyType));
+  if (listing.societyName) {
+    parts.push(listing.societyName);
+  } else {
+    parts.push(capitalizeFirst(listing.propertyType));
+  }
 
   return parts.join(" · ");
 }

@@ -214,6 +214,8 @@ export const listings = pgTable(
 
     // ─── Media & contact ──────────────────────────────────────────────────
     imageUrl: text("image_url"),
+    photos: jsonb("photos"),
+    propertySpecs: jsonb("property_specs"),
     contactName: text("contact_name"),
     contactPhone: text("contact_phone"),
     contactPhotoUrl: text("contact_photo_url"),
@@ -383,40 +385,71 @@ export type NewRealtorReview = typeof realtorReviews.$inferInsert;
 export const serviceConfig = pgTable("service_config", {
   id: varchar("id", { length: 20 }).primaryKey().default("default"),
 
-  /** L.B. Nagar service zone center. */
-  zoneCenterLat:  doublePrecision("zone_center_lat").notNull().default(17.3496),
-  zoneCenterLng:  doublePrecision("zone_center_lng").notNull().default(78.5521),
-  /** Service zone radius in kilometres. */
-  zoneRadiusKm:   doublePrecision("zone_radius_km").notNull().default(5),
+  /** Greater Hyderabad + ORR + 25km service zone center. */
+  zoneCenterLat:  doublePrecision("zone_center_lat").notNull().default(17.3850),
+  zoneCenterLng:  doublePrecision("zone_center_lng").notNull().default(78.4867),
+  /** Service zone radius in kilometres (65 km covers GHMC + ORR + 25 km belt). */
+  zoneRadiusKm:   doublePrecision("zone_radius_km").notNull().default(65),
 
   /**
    * Time windows as a JSON array of { id, label, startHour, startMin, endHour, endMin }.
-   * Default: 4 windows covering 9 AM – 7 PM.
+   * Default: 3 Daylight windows covering 9 AM – 5:30 PM.
    */
   timeWindows: jsonb("time_windows").notNull().default(
     JSON.parse(JSON.stringify([
-      { id: "A", label: "Morning",       startHour: 9,  startMin: 0,  endHour: 11, endMin: 0  },
-      { id: "B", label: "Late Morning",  startHour: 11, startMin: 30, endHour: 13, endMin: 30 },
-      { id: "C", label: "Afternoon",     startHour: 14, startMin: 30, endHour: 16, endMin: 30 },
-      { id: "D", label: "Evening",       startHour: 17, startMin: 0,  endHour: 19, endMin: 0  },
+      { id: "A", label: "Morning",   startHour: 9,  startMin: 0, endHour: 12, endMin: 0  },
+      { id: "B", label: "Midday",    startHour: 12, startMin: 0, endHour: 15, endMin: 0  },
+      { id: "C", label: "Afternoon", startHour: 15, startMin: 0, endHour: 17, endMin: 30 },
     ]))
   ),
 
   /** Minimum hours notice before a slot can be booked (prevents same-hour bookings). */
-  minLeadTimeHours: integer("min_lead_time_hours").notNull().default(3),
+  minLeadTimeHours: integer("min_lead_time_hours").notNull().default(2),
   /** How many days into the future slots are shown. */
   bookingWindowDays: integer("booking_window_days").notNull().default(10),
+
+  /** Dynamic pricing & 3-Month Launch Promo config */
+  launchPromoActive:   boolean("launch_promo_active").notNull().default(true),
+  launchPromoLabel:    text("launch_promo_label").notNull().default("Launch Offer · 100% Free"),
+  shootBasePriceInr:   integer("shoot_base_price_inr").notNull().default(999),
+  expressSurchargeInr: integer("express_surcharge_inr").notNull().default(500),
 
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export type ServiceConfig = typeof serviceConfig.$inferSelect;
 
+// ─── Shutterbug Profiles & Shifts ─────────────────────────────────────────────
+
+export const shutterbugProfiles = pgTable("shutterbug_profiles", {
+  userId:           uuid("user_id").primaryKey().references(() => users.id),
+  displayName:      text("display_name").notNull().default("Blab Shutterbug"),
+  enabled:          boolean("enabled").notNull().default(true),
+  dispatchEnabled:  boolean("dispatch_enabled").notNull().default(true),
+  capabilities:     jsonb("capabilities"),
+  reliabilityScore: numeric("reliability_score", { precision: 5, scale: 2 }).notNull().default("100.00"),
+  homeLat:          doublePrecision("home_lat").notNull().default(17.3850),
+  homeLng:          doublePrecision("home_lng").notNull().default(78.4867),
+  updatedAt:        timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const shutterbugShifts = pgTable("shutterbug_shifts", {
+  id:           uuid("id").defaultRandom().primaryKey(),
+  shutterbugId: uuid("shutterbug_id").references(() => shutterbugProfiles.userId).notNull(),
+  zoneCode:     text("zone_code").notNull().default("HYD_METRO"),
+  shiftDate:    varchar("shift_date", { length: 10 }).notNull(),
+  startsAt:     timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt:       timestamp("ends_at", { withTimezone: true }).notNull(),
+  status:       text("status").notNull().default("committed"),
+  routeVersion: integer("route_version").notNull().default(0),
+  createdAt:    timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 // ─── Photography Bookings ─────────────────────────────────────────────────────
 
 /**
  * One row per confirmed photography shoot booking.
- * Status lifecycle: pending → confirmed → en_route → completed | cancelled | no_show
+ * Lifecycle: booked → assigned → en_route → arrived → shooting → uploading → completed | cancelled | customer_no_show
  */
 export const photographyBookings = pgTable(
   "photography_bookings",
@@ -424,33 +457,55 @@ export const photographyBookings = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     listingId:  uuid("listing_id").references(() => listings.id).notNull(),
     customerId: uuid("customer_id").references(() => users.id).notNull(),
+    bookerId:   uuid("booker_id").references(() => users.id),
+    bookerRole: text("booker_role").notNull().default("owner"),
 
     /** ISO date string YYYY-MM-DD of the booked shoot. */
     slotDate:   varchar("slot_date", { length: 10 }).notNull(),
-    /** Time window identifier: A | B | C | D. */
+    /** Time window identifier: A | B | C (or E for Express). */
     slotWindow: varchar("slot_window", { length: 1 }).notNull(),
 
-    /**
-     * pending    — booked, awaiting admin confirmation
-     * confirmed  — admin confirmed, shutterbug assigned
-     * en_route   — shutterbug tapped "I'm heading there"
-     * completed  — shoot finished
-     * cancelled  — customer or admin cancelled
-     * no_show    — customer was not home
-     */
-    status: varchar("status", { length: 20 }).notNull().default("pending"),
+    serviceMode:    text("service_mode").notNull().default("scheduled"),
+    status:         varchar("status", { length: 20 }).notNull().default("pending"),
+    lifecycleState: text("lifecycle_state").notNull().default("booked"),
+    deliveryState:  text("delivery_state").notNull().default("pending"),
 
-    /** Assigned after admin reviews the booking. */
     assignedShutterbugId: uuid("assigned_shutterbug_id").references(() => users.id),
 
-    /** Optional notes from customer (gate code, parking, access instructions). */
-    customerNotes: text("customer_notes"),
+    arrivalWindowStart: timestamp("arrival_window_start", { withTimezone: true }),
+    arrivalWindowEnd:   timestamp("arrival_window_end", { withTimezone: true }),
+    plannedStartAt:     timestamp("planned_start_at", { withTimezone: true }),
+    forecastArrivalAt:  timestamp("forecast_arrival_at", { withTimezone: true }),
+    daylightCutoffAt:   timestamp("daylight_cutoff_at", { withTimezone: true }),
 
-    /** H3 res7 cell of the property — used for zone-aware capacity queries. */
+    onsiteMinutes:   integer("onsite_minutes").notNull().default(50),
+    exteriorMinutes: integer("exterior_minutes").notNull().default(20),
+    setupMinutes:    integer("setup_minutes").notNull().default(10),
+    unitsJson:       jsonb("units_json").notNull().default([]),
+
+    accessMode:            text("access_mode").notNull().default("booker_present"),
+    onsiteName:            text("onsite_name"),
+    onsitePhoneE164:       text("onsite_phone_e164"),
+    trackingTokenHash:     text("tracking_token_hash"),
+    trackingTokenExpires:  timestamp("tracking_token_expires", { withTimezone: true }),
+    arrivalOtp:            varchar("arrival_otp", { length: 6 }),
+    arrivalOtpHash:        text("arrival_otp_hash"),
+    arrivalOtpAttempts:    integer("arrival_otp_attempts").notNull().default(0),
+    arrivalPhotoUrl:       text("arrival_photo_url"),
+
+    travelStartedAt:   timestamp("travel_started_at", { withTimezone: true }),
+    trackingStartedAt: timestamp("tracking_started_at", { withTimezone: true }),
+    arrivedAt:         timestamp("arrived_at", { withTimezone: true }),
+    shootStartedAt:    timestamp("shoot_started_at", { withTimezone: true }),
+    shootFinishedAt:   timestamp("shoot_finished_at", { withTimezone: true }),
+    completedAt:       timestamp("completed_at", { withTimezone: true }),
+
+    customerNotes:  text("customer_notes"),
     propertyH3Cell: text("property_h3_cell"),
-
-    /** 'marketing' | 'organic' — for supply analytics. */
-    bookingSource: varchar("booking_source", { length: 20 }).default("organic"),
+    bookingSource:  varchar("booking_source", { length: 20 }).default("organic"),
+    idempotencyKey: text("idempotency_key"),
+    requestHash:    text("request_hash"),
+    version:        integer("version").notNull().default(0),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -464,6 +519,37 @@ export const photographyBookings = pgTable(
 
 export type PhotographyBookingRow = typeof photographyBookings.$inferSelect;
 export type NewPhotographyBooking = typeof photographyBookings.$inferInsert;
+
+export const photographyAllocations = pgTable("photography_allocations", {
+  id:               uuid("id").defaultRandom().primaryKey(),
+  bookingId:        uuid("booking_id").references(() => photographyBookings.id),
+  shiftId:          uuid("shift_id").references(() => shutterbugShifts.id).notNull(),
+  shutterbugId:     uuid("shutterbug_id").references(() => shutterbugProfiles.userId).notNull(),
+  kind:             text("kind").notNull().default("visit"),
+  status:           text("status").notNull(),
+  onsiteStart:      timestamp("onsite_start", { withTimezone: true }).notNull(),
+  onsiteEnd:        timestamp("onsite_end", { withTimezone: true }).notNull(),
+  actualFinishedAt: timestamp("actual_finished_at", { withTimezone: true }),
+  h3Cell:           text("h3_cell").notNull(),
+  expiresAt:        timestamp("expires_at", { withTimezone: true }),
+  createdAt:        timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const photographyOutbox = pgTable("photography_outbox", {
+  id:            uuid("id").defaultRandom().primaryKey(),
+  bookingId:     uuid("booking_id").references(() => photographyBookings.id),
+  targetUserId:  uuid("target_user_id").references(() => users.id),
+  eventType:     text("event_type").notNull(),
+  dedupeKey:     text("dedupe_key").notNull(),
+  payload:       jsonb("payload").notNull().default({}),
+  status:        text("status").notNull().default("pending"),
+  attempts:      integer("attempts").notNull().default(0),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).defaultNow().notNull(),
+  lockedUntil:   timestamp("locked_until", { withTimezone: true }),
+  lockOwner:     text("lock_owner"),
+  lastError:     text("last_error"),
+  createdAt:     timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
 
 // ─── Photography Waitlist ─────────────────────────────────────────────────────
 

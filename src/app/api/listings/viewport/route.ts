@@ -82,7 +82,10 @@ const SELECT_COLS = `
   l.lister_type   AS "listerType",
   l.bedrooms, l.bathrooms,
   l.built_up_area AS "builtUpArea",
+  l.carpet_area   AS "carpetArea",
   l.plot_area     AS "plotArea",
+  l.society_name  AS "societyName",
+  l.property_specs AS "propertySpecs",
   l.address, l.city,
   l.image_url     AS "imageUrl",
   l.contact_name  AS "contactName",
@@ -124,19 +127,40 @@ export async function GET(request: NextRequest) {
   const resolution = zoomToResolution(zoom);
 
   try {
-    // ── Street level (zoom ≥ STREET_ZOOM): all listings in viewport ───────────
+    // ── Street level (zoom ≥ STREET_ZOOM): 1 marker per society/complex ──────
+    // Collapses units sharing a society_name into 1 representative marker:
+    // Priority: Builder's 1st unit if present, otherwise 1st Owner unit (first-come, first-served).
     if (resolution === -1) {
       const rows = await sql.query(
-        `SELECT ${SELECT_COLS}
-         FROM listings l
-         WHERE l.latitude  BETWEEN $1 AND $2
-           AND l.longitude BETWEEN $3 AND $4
-           AND l.listing_type = $5
-           AND l.status = 'active'
-         ORDER BY l.created_at DESC`,
+        `SELECT * FROM (
+           SELECT DISTINCT ON (
+             CASE
+               WHEN l.property_type = 'apartment' AND NULLIF(TRIM(l.society_name), '') IS NOT NULL
+                 THEN TRIM(l.society_name)
+               ELSE l.id::text
+             END
+           )
+             ${SELECT_COLS},
+             l.created_at AS "_createdAt"
+           FROM listings l
+           WHERE l.latitude  BETWEEN $1 AND $2
+             AND l.longitude BETWEEN $3 AND $4
+             AND l.listing_type = $5
+             AND l.status = 'active'
+           ORDER BY
+             CASE
+               WHEN l.property_type = 'apartment' AND NULLIF(TRIM(l.society_name), '') IS NOT NULL
+                 THEN TRIM(l.society_name)
+               ELSE l.id::text
+             END,
+             CASE WHEN l.lister_type = 'developer' THEN 0 ELSE 1 END ASC,
+             l.created_at ASC
+         ) deduped
+         ORDER BY CASE WHEN deduped."listerType" = 'developer' THEN 0 ELSE 1 END ASC, deduped."_createdAt" ASC`,
         [swLat, neLat, swLng, neLng, listingType]
       );
-      return NextResponse.json({ listings: rows, total: rows.length });
+      const listings = rows.map(({ _createdAt, ...r }: any) => r);
+      return NextResponse.json({ listings, total: listings.length });
     }
 
     // ── H3 DISTINCT ON mode (zoom 8–13) ───────────────────────────────────────

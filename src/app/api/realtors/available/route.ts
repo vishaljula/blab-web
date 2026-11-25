@@ -94,7 +94,12 @@ export async function GET(request: NextRequest) {
         FROM users u
         WHERE u.role = 'realtor'
           AND u.subscription_tier != 'soft_cap'
-          AND u.active_listing_count < u.max_listing_capacity
+          AND (
+            u.subscription_tier IN ('pro', 'pro_plus')
+            OR (
+              (SELECT COUNT(*)::int FROM listings hl WHERE hl.assigned_realtor_id = u.id AND hl.status IN ('draft', 'pending_photography', 'active')) < 1
+            )
+          )
           AND (
             u.company_name ILIKE ${companyPattern}
             OR regexp_replace(u.rera_number, '[^A-Za-z0-9]', '', 'g')
@@ -134,7 +139,12 @@ export async function GET(request: NextRequest) {
               ST_MakePoint(${lng}, ${lat})::geography,
               ${SEARCH_RADIUS_M}
             )
-            AND u.active_listing_count < u.max_listing_capacity
+            AND (
+              u.subscription_tier IN ('pro', 'pro_plus')
+              OR (
+                (SELECT COUNT(*)::int FROM listings hl WHERE hl.assigned_realtor_id = u.id AND hl.status IN ('draft', 'pending_photography', 'active')) < 1
+              )
+            )
             AND u.id != ALL(${allExcludedIds}::uuid[])
           ORDER BY
             u.realtor_score DESC,
@@ -169,7 +179,12 @@ export async function GET(request: NextRequest) {
               ST_MakePoint(${lng}, ${lat})::geography,
               ${SEARCH_RADIUS_M}
             )
-            AND u.active_listing_count < u.max_listing_capacity
+            AND (
+              u.subscription_tier IN ('pro', 'pro_plus')
+              OR (
+                (SELECT COUNT(*)::int FROM listings hl WHERE hl.assigned_realtor_id = u.id AND hl.status IN ('draft', 'pending_photography', 'active')) < 1
+              )
+            )
           ORDER BY
             u.realtor_score DESC,
             "distanceM" ASC
@@ -198,7 +213,12 @@ export async function GET(request: NextRequest) {
           FROM users u
           WHERE u.role = 'realtor'
             AND u.subscription_tier != 'soft_cap'
-            AND u.active_listing_count < u.max_listing_capacity
+            AND (
+              u.subscription_tier IN ('pro', 'pro_plus')
+              OR (
+                (SELECT COUNT(*)::int FROM listings hl WHERE hl.assigned_realtor_id = u.id AND hl.status IN ('draft', 'pending_photography', 'active')) < 1
+              )
+            )
             AND u.id != ALL(${allExcludedIds}::uuid[])
           ORDER BY u.realtor_score DESC
           LIMIT ${limit}
@@ -223,20 +243,30 @@ export async function GET(request: NextRequest) {
           FROM users u
           WHERE u.role = 'realtor'
             AND u.subscription_tier != 'soft_cap'
-            AND u.active_listing_count < u.max_listing_capacity
+            AND (
+              u.subscription_tier IN ('pro', 'pro_plus')
+              OR (
+                (SELECT COUNT(*)::int FROM listings hl WHERE hl.assigned_realtor_id = u.id AND hl.status IN ('draft', 'pending_photography', 'active')) < 1
+              )
+            )
           ORDER BY u.realtor_score DESC
           LIMIT ${limit}
         `;
       }
     }
 
-    // Decrypt names server-side before returning
+    // Decrypt names server-side before returning & assert Invariant #2 (canAcceptHandoff = true)
     const realtors = rows.map((r) => {
       let name = "Realtor";
       try {
         if (r.encryptedName) name = decrypt(r.encryptedName);
       } catch {}
-      return { ...r, name, encryptedName: undefined };
+      return {
+        ...r,
+        name,
+        encryptedName: undefined,
+        canAcceptHandoff: true,
+      };
     });
 
     // ── Redis: soft-reserve the returned realtors ─────────────────────────────

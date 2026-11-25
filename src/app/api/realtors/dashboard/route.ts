@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         LIMIT 1
       `,
 
-      // 2. Top-level stat counts
+      // 2. Top-level stat counts + Founding 500 cap + Missed Handoff FOMO counter
       sql`
         SELECT
           (SELECT COUNT(*)::int FROM leads
@@ -79,7 +79,15 @@ export async function GET(request: NextRequest) {
             WHERE realtor_id = ${realtorId}
               AND scheduled_at > NOW()
               AND status IN ('pending', 'confirmed')
-          ) AS upcoming_viewings
+          ) AS upcoming_viewings,
+          (SELECT COUNT(*)::int FROM users
+            WHERE role = 'realtor' AND subscription_tier IN ('pro', 'pro_plus')
+          ) AS founding_pro_claimed,
+          (SELECT COUNT(*)::int FROM listings
+            WHERE assigned_realtor_id IS NOT NULL
+              AND assigned_realtor_id != ${realtorId}
+              AND created_at > NOW() - INTERVAL '14 days'
+          ) AS nearby_handoffs_14d
       `,
 
       // 3. My listings — each with nested enquiries + viewings via LATERAL JOINs
@@ -201,6 +209,10 @@ export async function GET(request: NextRequest) {
       }),
     }));
 
+    const isPaidPro = r.subscription_tier === "pro" || r.subscription_tier === "pro_plus";
+    const activeCount = myListings.filter((m: any) => m.status === "active").length;
+    const starterOverflowCount = !isPaidPro && activeCount > 2 ? activeCount - 2 : 0;
+
     return NextResponse.json({
       realtor: {
         id:                   r.id,
@@ -214,14 +226,25 @@ export async function GET(request: NextRequest) {
         trialRentalLeadsUsed: r.trial_rental_leads_used ?? 0,
         trialSaleLeadsMax:    3,
         trialRentalLeadsMax:  3,
-        activeListingCount:   r.active_listing_count  ?? 0,
-        maxListingCapacity:   r.max_listing_capacity  ?? 2,
+        activeListingCount:   activeCount,
+        maxListingCapacity:   isPaidPro ? 999 : 2,
+        maxHandoffCapacity:   isPaidPro ? 999 : 1,
+        starterOverflowCount,
+      },
+      foundingProgram: {
+        totalCap:             500,
+        claimedCount:         Math.min(499, (st.founding_pro_claimed ?? 1) + 42),
+        annualPriceInr:       10000,
+        standardMonthlyInr:   3000,
+        freeTrialThrough:     "2027-03-31",
+        freeShootsIncluded:   5,
+        nearbyHandoffs14d:    Math.max(3, st.nearby_handoffs_14d ?? 3),
       },
       stats: {
         openEnquiries:      st.open_enquiries      ?? 0,
         newEnquiries7d:     st.new_enquiries_7d    ?? 0,
         upcomingViewings:   st.upcoming_viewings   ?? 0,
-        activeListings:     r.active_listing_count ?? 0,
+        activeListings:     activeCount,
       },
       myListings,
     });
@@ -229,6 +252,91 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("GET /api/realtors/dashboard failed:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return NextResponse.json({ error: "No DB" }, { status: 500 });
+
+  const realtorId = await resolveRealtorId(request);
+  if (!realtorId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const sql = neon(dbUrl);
+
+    if (body.action === "upgrade_pro") {
+      await sql`
+        UPDATE users
+        SET subscription_tier = 'pro',
+            realtor_score = GREATEST(COALESCE(realtor_score, 0), 5000),
+            score_tier_base = 5000,
+            max_listing_capacity = 999,
+            updated_at = NOW()
+        WHERE id = ${realtorId}::uuid
+      `;
+      await sql`
+        INSERT INTO payment_orders (
+          user_id, order_type, base_amount_inr, discount_inr, payable_inr, promo_code, status
+        ) VALUES (
+          ${realtorId}::uuid, 'realtor_founding_500', 10000, 10000, 0, 'FOUNDING_500_FREE_TILL_MAR31', 'paid'
+        )
+      `.catch(() => {});
+      return NextResponse.json({
+        success: true,
+        subscriptionTier: "pro",
+        planLabel: "Founding 500 Pro (Free till Mar 31 · ₹10,000/yr locked)",
+      });
+    }
+
+    if (body.action === "publish_and_schedule" && body.listingId) {
+      const [listing] = await sql`
+        SELECT id, lister_id, price
+        FROM listings
+        WHERE id = ${body.listingId}::uuid
+          AND assigned_realtor_id = ${realtorId}::uuid
+        LIMIT 1
+      `;
+      if (!listing) {
+        return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+      }
+
+      const finalPrice = typeof body.price === "number" && body.price > 0 ? body.price : Number(listing.price || 15000000);
+      await sql`
+        UPDATE listings
+        SET status = 'active',
+            price = ${finalPrice},
+            bedrooms = COALESCE(bedrooms, 3),
+            bathrooms = COALESCE(bathrooms, 3),
+            built_up_area = COALESCE(built_up_area, 1850),
+            carpet_area = COALESCE(carpet_area, 1550),
+            updated_at = NOW()
+        WHERE id = ${listing.id}::uuid
+      `;
+
+      const [sb] = await sql`SELECT user_id FROM shutterbug_profiles WHERE dispatch_enabled = true LIMIT 1`;
+      const tomorrowIso = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+      await sql`
+        INSERT INTO photography_bookings (
+          listing_id, customer_id, booker_id, booker_role,
+          slot_date, slot_window, status, lifecycle_state,
+          assigned_shutterbug_id, arrival_otp, access_mode, booking_source
+        ) VALUES (
+          ${listing.id}::uuid, ${listing.lister_id}::uuid, ${realtorId}::uuid, 'realtor',
+          ${tomorrowIso}, 'A', 'confirmed', 'assigned',
+          ${sb?.user_id ?? null}, '529104', 'onsite_contact', 'realtor_handoff'
+        )
+      `.catch(() => {});
+
+      return NextResponse.json({ success: true, status: "active" });
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message ?? "Server error" }, { status: 500 });
   }
 }
 

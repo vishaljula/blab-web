@@ -125,7 +125,6 @@ export default function Step4RealtorList() {
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "Failed");
       setDone(true);
-      store.reset();
     } catch (e: any) {
       setError(e.message ?? "Something went wrong");
     } finally {
@@ -141,12 +140,15 @@ export default function Step4RealtorList() {
         <Text style={[s.successTitle, { color: C.foreground }]}>Realtor request sent!</Text>
         <Text style={[s.successDesc, { color: C.mutedForeground }]}>
           {chosenId
-            ? "Your chosen realtor will contact you within a few hours."
+            ? "Your chosen realtor will contact you within a few hours and handle photography & listing details end-to-end."
             : "We'll match you with a RERA-approved realtor nearby — expect a call within a few hours."}
         </Text>
         <Pressable
-          onPress={() => router.replace("/(tabs)")}
-          style={[s.successCta, { backgroundColor: C.primary }]}
+          onPress={() => {
+            router.replace("/(tabs)");
+            setTimeout(() => store.reset(), 450);
+          }}
+          style={[s.successCta, { backgroundColor: C.primary }, Platform.OS === "web" ? ({ cursor: "pointer" } as any) : null]}
         >
           <Text style={{ color: C.primaryForeground, fontSize: 15, fontWeight: "800" }}>
             Back to map

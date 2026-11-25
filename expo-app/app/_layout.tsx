@@ -1,5 +1,5 @@
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { Platform, NativeModules } from "react-native";
@@ -9,6 +9,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import { API_BASE_URL } from "@/lib/theme";
+import { useListingsStore, saveStoredAuth } from "@/store/listings";
 
 import "../global.css";
 
@@ -53,6 +55,28 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+  const { setAuth } = useListingsStore();
+
+  useEffect(() => {
+    if (!__DEV__ || Platform.OS === "web") return;
+    let lastId = 0;
+    const iv = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/dev/sim-nav`);
+        const data = await res.json();
+        if (data?.target?.route && data.target.id !== lastId) {
+          lastId = data.target.id;
+          if (data.target.auth?.token && data.target.auth?.user) {
+            setAuth(data.target.auth.token, data.target.auth.user);
+            saveStoredAuth(data.target.auth.token, data.target.auth.user);
+          }
+          router.replace(data.target.route as any);
+        }
+      } catch {}
+    }, 1500);
+    return () => clearInterval(iv);
+  }, [router, setAuth]);
 
   return (
     <SafeAreaProvider>
@@ -77,9 +101,9 @@ function RootLayoutNav() {
           <Stack.Screen
             name="list/index"
             options={{
-              // fullScreenModal on native: eliminates the black peek gap and sheet overlay.
-              // Web keeps "modal" (Expo Router ignores presentation on web anyway).
-              presentation: Platform.OS === "web" ? "modal" : "fullScreenModal",
+              // Use 'card' with slide_from_bottom so transitioning from /list to /tracking/[id]
+              // or /(tabs) stays in the same navigation stack without modal-dismiss flashes.
+              presentation: Platform.OS === "web" ? "modal" : "card",
               animation: "slide_from_bottom",
               gestureEnabled: false,
             }}
@@ -91,10 +115,15 @@ function RootLayoutNav() {
           <Stack.Screen
             name="tracking/[id]"
             options={{
-              headerShown: true,
-              headerTitle: "Live Tracking",
-              headerStyle: { backgroundColor: "#0F0F0F" },
-              headerTintColor: "#F5F5F3",
+              // Full-bleed map: no navigation header; the screen draws its own floating back button
+              headerShown: false,
+              presentation: "card",
+            }}
+          />
+          <Stack.Screen
+            name="ops/index"
+            options={{
+              headerShown: false,
               presentation: "card",
             }}
           />

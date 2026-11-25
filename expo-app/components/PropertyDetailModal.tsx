@@ -32,6 +32,8 @@ import NeighborhoodMap from "@/components/NeighborhoodMap.web";
 import EMICalculator from "@/components/EMICalculator";
 import { getPhotos } from "@/lib/stockPhotos";
 import { getRoleLabel, getRoleBadge } from "@/lib/listerRole";
+import { getPropertyConfig } from "@/lib/propertyConfig";
+import { trackEvent } from "@/lib/telemetry";
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 // Keep these in sync with the StyleSheet values below.
@@ -370,28 +372,46 @@ export default function PropertyDetailModal() {
     );
   };
 
-  // ─── Overview (Zillow-exact) ──────────────────────────────────────────────────
+  // ─── Overview (Mapper-driven across Resi/Comm/Ind/Agri + Builder Plans) ──────
   const renderOverview = (l: Listing) => {
-    const pps = l.builtUpArea && l.builtUpArea > 0 ? Math.round(l.price / l.builtUpArea) : null;
-    const tablets = [
-      { icon: "business-outline" as const, label: l.propertyType.charAt(0).toUpperCase() + l.propertyType.slice(1) },
-      { icon: "calendar-outline" as const, label: l.yearBuilt ? `Built in ${l.yearBuilt}` : "Year N/A" },
-      { icon: "expand-outline" as const, label: l.plotArea ? `${l.plotArea?.toLocaleString("en-IN")} sq.yd` : "N/A" },
-      { icon: "trending-up-outline" as const, label: l.marketEstimate ? formatPrice(l.marketEstimate) : "—" },
-      { icon: "cash-outline" as const, label: pps ? `₹${pps.toLocaleString("en-IN")}/sqft` : "—" },
-      { icon: "construct-outline" as const, label: l.maintenance ? `₹${l.maintenance}/mo` : "N/A" },
-    ];
+    const cfg = getPropertyConfig(l.propertyType);
+    const bigStats = cfg.buildBigStats(l);
+    const tablets = cfg.buildTablets(l);
+    const developerUnits: any[] = Array.isArray((l as any).developerUnits)
+      ? (l as any).developerUnits
+      : [];
+    const ownerUnits: any[] = Array.isArray((l as any).ownerUnits)
+      ? (l as any).ownerUnits
+      : [];
+    const hasSocietySelector = (developerUnits.length + ownerUnits.length) > 1;
+    const builderConfigs: any[] =
+      !hasSocietySelector && l.listerType === "developer" && Array.isArray((l as any).builderConfigs)
+        ? (l as any).builderConfigs
+        : [];
+    const selectUnitInPlace = (u: any) => {
+      setListing({ ...u, developerUnits, ownerUnits } as any);
+      setLightboxIdx(0);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      trackEvent({
+        eventType: "society_unit_switch",
+        listingId: u?.id ?? null,
+        metadata: { listerType: u?.listerType, price: u?.price },
+      });
+    };
 
     return (
       <View onLayout={e => { sectionOffsets.current.overview = e.nativeEvent.layout.y; }} style={m.section}>
         {/* Price row */}
         <View style={m.overviewTop}>
           <View style={m.overviewLeft}>
-            <View style={m.statusRow}>
+            <View style={[m.statusRow, { flexDirection: "row", gap: 6 }]}>
               <View style={[m.pill, { backgroundColor: l.listingType === "rent" ? "#EFF6FF" : "#ECFDF5" }]}>
                 <Text style={[m.pillText, { color: l.listingType === "rent" ? "#1D4ED8" : "#047857" }]}>
                   {l.listingType === "rent" ? "FOR RENT" : "FOR SALE"}
                 </Text>
+              </View>
+              <View style={[m.pill, { backgroundColor: `${C.primary}15` }]}>
+                <Text style={[m.pillText, { color: C.primary }]}>{cfg.shortLabel.toUpperCase()}</Text>
               </View>
             </View>
             <Text style={[m.priceText, { color: C.foreground }]}>
@@ -403,59 +423,224 @@ export default function PropertyDetailModal() {
               <Text style={[m.emiText, { color: isDark ? "#93C5FD" : "#1D4ED8" }]}>
                 Est. EMI: ₹{calcEMI(l.price * 0.8, 8.5, 20).toLocaleString("en-IN")}/mo
               </Text>
-              <Text style={[m.emiLink, { color: C.primary }]}> · Get pre-approved</Text>
+              <Text style={[m.emiLink, { color: C.primary }]}> · Pre-approved</Text>
             </View>
           </View>
 
-          {/* Big spec numbers */}
-          <View style={m.overviewRight}>
-            {l.bedrooms != null && (
-              <View style={m.bigCol}>
-                <Text style={[m.bigNum, { color: C.foreground }]}>{l.bedrooms}</Text>
-                <Text style={[m.bigLabel, { color: C.mutedForeground }]}>beds</Text>
-              </View>
-            )}
-            {l.bedrooms != null && l.bathrooms != null && <View style={[m.bigDivider, { backgroundColor: C.border }]} />}
-            {l.bathrooms != null && (
-              <View style={m.bigCol}>
-                <Text style={[m.bigNum, { color: C.foreground }]}>{l.bathrooms}</Text>
-                <Text style={[m.bigLabel, { color: C.mutedForeground }]}>baths</Text>
-              </View>
-            )}
-            {l.builtUpArea != null && (
-              <>
-                <View style={[m.bigDivider, { backgroundColor: C.border }]} />
-                <View style={m.bigCol}>
-                  <Text style={[m.bigNum, { color: C.foreground }]}>{l.builtUpArea.toLocaleString("en-IN")}</Text>
-                  <Text style={[m.bigLabel, { color: C.mutedForeground }]}>sqft</Text>
-                </View>
-              </>
-            )}
-          </View>
+          {/* Dynamic Big spec numbers from mapper */}
+          {bigStats.length > 0 && (
+            <View style={m.overviewRight}>
+              {bigStats.map((st, idx) => (
+                <React.Fragment key={st.label + idx}>
+                  {idx > 0 && <View style={[m.bigDivider, { backgroundColor: C.border }]} />}
+                  <View style={m.bigCol}>
+                    <Text style={[m.bigNum, { color: C.foreground }]}>{st.value}</Text>
+                    <Text style={[m.bigLabel, { color: C.mutedForeground }]}>{st.label}</Text>
+                  </View>
+                </React.Fragment>
+              ))}
+            </View>
+          )}
         </View>
 
-        {/* Fact tablets — Zillow 3×2 table */}
+        {/* Fact tablets — 3×2 mapper table */}
         <View style={[m.tabletsContainer, { borderColor: C.border }]}>
           {tablets.map((t, i) => (
-            <React.Fragment key={i}>
+            <React.Fragment key={t.sub + i}>
               <View style={[
                 m.tablet,
                 { backgroundColor: isDark ? "#1A1A1A" : "#F6F6F6" },
                 i % 3 !== 0 && { borderLeftWidth: 1, borderLeftColor: C.border },
                 i >= 3 && { borderTopWidth: 1, borderTopColor: C.border },
               ]}>
-                <Ionicons name={t.icon} size={17} color={isDark ? "#6B6B6B" : "#555"} />
+                <Ionicons name={t.icon as any} size={17} color={isDark ? "#6B6B6B" : "#555"} />
                 <Text style={[m.tabletText, { color: C.foreground }]} numberOfLines={1}>{t.label}</Text>
               </View>
             </React.Fragment>
           ))}
         </View>
 
+        {/* Society Units (Developer Units & Owner Units — In-Place Dynamic Selection) */}
+        {hasSocietySelector && (
+          <View style={{ marginTop: 20 }}>
+            <Text style={[m.sectionTitle, { color: C.foreground, marginBottom: 4 }]}>
+              Units in {(l as any).societyName ?? (l as any).title ?? l.address}
+            </Text>
+            <Text style={{ fontSize: 12, color: C.mutedForeground, marginBottom: 14 }}>
+              Tap any unit below to view its photos, details & direct contact
+            </Text>
+
+            {developerUnits.length >= 1 && (
+              <View style={{ marginBottom: 14 }}>
+                <Text style={{ fontSize: 11, fontWeight: "800", color: C.mutedForeground, letterSpacing: 0.7, textTransform: "uppercase", marginBottom: 8 }}>
+                  Developer Units ({developerUnits.length})
+                </Text>
+                {developerUnits.map((u: any) => {
+                  const isSelected = u.id === l.id;
+                  return (
+                    <Pressable
+                      key={u.id}
+                      onPress={() => selectUnitInPlace(u)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: 12,
+                        borderRadius: 12,
+                        borderWidth: isSelected ? 2 : 1,
+                        borderColor: isSelected ? C.primary : C.border,
+                        backgroundColor: isSelected ? `${C.primary}0C` : C.card,
+                        marginBottom: 8,
+                        ...(Platform.OS === "web" ? ({ cursor: "pointer" } as any) : {}),
+                      }}
+                    >
+                      <View style={{ flex: 1, paddingRight: 10 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: 5, backgroundColor: `${C.primary}18` }}>
+                            <Text style={{ fontSize: 9, fontWeight: "800", color: C.primary }}>
+                              BUILDER INVENTORY
+                            </Text>
+                          </View>
+                          {u.contactName && (
+                            <Text style={{ fontSize: 11, fontWeight: "600", color: C.mutedForeground }}>
+                              · {u.contactName}
+                            </Text>
+                          )}
+                        </View>
+                        <Text style={{ fontSize: 13, fontWeight: "800", color: C.foreground }}>
+                          {u.unitLabel ?? u.configLabel ?? `${u.bedrooms} BHK`} · {u.builtUpArea ?? u.areaSqft} sqft
+                        </Text>
+                        {u.unitsAvailable ? (
+                          <Text style={{ fontSize: 11, color: C.mutedForeground, marginTop: 1 }}>
+                            {u.unitsAvailable} units available
+                          </Text>
+                        ) : null}
+                      </View>
+                      <View style={{ alignItems: "flex-end", flexDirection: "row", gap: 6 }}>
+                        <Text style={{ fontSize: 14, fontWeight: "900", color: C.primary }}>
+                          {formatPrice(u.price)}
+                        </Text>
+                        {isSelected ? (
+                          <Ionicons name="checkmark-circle" size={18} color={C.primary} />
+                        ) : (
+                          <Ionicons name="chevron-forward" size={16} color={C.mutedForeground} />
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+
+            {ownerUnits.length >= 1 && (
+              <View>
+                <Text style={{ fontSize: 11, fontWeight: "800", color: C.mutedForeground, letterSpacing: 0.7, textTransform: "uppercase", marginBottom: 8 }}>
+                  Owner Units ({ownerUnits.length})
+                </Text>
+                {ownerUnits.map((u: any) => {
+                  const isSelected = u.id === l.id;
+                  const specs = u.propertySpecs ?? {};
+                  return (
+                    <Pressable
+                      key={u.id}
+                      onPress={() => selectUnitInPlace(u)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: 12,
+                        borderRadius: 12,
+                        borderWidth: isSelected ? 2 : 1,
+                        borderColor: isSelected ? C.primary : C.border,
+                        backgroundColor: isSelected ? `${C.primary}0C` : C.card,
+                        marginBottom: 8,
+                        ...(Platform.OS === "web" ? ({ cursor: "pointer" } as any) : {}),
+                      }}
+                    >
+                      <View style={{ flex: 1, paddingRight: 10 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: 5, backgroundColor: "#10B98118" }}>
+                            <Text style={{ fontSize: 9, fontWeight: "800", color: "#059669" }}>
+                              DIRECT OWNER · VERIFIED
+                            </Text>
+                          </View>
+                          {u.contactName && (
+                            <Text style={{ fontSize: 11, fontWeight: "600", color: C.mutedForeground }}>
+                              · {u.contactName}
+                            </Text>
+                          )}
+                        </View>
+                        <Text style={{ fontSize: 13, fontWeight: "800", color: C.foreground }}>
+                          {u.bedrooms} BHK · {u.builtUpArea ?? u.areaSqft} sqft
+                          {(u.floorNumber ?? specs.floorNumber) ? ` · Floor ${u.floorNumber ?? specs.floorNumber}` : ""}
+                        </Text>
+                        {(u.facing ?? specs.facing ?? specs.possessionStatus) ? (
+                          <Text style={{ fontSize: 11, color: C.mutedForeground, marginTop: 1 }}>
+                            {(u.facing ?? specs.facing) ? `${u.facing ?? specs.facing} Facing` : ""}
+                            {specs.possessionStatus ? ` · ${specs.possessionStatus}` : ""}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <View style={{ alignItems: "flex-end", flexDirection: "row", gap: 6 }}>
+                        <Text style={{ fontSize: 14, fontWeight: "900", color: C.primary }}>
+                          {formatPrice(u.price)}
+                        </Text>
+                        {isSelected ? (
+                          <Ionicons name="checkmark-circle" size={18} color={C.primary} />
+                        ) : (
+                          <Ionicons name="chevron-forward" size={16} color={C.mutedForeground} />
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Builder Floor Plans (Only when single-item builder page) */}
+        {builderConfigs.length > 0 && (
+          <View style={{ marginTop: 20 }}>
+            <Text style={[m.sectionTitle, { color: C.foreground, marginBottom: 10 }]}>
+              Available Floor Plans
+            </Text>
+            {builderConfigs.map((bc: any, idx: number) => (
+              <View
+                key={idx}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: C.border,
+                  backgroundColor: C.card,
+                  marginBottom: 8,
+                }}
+              >
+                <View>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: C.foreground }}>
+                    {bc.bhk} · {bc.areaSqft} sqft
+                  </Text>
+                  <Text style={{ fontSize: 11, color: C.mutedForeground, marginTop: 2 }}>
+                    {bc.unitsAvailable} units available
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 14, fontWeight: "800", color: C.primary }}>
+                  {formatPrice(bc.priceInr)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* About */}
         <View style={[m.divider, { backgroundColor: C.border, marginTop: 20 }]} />
-        <Text style={[m.sectionTitle, { color: C.foreground }]}>About this home</Text>
+        <Text style={[m.sectionTitle, { color: C.foreground }]}>{cfg.aboutHeading}</Text>
         <Text style={[m.bodyText, { color: C.mutedForeground }]}>
-          {l.description ?? "A beautifully crafted property in one of the most sought-after localities. Spacious rooms, modern finishes, and excellent connectivity."}
+          {l.description ?? "Verified listing in a prime locality with modern infrastructure and clear title."}
         </Text>
       </View>
     );

@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { COLORS } from "@/lib/theme";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListingsStore } from "@/store/listings";
+import { useListingFormStore } from "@/store/listingForm";
 
 export default function PostScreen() {
   const colorScheme = useColorScheme();
@@ -42,7 +43,9 @@ export default function PostScreen() {
               router.push("/shutterbug/jobs" as any);
               return;
             }
-            router.push("/list");
+            useListingFormStore.getState().reset();
+            router.replace("/(tabs)");
+            setTimeout(() => router.push("/list"), 10);
           }}
         >
           <Ionicons name="add" size={18} color={colors.primaryForeground} />

@@ -5,22 +5,24 @@ import { decrypt } from "@/lib/crypto";
 /**
  * GET /api/shutterbug/jobs
  *
- * Returns the list of assigned photography bookings for the authenticated shutterbug.
- * Includes property address and customer contact details (decrypted for display).
- * Filters: pending, confirmed, en_route (not completed/cancelled/no_show).
+ * Returns the ordered queue of assigned photography bookings for the authenticated shutterbug,
+ * sorted strictly by planned_start_at so the Shutterbug app presents a guided 1-by-1 queue.
  */
 export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "").trim();
-    if (!token) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (!token) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     let shutterbugId: string;
     try {
       const decrypted = decrypt(token);
       const payload = JSON.parse(decrypted);
-      if (!payload.userId || payload.expiry < Date.now())
+      if (!payload.userId || payload.expiry < Date.now()) {
         return NextResponse.json({ success: false, error: "Token expired" }, { status: 401 });
+      }
       shutterbugId = payload.userId;
     } catch {
       return NextResponse.json({ success: false, error: "Invalid token" }, { status: 401 });
@@ -28,55 +30,116 @@ export async function GET(request: Request) {
 
     const sql = neon(process.env.DATABASE_URL!);
 
-    // Verify this user is actually a shutterbug
     const [sbUser] = await sql`
-      SELECT id FROM users WHERE id = ${shutterbugId} AND role = 'shutterbug' LIMIT 1
+      SELECT id FROM users WHERE id = ${shutterbugId}::uuid AND role = 'shutterbug' LIMIT 1
     `;
     if (!sbUser) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
 
-    const bookings = await sql`
-      SELECT
-        pb.id,
-        pb.slot_date,
-        pb.slot_window,
-        pb.status,
-        pb.customer_notes,
-        l.address AS property_address,
-        l.latitude AS property_lat,
-        l.longitude AS property_lng,
-        cu.encrypted_name AS customer_encrypted_name,
-        cu.encrypted_phone AS customer_encrypted_phone
-      FROM photography_bookings pb
-      JOIN listings l ON l.id = pb.listing_id
-      JOIN users cu ON cu.id = pb.customer_id
-      WHERE pb.assigned_shutterbug_id = ${shutterbugId}
-        AND pb.status IN ('pending', 'confirmed', 'en_route')
-        AND pb.slot_date >= CURRENT_DATE::text
-      ORDER BY pb.slot_date ASC, pb.slot_window ASC
-    `;
+    const [profileRow, completedRow, bookings] = await Promise.all([
+      sql`
+        SELECT display_name, dispatch_enabled
+        FROM shutterbug_profiles
+        WHERE user_id = ${shutterbugId}::uuid
+        LIMIT 1
+      `,
+      sql`
+        SELECT COUNT(*)::int AS cnt
+        FROM photography_bookings
+        WHERE assigned_shutterbug_id = ${shutterbugId}::uuid
+          AND status = 'completed'
+          AND slot_date = CURRENT_DATE::text
+      `,
+      sql`
+        SELECT
+          pb.id,
+          pb.slot_date,
+          pb.slot_window,
+          pb.status,
+          pb.lifecycle_state,
+          pb.delivery_state,
+          pb.planned_start_at,
+          pb.onsite_minutes,
+          pb.access_mode,
+          pb.onsite_name,
+          pb.onsite_phone_e164,
+          pb.arrival_otp,
+          pb.customer_notes,
+          l.address AS property_address,
+          l.latitude AS property_lat,
+          l.longitude AS property_lng,
+          l.property_type AS property_type
+        FROM photography_bookings pb
+        JOIN listings l ON l.id = pb.listing_id
+        WHERE pb.assigned_shutterbug_id = ${shutterbugId}::uuid
+          AND pb.status NOT IN ('completed', 'cancelled', 'no_show')
+          AND pb.slot_date >= (CURRENT_DATE - interval '1 day')::date::text
+        ORDER BY COALESCE(pb.planned_start_at, NOW()) ASC, pb.slot_date ASC, pb.slot_window ASC
+      `,
+    ]);
 
-    // Return bookings (customer name/phone remain encrypted server-side for now;
-    // in Phase 2 add a proper decryption call here)
     return NextResponse.json({
       success: true,
-      bookings: bookings.map((b) => ({
+      profile: {
+        displayName: profileRow[0]?.display_name ?? "Blab Shutterbug",
+        dispatchEnabled: profileRow[0]?.dispatch_enabled ?? true,
+        completedToday: completedRow[0]?.cnt ?? 0,
+      },
+      bookings: bookings.map((b, idx) => ({
         id: b.id,
+        queue_rank: idx + 1,
+        is_up_next: idx === 0,
         slot_date: b.slot_date,
         slot_window: b.slot_window,
         status: b.status,
+        lifecycle_state: b.lifecycle_state ?? b.status,
+        delivery_state: b.delivery_state ?? "pending",
+        planned_start_at: b.planned_start_at,
+        onsite_minutes: b.onsite_minutes ?? 50,
+        access_mode: b.access_mode ?? "booker_present",
+        onsite_name: b.onsite_name ?? null,
+        onsite_phone: b.onsite_phone_e164 ?? null,
+        arrival_otp: b.arrival_otp ?? null,
         customer_notes: b.customer_notes,
         property_address: b.property_address,
         property_lat: b.property_lat,
         property_lng: b.property_lng,
-        // Customer contact kept null for MVP1 privacy — admin shares manually
-        customer_name: null,
-        customer_phone: null,
+        property_type: b.property_type,
       })),
     });
   } catch (err: any) {
     console.error("[shutterbug/jobs] error:", err);
+    return NextResponse.json(
+      { success: false, error: err.message ?? "Server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const authHeader = request.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const payload = JSON.parse(decrypt(token));
+    if (!payload.userId || payload.expiry < Date.now()) {
+      return NextResponse.json({ success: false, error: "Token expired" }, { status: 401 });
+    }
+    const body = await request.json();
+    const dispatchEnabled = Boolean(body.dispatchEnabled);
+    const sql = neon(process.env.DATABASE_URL!);
+
+    await sql`
+      INSERT INTO shutterbug_profiles (user_id, display_name, dispatch_enabled)
+      VALUES (${payload.userId}::uuid, 'Blab Shutterbug', ${dispatchEnabled})
+      ON CONFLICT (user_id) DO UPDATE
+      SET dispatch_enabled = ${dispatchEnabled}, updated_at = NOW()
+    `;
+    return NextResponse.json({ success: true, dispatchEnabled });
+  } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message ?? "Server error" }, { status: 500 });
   }
 }

@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { View } from "react-native";
 import { useRouter } from "expo-router";
 import { useListingFormStore } from "@/store/listingForm";
 import { useListingsStore } from "@/store/listings";
+import { trackEvent } from "@/lib/telemetry";
 
 // Shared steps
 import Step1Type      from "@/components/listing-steps/Step1PropertyType";
@@ -28,6 +30,23 @@ export default function ListWizard() {
   const router = useRouter();
   const { token, user } = useListingsStore();
   const { currentStep, listingPath } = useListingFormStore();
+
+  useEffect(() => {
+    const stepNames: Record<number, string> = {
+      1: "step1_type",
+      2: "step2_location",
+      3: "step4_path",
+      4: listingPath === "realtor" ? "step4_path" : "step3_details",
+      5: "step3_details",
+      6: "step5_booked",
+    };
+    trackEvent({
+      eventType: "wizard_step_view",
+      userId: user?.id ?? null,
+      stepName: stepNames[currentStep] ?? `step${currentStep}`,
+      metadata: { listingPath: listingPath ?? "undecided", currentStep },
+    });
+  }, [currentStep, listingPath, user?.id]);
 
   if (!token) {
     router.replace("/login");

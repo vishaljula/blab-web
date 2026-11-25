@@ -1,18 +1,16 @@
 import { NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
+import { getLocation, getBookingRoute, setBookingRoute } from "@/lib/location-store";
+import { fetchRoadRoute } from "@/app/api/dev/simulate-booking/[id]/route";
 import { neon } from "@neondatabase/serverless";
 import { decrypt } from "@/lib/crypto";
+import { haversineMeters, sha256Hex } from "@/lib/photography-dispatch";
 
 /**
- * GET /api/photography/bookings/[id]/track
+ * GET /api/photography/bookings/[id]/track?t=<optional_keyholder_token>
  *
- * Returns the live location of the assigned shutterbug for this booking.
- * Called by the customer tracking screen every 10 seconds.
- *
- * Response:
- *   { status, shutterbugLocation: { lat, lng, heading, ts } | null, eta_minutes: number | null }
- *
- * Auth: Bearer token (must belong to the booking's customer)
+ * Returns booking lifecycle state, scheduled window, assigned Shutterbug info,
+ * and (when en_route and outside the 300m previous-property privacy buffer)
+ * the live GPS location + 6-digit Arrival OTP.
  */
 export async function GET(
   request: Request,
@@ -21,31 +19,57 @@ export async function GET(
   const { id: bookingId } = await params;
 
   try {
-    const authHeader = request.headers.get("Authorization") ?? "";
-    const token = authHeader.replace("Bearer ", "").trim();
-    if (!token) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const shareToken = searchParams.get("t")?.trim() || null;
+    const shareTokenHash = shareToken ? sha256Hex(shareToken) : null;
 
-    let customerId: string;
-    try {
-      const decrypted = decrypt(token);
-      const payload = JSON.parse(decrypted);
-      if (!payload.userId || payload.expiry < Date.now())
-        return NextResponse.json({ success: false, error: "Token expired" }, { status: 401 });
-      customerId = payload.userId;
-    } catch {
-      return NextResponse.json({ success: false, error: "Invalid token" }, { status: 401 });
+    const authHeader = request.headers.get("Authorization") ?? "";
+    const bearer = authHeader.replace("Bearer ", "").trim();
+    const isDev = process.env.NODE_ENV !== "production";
+
+    let customerId: string | null = null;
+    if (bearer) {
+      try {
+        const decrypted = decrypt(bearer);
+        const payload = JSON.parse(decrypted);
+        if (payload.userId && payload.expiry >= Date.now()) {
+          customerId = payload.userId;
+        }
+      } catch {
+        // ignore invalid bearer if shareToken or isDev is used
+      }
     }
 
     const sql = neon(process.env.DATABASE_URL!);
 
-    // Verify booking belongs to this customer
     const [booking] = await sql`
-      SELECT pb.id, pb.status, pb.slot_date, pb.slot_window,
-             l.latitude AS property_lat, l.longitude AS property_lng
+      SELECT
+        pb.id,
+        pb.customer_id,
+        pb.booker_id,
+        pb.status,
+        pb.lifecycle_state,
+        pb.delivery_state,
+        pb.slot_date,
+        pb.slot_window,
+        pb.service_mode,
+        pb.planned_start_at,
+        pb.forecast_arrival_at,
+        pb.access_mode,
+        pb.onsite_name,
+        pb.arrival_otp,
+        pb.tracking_token_hash,
+        pb.tracking_token_expires,
+        pb.assigned_shutterbug_id,
+        sp.display_name AS shutterbug_name,
+        l.latitude AS property_lat,
+        l.longitude AS property_lng,
+        l.address AS property_address,
+        l.property_type AS property_type
       FROM photography_bookings pb
       JOIN listings l ON l.id = pb.listing_id
-      WHERE pb.id = ${bookingId}
-        AND pb.customer_id = ${customerId}
+      LEFT JOIN shutterbug_profiles sp ON sp.user_id = pb.assigned_shutterbug_id
+      WHERE pb.id = ${bookingId}::uuid
       LIMIT 1
     `;
 
@@ -53,71 +77,154 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Booking not found" }, { status: 404 });
     }
 
-    // Only return live location when en_route
-    if (booking.status !== "en_route") {
-      return NextResponse.json({
-        success: true,
-        status: booking.status,
-        shutterbugLocation: null,
-        etaMinutes: null,
-      });
+    // Authorization check: Owner/Booker OR valid unexpired Keyholder Token OR Dev Mode
+    const isOwner =
+      customerId !== null &&
+      (booking.customer_id === customerId || booking.booker_id === customerId);
+    const isValidShareToken =
+      shareTokenHash !== null &&
+      booking.tracking_token_hash === shareTokenHash &&
+      (!booking.tracking_token_expires ||
+        new Date(booking.tracking_token_expires).getTime() > Date.now());
+
+    if (!isOwner && !isValidShareToken && !isDev) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch latest location from Redis
-    let shutterbugLocation: { lat: number; lng: number; heading: number; speed: number; ts: number } | null = null;
-    if (redis) {
-      try {
-        const raw = await redis.get<string>(`location:${bookingId}`);
-        if (raw) shutterbugLocation = typeof raw === "string" ? JSON.parse(raw) : raw;
-      } catch (e) {
-        console.warn("[track] Redis read failed:", e);
-      }
+    const propLat = Number(booking.property_lat);
+    const propLng = Number(booking.property_lng);
+    const effectiveState = booking.lifecycle_state || booking.status;
+    const isEnRoute = booking.status === "en_route" || effectiveState === "en_route";
+    const isArrived = booking.status === "arrived" || effectiveState === "arrived";
+
+    // Reveal Arrival OTP only during en_route / arrived (and when not an unattended plot)
+    const showOtp =
+      !["completed", "cancelled", "shooting", "uploading"].includes(effectiveState) &&
+      booking.access_mode !== "open_plot_no_key"
+        ? (booking.arrival_otp ?? null)
+        : null;
+
+    const headers = {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      "Referrer-Policy": "no-referrer",
+    };
+
+    // Never expose live GPS unless the booking is actively en_route
+    if (!isEnRoute) {
+      return NextResponse.json(
+        {
+          success: true,
+          status: booking.status,
+          lifecycleState: effectiveState,
+          deliveryState: booking.delivery_state ?? "pending",
+          slotDate: booking.slot_date,
+          slotWindow: booking.slot_window,
+          plannedStartAt: booking.planned_start_at,
+          forecastArrivalAt: booking.forecast_arrival_at,
+          shutterbugName: booking.shutterbug_name ?? "Blab Shutterbug",
+          accessMode: booking.access_mode ?? "booker_present",
+          onsiteName: booking.onsite_name ?? null,
+          arrivalOtp: showOtp,
+          shutterbugLocation: null,
+          etaMinutes: null,
+          propertyLocation: propLat && propLng ? { lat: propLat, lng: propLng } : null,
+          propertyAddress: booking.property_address ?? null,
+          propertyType: booking.property_type ?? null,
+        },
+        { headers }
+      );
     }
 
-    // Compute ETA via Mapbox Directions API (straight-line fallback if no token)
-    let etaMinutes: number | null = null;
-    if (shutterbugLocation && booking.property_lat && booking.property_lng) {
-      const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-      if (mapboxToken) {
-        try {
-          const origin = `${shutterbugLocation.lng},${shutterbugLocation.lat}`;
-          const dest = `${booking.property_lng},${booking.property_lat}`;
-          const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin};${dest}?access_token=${mapboxToken}`;
-          const res = await fetch(url, { next: { revalidate: 0 } });
-          if (res.ok) {
-            const data = await res.json();
-            const durationSec: number = data?.routes?.[0]?.duration ?? null;
-            if (durationSec != null) etaMinutes = Math.ceil(durationSec / 60);
-          }
-        } catch (e) {
-          console.warn("[track] Mapbox directions failed:", e);
-          // Fallback: straight-line distance / 30km/h
-          const R = 6371;
-          const dLat = ((booking.property_lat - shutterbugLocation.lat) * Math.PI) / 180;
-          const dLng = ((booking.property_lng - shutterbugLocation.lng) * Math.PI) / 180;
-          const a =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos((shutterbugLocation.lat * Math.PI) / 180) *
-              Math.cos((booking.property_lat * Math.PI) / 180) *
-              Math.sin(dLng / 2) ** 2;
-          const distKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          etaMinutes = Math.ceil((distKm / 30) * 60);
+    // Fetch latest location and cached road route from Redis in parallel
+    let [shutterbugLocation, cachedRoute] = await Promise.all([
+      getLocation(bookingId),
+      getBookingRoute(bookingId),
+    ]);
+    let privacySuppressed = false;
+
+    // 300m Previous-Customer Property Privacy Buffer:
+    // If the Shutterbug just finished a previous visit today, suppress exact coordinates
+    // while they are still within 300m of that previous private property.
+    if (shutterbugLocation && booking.assigned_shutterbug_id) {
+      const [prevVisit] = await sql`
+        SELECT ST_Y(point::geometry) AS lat, ST_X(point::geometry) AS lng
+        FROM photography_allocations
+        WHERE shutterbug_id = ${booking.assigned_shutterbug_id}::uuid
+          AND booking_id IS DISTINCT FROM ${bookingId}::uuid
+          AND status = 'finished'
+          AND actual_finished_at >= clock_timestamp() - interval '3 hours'
+        ORDER BY actual_finished_at DESC
+        LIMIT 1
+      `;
+      if (prevVisit && typeof prevVisit.lat === "number" && typeof prevVisit.lng === "number") {
+        const distFromPrevM = haversineMeters(
+          shutterbugLocation.lat,
+          shutterbugLocation.lng,
+          prevVisit.lat,
+          prevVisit.lng
+        );
+        // Only suppress if the two properties aren't themselves next door (<400m apart)
+        const distBetweenPropsM = haversineMeters(
+          propLat,
+          propLng,
+          prevVisit.lat,
+          prevVisit.lng
+        );
+        if (distFromPrevM < 300 && distBetweenPropsM > 450) {
+          shutterbugLocation = null;
+          privacySuppressed = true;
         }
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      status: booking.status,
-      shutterbugLocation,
-      etaMinutes,
-      propertyLocation: {
-        lat: booking.property_lat,
-        lng: booking.property_lng,
+    let etaMinutes: number | null = null;
+    if (shutterbugLocation && propLat && propLng) {
+      const distKm =
+        haversineMeters(shutterbugLocation.lat, shutterbugLocation.lng, propLat, propLng) /
+        1000;
+      etaMinutes = Math.max(1, Math.ceil((distKm / 24) * 60));
+
+      // If no cached road route exists yet for this active ride, fetch and cache it once on the server
+      if (!cachedRoute || cachedRoute.length < 2) {
+        cachedRoute = await fetchRoadRoute(
+          [shutterbugLocation.lng, shutterbugLocation.lat],
+          [propLng, propLat]
+        );
+        if (cachedRoute.length > 1) {
+          setBookingRoute(bookingId, cachedRoute).catch(() => {});
+        }
+      }
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        status: booking.status,
+        lifecycleState: effectiveState,
+        deliveryState: booking.delivery_state ?? "pending",
+        slotDate: booking.slot_date,
+        slotWindow: booking.slot_window,
+        plannedStartAt: booking.planned_start_at,
+        forecastArrivalAt: booking.forecast_arrival_at,
+        shutterbugName: booking.shutterbug_name ?? "Blab Shutterbug",
+        accessMode: booking.access_mode ?? "booker_present",
+        onsiteName: booking.onsite_name ?? null,
+        arrivalOtp: showOtp,
+        privacySuppressed,
+        shutterbugLocation,
+        route: privacySuppressed ? null : cachedRoute,
+        etaMinutes,
+        propertyLocation: propLat && propLng ? { lat: propLat, lng: propLng } : null,
+        propertyAddress: booking.property_address ?? null,
+        propertyType: booking.property_type ?? null,
       },
-    });
+      { headers }
+    );
   } catch (err: any) {
     console.error("[track] error:", err);
-    return NextResponse.json({ success: false, error: err.message ?? "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: err.message ?? "Server error" },
+      { status: 500 }
+    );
   }
 }

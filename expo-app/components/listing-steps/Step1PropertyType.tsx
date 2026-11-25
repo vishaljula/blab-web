@@ -9,23 +9,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "@/components/useColorScheme";
 import { COLORS } from "@/lib/theme";
 import { useListingFormStore, type ListingType, type PropertyType } from "@/store/listingForm";
+import { PROPERTY_CONFIGS } from "@/lib/propertyConfig";
 import WizardShell, { CtaButton } from "./WizardShell";
 
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
 const PURPOSE: { id: ListingType; label: string; icon: IoniconName; desc: string }[] = [
-  { id: "sale", label: "For Sale", icon: "pricetag-outline", desc: "Sell your property" },
+  { id: "sale", label: "For Sale", icon: "pricetag-outline", desc: "Sell property" },
   { id: "rent", label: "For Rent", icon: "key-outline",      desc: "Find a tenant" },
 ];
 
-const PROPERTY_TYPES: { id: PropertyType; label: string; icon: IoniconName }[] = [
-  { id: "apartment",         label: "Apartment",      icon: "business-outline"      },
-  { id: "independent_house", label: "Independent House", icon: "home-outline"       },
-  { id: "villa",             label: "Villa",          icon: "leaf-outline"          },
-  { id: "plot",              label: "Plot / Land",    icon: "map-outline"           },
-  { id: "commercial",        label: "Commercial",     icon: "storefront-outline"    },
-  { id: "pg",                label: "PG / Co-living", icon: "people-outline"        },
-];
+const PROPERTY_TYPES: { id: PropertyType; label: string; icon: IoniconName }[] = PROPERTY_CONFIGS.map((c) => ({
+  id: c.id,
+  label: c.label,
+  icon: c.icon as IoniconName,
+}));
 
 export default function Step1PropertyType() {
   const colorScheme = useColorScheme();

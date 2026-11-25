@@ -758,6 +758,619 @@ async function run() {
     `;
     console.log("✓ Migrated buyer/owner → 'user' role (developer unchanged)");
 
+    // ════════════════════════════════════════════════════════════════════════
+    // Shutterbug Dispatch, Route Allocation & Live Tracking Engine — MVP2
+    // ════════════════════════════════════════════════════════════════════════
+
+    await sql`CREATE EXTENSION IF NOT EXISTS btree_gist;`;
+    console.log("✔ btree_gist extension enabled");
+
+    // Update service_config to cover Full Hyderabad + ORR + 25 km belt (65 km radius)
+    // and use the 3 Daylight Windows (9–12, 12–3, 3–5:30).
+    await sql`
+      UPDATE service_config
+      SET zone_center_lat = 17.3850,
+          zone_center_lng = 78.4867,
+          zone_radius_km = 65,
+          min_lead_time_hours = 2,
+          time_windows = '[
+            {"id":"A","label":"Morning","startHour":9,"startMin":0,"endHour":12,"endMin":0},
+            {"id":"B","label":"Midday","startHour":12,"startMin":0,"endHour":15,"endMin":0},
+            {"id":"C","label":"Afternoon","startHour":15,"startMin":0,"endHour":17,"endMin":30}
+          ]'::jsonb,
+          updated_at = NOW()
+      WHERE id = 'default';
+    `;
+    console.log("✔ service_config updated to 65 km Greater Hyderabad + ORR + 25km radius & 3 Daylight Windows");
+
+    // 1. shutterbug_profiles table
+    await sql`
+      CREATE TABLE IF NOT EXISTS shutterbug_profiles (
+        user_id           uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        display_name      text NOT NULL DEFAULT 'Blab Shutterbug',
+        enabled           boolean NOT NULL DEFAULT true,
+        dispatch_enabled  boolean NOT NULL DEFAULT true,
+        capabilities      text[] NOT NULL DEFAULT ARRAY['photos']::text[],
+        reliability_score numeric(5,2) NOT NULL DEFAULT 100.00 CHECK (reliability_score BETWEEN 0 AND 100),
+        home_lat          double precision NOT NULL DEFAULT 17.3850,
+        home_lng          double precision NOT NULL DEFAULT 78.4867,
+        updated_at        timestamptz NOT NULL DEFAULT now()
+      );
+    `;
+    console.log("✔ shutterbug_profiles table ready");
+
+    // 2. shutterbug_shifts table
+    await sql`
+      CREATE TABLE IF NOT EXISTS shutterbug_shifts (
+        id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        shutterbug_id   uuid NOT NULL REFERENCES shutterbug_profiles(user_id) ON DELETE CASCADE,
+        zone_code       text NOT NULL DEFAULT 'HYD_METRO',
+        shift_date      varchar(10) NOT NULL,
+        starts_at       timestamptz NOT NULL,
+        ends_at         timestamptz NOT NULL,
+        start_point     geography(Point, 4326) NOT NULL,
+        end_point       geography(Point, 4326) NOT NULL,
+        status          text NOT NULL DEFAULT 'committed' CHECK (status IN ('committed', 'cancelled')),
+        route_version   integer NOT NULL DEFAULT 0,
+        created_at      timestamptz NOT NULL DEFAULT now(),
+        CHECK (ends_at > starts_at),
+        EXCLUDE USING gist (
+          shutterbug_id WITH =,
+          tstzrange(starts_at, ends_at, '[)') WITH &&
+        ) WHERE (status = 'committed')
+      );
+    `;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_shutterbug_shift_day ON shutterbug_shifts (shutterbug_id, shift_date) WHERE status = 'committed';`;
+    console.log("✔ shutterbug_shifts table ready");
+
+    // 3. Upgrade photography_bookings constraints & columns
+    await sql`
+      DO $$
+      DECLARE
+        r record;
+      BEGIN
+        FOR r IN (
+          SELECT conname FROM pg_constraint
+          WHERE conrelid = 'photography_bookings'::regclass
+            AND contype = 'c'
+            AND (pg_get_constraintdef(oid) ILIKE '%slot_window%' OR pg_get_constraintdef(oid) ILIKE '%status%')
+        ) LOOP
+          EXECUTE 'ALTER TABLE photography_bookings DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
+        END LOOP;
+      END $$;
+    `;
+
+    await sql`
+      ALTER TABLE photography_bookings
+        ADD COLUMN IF NOT EXISTS booker_id              uuid REFERENCES users(id),
+        ADD COLUMN IF NOT EXISTS booker_role            text NOT NULL DEFAULT 'owner',
+        ADD COLUMN IF NOT EXISTS service_mode           text NOT NULL DEFAULT 'scheduled',
+        ADD COLUMN IF NOT EXISTS lifecycle_state        text NOT NULL DEFAULT 'booked',
+        ADD COLUMN IF NOT EXISTS delivery_state         text NOT NULL DEFAULT 'pending',
+        ADD COLUMN IF NOT EXISTS property_point         geography(Point, 4326),
+        ADD COLUMN IF NOT EXISTS access_point           geography(Point, 4326),
+        ADD COLUMN IF NOT EXISTS arrival_window_start   timestamptz,
+        ADD COLUMN IF NOT EXISTS arrival_window_end     timestamptz,
+        ADD COLUMN IF NOT EXISTS planned_start_at       timestamptz,
+        ADD COLUMN IF NOT EXISTS forecast_arrival_at    timestamptz,
+        ADD COLUMN IF NOT EXISTS daylight_cutoff_at     timestamptz,
+        ADD COLUMN IF NOT EXISTS onsite_minutes         integer NOT NULL DEFAULT 50,
+        ADD COLUMN IF NOT EXISTS exterior_minutes       integer NOT NULL DEFAULT 20,
+        ADD COLUMN IF NOT EXISTS setup_minutes          integer NOT NULL DEFAULT 10,
+        ADD COLUMN IF NOT EXISTS units_json             jsonb NOT NULL DEFAULT '[]'::jsonb,
+        ADD COLUMN IF NOT EXISTS access_mode            text NOT NULL DEFAULT 'booker_present',
+        ADD COLUMN IF NOT EXISTS onsite_name            text,
+        ADD COLUMN IF NOT EXISTS onsite_phone_e164      text,
+        ADD COLUMN IF NOT EXISTS tracking_token_hash    text,
+        ADD COLUMN IF NOT EXISTS tracking_token_expires timestamptz,
+        ADD COLUMN IF NOT EXISTS arrival_otp            varchar(6),
+        ADD COLUMN IF NOT EXISTS arrival_otp_hash       text,
+        ADD COLUMN IF NOT EXISTS arrival_otp_attempts   integer NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS arrival_photo_url      text,
+        ADD COLUMN IF NOT EXISTS travel_started_at      timestamptz,
+        ADD COLUMN IF NOT EXISTS tracking_started_at    timestamptz,
+        ADD COLUMN IF NOT EXISTS arrived_at             timestamptz,
+        ADD COLUMN IF NOT EXISTS shoot_started_at       timestamptz,
+        ADD COLUMN IF NOT EXISTS shoot_finished_at      timestamptz,
+        ADD COLUMN IF NOT EXISTS completed_at           timestamptz,
+        ADD COLUMN IF NOT EXISTS idempotency_key        text,
+        ADD COLUMN IF NOT EXISTS request_hash           text,
+        ADD COLUMN IF NOT EXISTS version                integer NOT NULL DEFAULT 0;
+    `;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_photo_bookings_idempotency ON photography_bookings (idempotency_key) WHERE idempotency_key IS NOT NULL;`;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_photo_bookings_tracking_token ON photography_bookings (tracking_token_hash) WHERE tracking_token_hash IS NOT NULL;`;
+    console.log("✔ photography_bookings upgraded with route, access, OTP & lifecycle columns");
+
+    // 4. photography_allocations table
+    await sql`
+      CREATE TABLE IF NOT EXISTS photography_allocations (
+        id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        booking_id          uuid REFERENCES photography_bookings(id) ON DELETE CASCADE,
+        shift_id            uuid NOT NULL REFERENCES shutterbug_shifts(id) ON DELETE CASCADE,
+        shutterbug_id       uuid NOT NULL REFERENCES shutterbug_profiles(user_id) ON DELETE CASCADE,
+        kind                text NOT NULL DEFAULT 'visit' CHECK (kind IN ('visit', 'break')),
+        status              text NOT NULL CHECK (status IN ('offered', 'committed', 'released', 'expired', 'finished')),
+        onsite_start        timestamptz NOT NULL,
+        onsite_end          timestamptz NOT NULL,
+        actual_finished_at  timestamptz,
+        point               geography(Point, 4326) NOT NULL,
+        h3_cell             text NOT NULL,
+        expires_at          timestamptz,
+        created_at          timestamptz NOT NULL DEFAULT now(),
+        CHECK (onsite_end > onsite_start),
+        CHECK (kind <> 'visit' OR booking_id IS NOT NULL),
+        CHECK (status <> 'offered' OR expires_at IS NOT NULL),
+        EXCLUDE USING gist (
+          shutterbug_id WITH =,
+          tstzrange(onsite_start, COALESCE(actual_finished_at, onsite_end), '[)') WITH &&
+        ) WHERE (status IN ('offered', 'committed'))
+      );
+    `;
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS one_active_alloc_per_booking
+        ON photography_allocations(booking_id)
+        WHERE status IN ('offered', 'committed');
+    `;
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS one_active_offer_per_worker
+        ON photography_allocations(shutterbug_id)
+        WHERE status = 'offered';
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_allocations_shift_start
+        ON photography_allocations(shift_id, onsite_start);
+    `;
+    console.log("✔ photography_allocations table ready");
+
+    // 5. photography_outbox table
+    await sql`
+      CREATE TABLE IF NOT EXISTS photography_outbox (
+        id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        booking_id      uuid REFERENCES photography_bookings(id) ON DELETE CASCADE,
+        target_user_id  uuid REFERENCES users(id) ON DELETE SET NULL,
+        event_type      text NOT NULL,
+        dedupe_key      text NOT NULL UNIQUE,
+        payload         jsonb NOT NULL DEFAULT '{}'::jsonb,
+        status          text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'suppressed', 'failed')),
+        attempts        integer NOT NULL DEFAULT 0,
+        next_attempt_at timestamptz NOT NULL DEFAULT now(),
+        locked_until    timestamptz,
+        lock_owner      text,
+        last_error      text,
+        created_at      timestamptz NOT NULL DEFAULT now()
+      );
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_outbox_due
+        ON photography_outbox(next_attempt_at)
+        WHERE status = 'pending';
+    `;
+    console.log("✔ photography_outbox table ready");
+
+    // 6. Sequential PL/pgSQL function: reserve_photography_visit
+    await sql`
+      CREATE OR REPLACE FUNCTION reserve_photography_visit(
+        p_booking_id             uuid,
+        p_caller_user_id         uuid,
+        p_idempotency_key        text,
+        p_request_hash           text,
+        p_shift_id               uuid,
+        p_expected_route_ver     integer,
+        p_expected_prev_alloc_id uuid,
+        p_expected_next_alloc_id uuid,
+        p_allocation_status      text,
+        p_offer_ttl_seconds      integer,
+        p_onsite_start           timestamptz,
+        p_travel_from_prev_mins  integer,
+        p_travel_to_next_mins    integer
+      )
+      RETURNS TABLE (
+        ok                boolean,
+        error_code        text,
+        allocation_id     uuid,
+        allocation_status text,
+        new_route_ver     integer
+      )
+      LANGUAGE plpgsql
+      AS $$
+      DECLARE
+        v_booking        photography_bookings%ROWTYPE;
+        v_shift          shutterbug_shifts%ROWTYPE;
+        v_existing_alloc photography_allocations%ROWTYPE;
+        v_prev_id        uuid;
+        v_prev_end       timestamptz;
+        v_next_id        uuid;
+        v_next_start     timestamptz;
+        v_onsite_end     timestamptz;
+        v_expired_count  integer := 0;
+        v_expires_at     timestamptz;
+        v_alloc_id       uuid;
+      BEGIN
+        -- 0. Basic non-null & domain guard
+        IF p_booking_id IS NULL OR p_shift_id IS NULL OR p_onsite_start IS NULL
+           OR p_idempotency_key IS NULL OR p_request_hash IS NULL
+           OR p_travel_from_prev_mins IS NULL OR p_travel_from_prev_mins < 0
+           OR p_travel_to_next_mins IS NULL OR p_travel_to_next_mins < 0
+           OR p_allocation_status NOT IN ('committed', 'offered') THEN
+          RETURN QUERY SELECT false, 'INVALID_ARGUMENTS'::text, NULL::uuid, NULL::text, NULL::integer;
+          RETURN;
+        END IF;
+
+        -- 1. Lock the booking row FIRST to serialize all reservation attempts for this booking
+        SELECT * INTO v_booking
+          FROM photography_bookings
+         WHERE id = p_booking_id
+         FOR UPDATE;
+
+        IF NOT FOUND THEN
+          RETURN QUERY SELECT false, 'BOOKING_NOT_FOUND'::text, NULL::uuid, NULL::text, NULL::integer;
+          RETURN;
+        END IF;
+
+        IF COALESCE(v_booking.booker_id, v_booking.customer_id) IS DISTINCT FROM p_caller_user_id THEN
+          RETURN QUERY SELECT false, 'FORBIDDEN'::text, NULL::uuid, NULL::text, NULL::integer;
+          RETURN;
+        END IF;
+
+        -- 2. Post-lock idempotency check (verifies payload hash & returns live status)
+        IF v_booking.idempotency_key IS NOT NULL THEN
+          IF v_booking.idempotency_key = p_idempotency_key THEN
+            IF v_booking.request_hash IS DISTINCT FROM p_request_hash THEN
+              RETURN QUERY SELECT false, 'IDEMPOTENCY_PAYLOAD_MISMATCH'::text, NULL::uuid, NULL::text, NULL::integer;
+              RETURN;
+            END IF;
+            SELECT * INTO v_existing_alloc
+              FROM photography_allocations
+             WHERE booking_id = p_booking_id
+             ORDER BY created_at DESC
+             LIMIT 1;
+            IF FOUND THEN
+              RETURN QUERY SELECT
+                v_existing_alloc.status IN ('offered', 'committed'),
+                CASE WHEN v_existing_alloc.status IN ('offered', 'committed') THEN NULL ELSE 'ALLOCATION_' || upper(v_existing_alloc.status) END,
+                v_existing_alloc.id,
+                v_existing_alloc.status,
+                NULL::integer;
+              RETURN;
+            END IF;
+          END IF;
+        END IF;
+
+        -- Reject if booking already has an active allocation
+        IF EXISTS (
+          SELECT 1 FROM photography_allocations
+           WHERE booking_id = p_booking_id
+             AND status IN ('offered', 'committed')
+        ) THEN
+          RETURN QUERY SELECT false, 'BOOKING_ALREADY_ALLOCATED'::text, NULL::uuid, NULL::text, NULL::integer;
+          RETURN;
+        END IF;
+
+        -- 3. Validate booking-derived window, duration, and daylight invariants
+        IF v_booking.onsite_minutes IS NULL OR v_booking.onsite_minutes <= 0
+           OR v_booking.arrival_window_start IS NULL OR v_booking.arrival_window_end IS NULL
+           OR p_onsite_start < v_booking.arrival_window_start
+           OR p_onsite_start > v_booking.arrival_window_end THEN
+          RETURN QUERY SELECT false, 'OUTSIDE_PROMISED_WINDOW'::text, NULL::uuid, NULL::text, NULL::integer;
+          RETURN;
+        END IF;
+
+        v_onsite_end := p_onsite_start + make_interval(mins => v_booking.onsite_minutes);
+
+        IF COALESCE(v_booking.exterior_minutes, 0) > 0 THEN
+          IF v_booking.daylight_cutoff_at IS NULL
+             OR (p_onsite_start + make_interval(mins => COALESCE(v_booking.setup_minutes, 0) + v_booking.exterior_minutes) > v_booking.daylight_cutoff_at) THEN
+            RETURN QUERY SELECT false, 'PAST_DAYLIGHT_CUTOFF'::text, NULL::uuid, NULL::text, NULL::integer;
+            RETURN;
+          END IF;
+        END IF;
+
+        -- 4. Lock the candidate shift row
+        SELECT * INTO v_shift
+          FROM shutterbug_shifts
+         WHERE id = p_shift_id
+           AND status = 'committed'
+         FOR UPDATE;
+
+        IF NOT FOUND THEN
+          RETURN QUERY SELECT false, 'SHIFT_NOT_FOUND'::text, NULL::uuid, NULL::text, NULL::integer;
+          RETURN;
+        END IF;
+
+        -- 5. Expire stale offers on this shift; if any row expired, bump route_version immediately
+        WITH expired AS (
+          UPDATE photography_allocations
+             SET status = 'expired'
+           WHERE shift_id = p_shift_id
+             AND status = 'offered'
+             AND expires_at <= clock_timestamp()
+          RETURNING id
+        )
+        SELECT COUNT(*)::integer INTO v_expired_count FROM expired;
+
+        IF v_expired_count > 0 THEN
+          UPDATE shutterbug_shifts
+             SET route_version = route_version + 1
+           WHERE id = p_shift_id
+           RETURNING route_version INTO v_shift.route_version;
+        END IF;
+
+        -- 6. Verify route_version matches what Mapbox computed against
+        IF v_shift.route_version IS DISTINCT FROM p_expected_route_ver THEN
+          RETURN QUERY SELECT false, 'ROUTE_VERSION_MISMATCH'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        -- 7. Check shift start/end bounds including travel to/from shift anchors
+        IF p_onsite_start - make_interval(mins => p_travel_from_prev_mins) < v_shift.starts_at
+           OR v_onsite_end + make_interval(mins => p_travel_to_next_mins) > v_shift.ends_at THEN
+          RETURN QUERY SELECT false, 'OUTSIDE_SHIFT_BOUNDS'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        -- 8. Check direct interval overlap using actual_finished_at for completed visits
+        IF EXISTS (
+          SELECT 1 FROM photography_allocations
+           WHERE shift_id = p_shift_id
+             AND status IN ('offered', 'committed', 'finished')
+             AND tstzrange(onsite_start, COALESCE(actual_finished_at, onsite_end), '[)')
+                 && tstzrange(p_onsite_start, v_onsite_end, '[)')
+        ) THEN
+          RETURN QUERY SELECT false, 'INTERVAL_CONFLICT'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        -- 9. Verify exact preceding neighbor ID & travel inequality
+        SELECT id, COALESCE(actual_finished_at, onsite_end)
+          INTO v_prev_id, v_prev_end
+          FROM photography_allocations
+         WHERE shift_id = p_shift_id
+           AND status IN ('offered', 'committed', 'finished')
+           AND COALESCE(actual_finished_at, onsite_end) <= p_onsite_start
+         ORDER BY COALESCE(actual_finished_at, onsite_end) DESC
+         LIMIT 1;
+
+        IF v_prev_id IS DISTINCT FROM p_expected_prev_alloc_id THEN
+          RETURN QUERY SELECT false, 'NEIGHBOR_CHANGED'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        IF v_prev_end IS NOT NULL
+           AND (v_prev_end + make_interval(mins => p_travel_from_prev_mins) > p_onsite_start) THEN
+          RETURN QUERY SELECT false, 'PREV_TRAVEL_INFEASIBLE'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        -- 10. Verify exact following neighbor ID & travel inequality
+        SELECT id, onsite_start
+          INTO v_next_id, v_next_start
+          FROM photography_allocations
+         WHERE shift_id = p_shift_id
+           AND status IN ('offered', 'committed')
+           AND onsite_start >= v_onsite_end
+         ORDER BY onsite_start ASC
+         LIMIT 1;
+
+        IF v_next_id IS DISTINCT FROM p_expected_next_alloc_id THEN
+          RETURN QUERY SELECT false, 'NEIGHBOR_CHANGED'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        IF v_next_start IS NOT NULL
+           AND (v_onsite_end + make_interval(mins => p_travel_to_next_mins) > v_next_start) THEN
+          RETURN QUERY SELECT false, 'NEXT_TRAVEL_INFEASIBLE'::text, NULL::uuid, NULL::text, v_shift.route_version;
+          RETURN;
+        END IF;
+
+        -- 11. Insert allocation, update booking & shift route_version, and enqueue outbox event
+        v_expires_at := CASE
+          WHEN p_allocation_status = 'offered' THEN clock_timestamp() + make_interval(secs => COALESCE(p_offer_ttl_seconds, 35))
+          ELSE NULL
+        END;
+
+        INSERT INTO photography_allocations (
+          booking_id, shift_id, shutterbug_id, kind, status,
+          onsite_start, onsite_end, point, h3_cell, expires_at
+        ) VALUES (
+          p_booking_id, p_shift_id, v_shift.shutterbug_id, 'visit', p_allocation_status,
+          p_onsite_start, v_onsite_end, v_booking.property_point, COALESCE(v_booking.property_h3_cell, ''), v_expires_at
+        ) RETURNING id INTO v_alloc_id;
+
+        UPDATE photography_bookings
+           SET assigned_shutterbug_id = v_shift.shutterbug_id,
+               planned_start_at       = p_onsite_start,
+               forecast_arrival_at    = p_onsite_start,
+               status                 = CASE WHEN p_allocation_status = 'committed' THEN 'confirmed' ELSE 'pending' END,
+               lifecycle_state        = CASE WHEN p_allocation_status = 'committed' THEN 'assigned' ELSE 'booked' END,
+               idempotency_key        = p_idempotency_key,
+               request_hash           = p_request_hash,
+               version                = version + 1,
+               updated_at             = clock_timestamp()
+         WHERE id = p_booking_id;
+
+        UPDATE shutterbug_shifts
+           SET route_version = route_version + 1
+         WHERE id = p_shift_id
+         RETURNING route_version INTO new_route_ver;
+
+        INSERT INTO photography_outbox (booking_id, target_user_id, event_type, dedupe_key, payload)
+        VALUES (
+          p_booking_id,
+          v_shift.shutterbug_id,
+          CASE WHEN p_allocation_status = 'offered' THEN 'EXPRESS_OFFER_CREATED' ELSE 'SCHEDULED_VISIT_ASSIGNED' END,
+          'alloc:' || v_alloc_id::text,
+          jsonb_build_object(
+            'allocationId', v_alloc_id,
+            'bookingId', p_booking_id,
+            'onsiteStart', p_onsite_start,
+            'expiresAt', v_expires_at
+          )
+        ) ON CONFLICT (dedupe_key) DO NOTHING;
+
+        RETURN QUERY SELECT true, NULL::text, v_alloc_id, p_allocation_status, new_route_ver;
+      END;
+      $$;
+    `;
+    console.log("✔ reserve_photography_visit PL/pgSQL function installed");
+
+    // 7. Seed shutterbug_profiles & 14 days of shifts for all active shutterbugs
+    await sql`
+      INSERT INTO shutterbug_profiles (user_id, display_name, home_lat, home_lng)
+      SELECT id, 'Rahul K. (Shutterbug)', 17.3496, 78.5521
+      FROM users
+      WHERE role = 'shutterbug'
+      ON CONFLICT (user_id) DO NOTHING;
+    `;
+    console.log("✔ Seeded shutterbug_profiles for existing shutterbugs");
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MVP Phases 1–4: Multi-Category Specs, Society/Builder Units, Promo & Orders
+    // ══════════════════════════════════════════════════════════════════════════
+
+    await sql`ALTER TABLE listings ADD COLUMN IF NOT EXISTS photos jsonb DEFAULT '[]'::jsonb;`;
+    await sql`ALTER TABLE listings ADD COLUMN IF NOT EXISTS property_specs jsonb DEFAULT '{}'::jsonb;`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_listings_society_name ON listings (society_name) WHERE society_name IS NOT NULL;`;
+    console.log("✔ listings.photos & listings.property_specs ready");
+
+    await sql`ALTER TABLE service_config ADD COLUMN IF NOT EXISTS launch_promo_active boolean NOT NULL DEFAULT true;`;
+    await sql`ALTER TABLE service_config ADD COLUMN IF NOT EXISTS launch_promo_label text NOT NULL DEFAULT 'Launch Offer · 100% Free';`;
+    await sql`ALTER TABLE service_config ADD COLUMN IF NOT EXISTS shoot_base_price_inr integer NOT NULL DEFAULT 999;`;
+    await sql`ALTER TABLE service_config ADD COLUMN IF NOT EXISTS express_surcharge_inr integer NOT NULL DEFAULT 500;`;
+    console.log("✔ service_config pricing & launch promo columns ready");
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS payment_orders (
+        id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id          uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        listing_id       uuid REFERENCES listings(id) ON DELETE SET NULL,
+        booking_id       uuid REFERENCES photography_bookings(id) ON DELETE SET NULL,
+        order_type       text NOT NULL CHECK (order_type IN ('photography_shoot', 'realtor_pro', 'realtor_pro_plus')),
+        base_amount_inr  integer NOT NULL,
+        discount_inr     integer NOT NULL DEFAULT 0,
+        payable_inr      integer NOT NULL DEFAULT 0,
+        promo_code       text,
+        status           text NOT NULL DEFAULT 'paid' CHECK (status IN ('pending', 'paid', 'refunded')),
+        created_at       timestamptz NOT NULL DEFAULT NOW()
+      );
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_payment_orders_user ON payment_orders (user_id, created_at DESC);`;
+    console.log("✔ payment_orders table ready");
+
+    // Seed diverse Hyderabad Commercial, Industrial, Agricultural & Multi-Unit Society listings
+    const [ownerRow] = await sql`SELECT id FROM users LIMIT 1`;
+    if (ownerRow?.id) {
+      const seedMarker = "BLAB_MVP_SEED_V1";
+      const existingSeed = await sql`SELECT id FROM listings WHERE property_specs->>'seedTag' = ${seedMarker} LIMIT 1`;
+      if (existingSeed.length === 0) {
+        // 1. Multi-unit society: My Home Bhooja (Builder Floor Plans + 2 Individual Verified Owner Units)
+        await sql`
+          INSERT INTO listings (
+            lister_id, latitude, longitude, price, property_type, listing_type, lister_type, status,
+            bedrooms, bathrooms, built_up_area, carpet_area, area_unit,
+            address, city, floor_number, total_floors, society_name, facing,
+            contact_name, contact_phone, image_url, description, features, property_specs
+          ) VALUES
+          (
+            ${ownerRow.id}, 17.4326, 78.3744, 34500000, 'apartment', 'sale', 'developer', 'active',
+            3, 3, 2595, 2100, 'sqft',
+            'My Home Bhooja, Silpa Gram Craft Village, Hitec City', 'Hyderabad', 18, 36, 'My Home Bhooja', 'E',
+            'My Home Constructions', '+919848011223',
+            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80',
+            'Flagship luxury gated community in Hitec City with 75% open landscaped greens and central clubhouse.',
+            '["Swimming Pool", "Club House", "Gym / Fitness Center", "Covered Parking", "Power Backup", "Security / CCTV", "Gated Community"]'::jsonb,
+            ${JSON.stringify({
+              seedTag: seedMarker,
+              projectRera: "P02400000012",
+              possessionStatus: "Ready to Move",
+              builderConfigs: [
+                { bhk: "3 BHK East", areaSqft: 2595, priceInr: 34500000, unitsAvailable: 4 },
+                { bhk: "3 BHK West", areaSqft: 2680, priceInr: 36000000, unitsAvailable: 2 },
+                { bhk: "4 BHK Sky Villa", areaSqft: 4070, priceInr: 58000000, unitsAvailable: 1 }
+              ]
+            })}::jsonb
+          ),
+          (
+            ${ownerRow.id}, 17.4328, 78.3746, 32500000, 'apartment', 'sale', 'owner', 'active',
+            3, 3, 2595, 2100, 'sqft',
+            'Tower B, Flat 1404, My Home Bhooja, Hitec City', 'Hyderabad', 14, 36, 'My Home Bhooja', 'E',
+            'Vikram Reddy (Owner)', '+919849022334',
+            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80',
+            'Direct owner resale in Tower B overlooking central park. No GST, modular kitchen, Shutterbug verified.',
+            '["Air Conditioning", "Modular Kitchen", "Covered Parking", "Club House", "Swimming Pool", "Gated Community"]'::jsonb,
+            ${JSON.stringify({
+              seedTag: seedMarker,
+              shutterbugVerified: true,
+              possessionStatus: "Ready · No GST"
+            })}::jsonb
+          ),
+          -- 2. Commercial Office (Crexi style: Cap Rate, Warm Shell, Pre-Leased)
+          (
+            ${ownerRow.id}, 17.4483, 78.3818, 65000000, 'commercial', 'sale', 'owner', 'active',
+            null, 2, 4800, 3950, 'sqft',
+            ' Mindspace Cyberabad Road, Madhapur, Hitec City', 'Hyderabad', 6, 14, 'Orbit Tech Park', 'N',
+            'Arjun Mehta', '+919849133445',
+            'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80',
+            'Grade-A pre-leased IT office suite with MNC tenant, 8.4% Cap Rate, 5-year lock-in, and 100% DG backup.',
+            '["Power Backup", "Lift / Elevator", "Security / CCTV", "Covered Parking", "Air Conditioning"]'::jsonb,
+            ${JSON.stringify({
+              seedTag: seedMarker,
+              subType: "Office Space",
+              shellStatus: "Plug & Play",
+              occupancyStatus: "Pre-Leased",
+              capRatePct: "8.4%",
+              monthlyRentInr: 456000,
+              lockInYears: "5 Yrs",
+              frontageFt: "60 ft",
+              powerLoadKva: "120 kVA",
+              parkingSlots: "6 Covered"
+            })}::jsonb
+          ),
+          -- 3. Industrial Warehouse (Shamshabad ORR)
+          (
+            ${ownerRow.id}, 17.2403, 78.4294, 42000000, 'industrial', 'sale', 'owner', 'active',
+            null, 2, 18500, 16000, 'sqft',
+            'Exit 16 Outer Ring Road, Shamshabad Logistics Park', 'Hyderabad', 1, 1, 'ORR Logistics Hub', 'E',
+            'Srinivas Rao', '+919849244556',
+            'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80',
+            'PEB clear-span warehouse 1.2 km from Shamshabad ORR Exit 16 with 36 ft clear height and 4 hydraulic dock levellers.',
+            '["Power Backup", "Security / CCTV", "24/7 Water Supply"]'::jsonb,
+            ${JSON.stringify({
+              seedTag: seedMarker,
+              subType: "Warehouse / Godown",
+              ceilingHeightFt: "36 ft",
+              loadingDocks: "4 Docks",
+              powerLoadKva: "250 kVA",
+              floorCapacityTpsm: "6 T/m²",
+              orrDistanceKm: "1.2 km",
+              zoningType: "Industrial · Green"
+            })}::jsonb
+          ),
+          -- 4. Agricultural / Farm Land (Shankarpally)
+          (
+            ${ownerRow.id}, 17.4561, 78.1322, 28000000, 'agricultural', 'sale', 'owner', 'active',
+            null, null, 108900, 108900, 'sqft',
+            'Shankarpally – Chevella Road, Ranga Reddy', 'Hyderabad', null, null, null, 'E',
+            'Prakash Goud', '+919849355667',
+            'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80',
+            '2.5 Acres fertile red-soil mango orchard with 2 active borewells, drip irrigation, 40 ft BT road frontage, and Dharani clear title.',
+            '["Garden / Landscape", "24/7 Water Supply", "Rain Water Harvesting"]'::jsonb,
+            ${JSON.stringify({
+              seedTag: seedMarker,
+              subType: "Farm / Orchard",
+              acres: "2.5 Acres",
+              guntas: "2 Ac 20 Gu",
+              pricePerAcre: "₹1.12 Cr/Ac",
+              waterSource: "2 Borewells + Drip",
+              soilType: "Red Soil",
+              roadWidthFt: "40 ft BT Road",
+              titleStatus: "Dharani Clear"
+            })}::jsonb
+          );
+        `;
+        console.log("✔ Seeded Hyderabad Multi-Unit Society, Commercial, Industrial & Agricultural listings");
+      }
+    }
+
     console.log("Migration completed successfully!");
 
 

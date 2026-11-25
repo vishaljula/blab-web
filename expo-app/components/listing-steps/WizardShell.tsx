@@ -20,7 +20,7 @@ import { useListingFormStore } from "@/store/listingForm";
 
 const MAX_CARD_WIDTH = 860;
 
-const SELF_LABELS    = ["Type", "Location", "Path", "Details", "Review"];
+const SELF_LABELS    = ["Type", "Location", "Path", "Details", "Review", "Schedule"];
 const REALTOR_LABELS = ["Type", "Location", "Path", "Realtor"];
 
 interface WizardShellProps {

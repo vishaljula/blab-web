@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import { COLORS, MAP_STYLES, API_BASE_URL } from "@/lib/theme";
 import { useListingFormStore } from "@/store/listingForm";
+import { useListingsStore } from "@/store/listings";
 import { useRouter } from "expo-router";
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
@@ -132,7 +133,7 @@ export default function Step2Location() {
         floorNumber: null,
         totalFloors: null,
       });
-      const token = store.token;
+      const token = useListingsStore.getState().token;
       await fetch(`${API_BASE_URL}/api/photography/waitlist`, {
         method: 'POST',
         headers: {
@@ -151,7 +152,7 @@ export default function Step2Location() {
     } finally {
       setIsWaitlisting(false);
     }
-  }, [resolvedAddress, viewport, store.token, setStep2]);
+  }, [resolvedAddress, viewport, setStep2]);
 
   // ── Address search ─────────────────────────────────────────────────────────
   const searchAddress = (q: string) => {

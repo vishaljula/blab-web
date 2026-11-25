@@ -34,7 +34,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useRouter } from "expo-router";
-import { COLORS, TIER_COLORS } from "@/lib/theme";
+import { COLORS, TIER_COLORS, API_BASE_URL } from "@/lib/theme";
 import {
   useRealtorStore,
   ManagedListing,
@@ -422,12 +422,27 @@ function FlatBuyerContactCard({ contact, token, isDark }: {
 
 // ── PropertyActivityCard (accordion — My Properties tab) ──────────────────────
 
-function PropertyActivityCard({ listing, token, isDark }: {
-  listing: ManagedListing; token: string; isDark: boolean;
+function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
+  listing: ManagedListing; token: string; isDark: boolean; onRefresh?: () => void;
 }) {
   const colors = isDark ? COLORS.dark : COLORS.light;
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+
+  const handlePublishDraft = async () => {
+    setPublishing(true);
+    try {
+      await fetch(`${API_BASE_URL}/api/realtors/dashboard`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "publish_and_schedule", listingId: listing.id }),
+      });
+      onRefresh?.();
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const imageUri = listing.imageUrl ||
     STOCK[Math.abs((listing.price ?? 0) + (listing.address?.charCodeAt(0) ?? 0)) % STOCK.length];
@@ -479,7 +494,35 @@ function PropertyActivityCard({ listing, token, isDark }: {
                 <Text style={[s.tagText, { color: colors.primary }]}>{ptLabel}</Text>
               </View>
             )}
+            {listing.status === "draft" && (
+              <View style={[s.tag, { backgroundColor: "#F59E0B20" }]}>
+                <Text style={[s.tagText, { color: "#D97706" }]}>New Owner Handoff</Text>
+              </View>
+            )}
           </View>
+
+          {listing.status === "draft" && (
+            <Pressable
+              onPress={handlePublishDraft}
+              disabled={publishing}
+              style={{
+                marginTop: 8,
+                alignSelf: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
+                backgroundColor: colors.primary,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 8,
+              }}
+            >
+              <Ionicons name="camera-outline" size={13} color="#fff" />
+              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
+                {publishing ? "Booking Shoot…" : "Accept & Schedule Shoot"}
+              </Text>
+            </Pressable>
+          )}
 
           <View style={s.cardCountRow}>
             {listing.enquiryCount > 0 && (
@@ -699,39 +742,65 @@ export default function RealtorDashboard({ token }: Props) {
         <StatPill label="My Properties"             value={myListings.length}                                      icon="home-outline"      color={colors.primary} isDark={isDark} />
       </View>
 
-      {/* Trial quota (free_trial only) */}
-      {isTrial && (
+      {/* Starter Tier / Founding 500 Pro Banner */}
+      {isTrial ? (
         <View style={[s.trialRow, { borderColor: "#1E293B", backgroundColor: "#0F172A" }]}>
           <View style={s.trialHeader}>
             <Ionicons name="flash" size={13} color="#F97316" />
-            <Text style={[s.trialTitle, { color: "rgba(255,255,255,0.9)" }]}>Seller leads — free trial</Text>
+            <Text style={[s.trialTitle, { color: "rgba(255,255,255,0.95)" }]}>
+              Starter Tier (2 Active · 1 Handoff Cap)
+            </Text>
             <Pressable
               style={[s.upgradeChip, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
-              onPress={() => { /* TODO: navigate to upgrade screen */ }}
+              onPress={async () => {
+                await fetch(`${API_BASE_URL}/api/realtors/dashboard`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({ action: "upgrade_pro" }),
+                });
+                fetchDashboard(token);
+              }}
             >
               <Text style={s.upgradeCrownIcon}>👑</Text>
-              <Text style={s.upgradeChipText}>Upgrade</Text>
+              <Text style={s.upgradeChipText}>Founding 500 · ₹0 till Mar 31</Text>
             </Pressable>
           </View>
+          <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.72)", marginBottom: 8 }}>
+            First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots.
+          </Text>
           <View style={s.trialBars}>
             <View style={s.trialBarGroup}>
-              <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Sale properties</Text>
+              <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Active Map Listings</Text>
               <View style={[s.trialBarTrack, { backgroundColor: "rgba(255,255,255,0.12)" }]}>
-                <View style={[s.trialBarFill, { width: `${Math.min(trialSalePct, 1) * 100}%`, backgroundColor: "#F97316" }]} />
+                <View style={[s.trialBarFill, { width: `${Math.min(myListings.length / 2, 1) * 100}%`, backgroundColor: "#F97316" }]} />
               </View>
               <Text style={[s.trialBarCount, { color: "#fff" }]}>
-                {realtor.trialSaleLeadsUsed} of {realtor.trialSaleLeadsMax} used
+                {Math.min(myListings.length, 2)} of 2 Free Cap ({myListings.length > 2 ? `${myListings.length - 2} in Owner Fallback` : "0 overflow"})
               </Text>
             </View>
             <View style={[s.trialBarGroup, { marginLeft: 16 }]}>
-              <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Rental properties</Text>
+              <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Seller Handoff Slot</Text>
               <View style={[s.trialBarTrack, { backgroundColor: "rgba(255,255,255,0.12)" }]}>
-                <View style={[s.trialBarFill, { width: `${Math.min(trialRentalPct, 1) * 100}%`, backgroundColor: "#3B82F6" }]} />
+                <View style={[s.trialBarFill, { width: `${Math.min(myListings.length, 1) * 100}%`, backgroundColor: "#3B82F6" }]} />
               </View>
               <Text style={[s.trialBarCount, { color: "#fff" }]}>
-                {realtor.trialRentalLeadsUsed} of {realtor.trialRentalLeadsMax} used
+                {Math.min(myListings.length, 1)} of 1 Active · 🔥 4 nearby handoffs this week
               </Text>
             </View>
+          </View>
+        </View>
+      ) : (
+        <View style={[s.trialRow, { borderColor: "#065F46", backgroundColor: "#064E3B", paddingVertical: 10 }]}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Text style={{ fontSize: 13 }}>👑</Text>
+              <Text style={{ fontSize: 12, fontWeight: "800", color: "#ECFDF5" }}>
+                Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)
+              </Text>
+            </View>
+            <Text style={{ fontSize: 11, fontWeight: "700", color: "#A7F3D0" }}>
+              Unlimited Listings & Handoffs
+            </Text>
           </View>
         </View>
       )}
@@ -774,6 +843,7 @@ export default function RealtorDashboard({ token }: Props) {
                   listing={listing}
                   token={token}
                   isDark={isDark}
+                  onRefresh={() => fetchDashboard(token)}
                 />
               ))
             )}

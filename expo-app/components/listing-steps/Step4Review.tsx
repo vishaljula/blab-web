@@ -11,6 +11,7 @@ import { useColorScheme } from "@/components/useColorScheme";
 import { COLORS, API_BASE_URL } from "@/lib/theme";
 import { useListingFormStore, buildListingPayload } from "@/store/listingForm";
 import { useListingsStore } from "@/store/listings";
+import { getPropertyConfig } from "@/lib/propertyConfig";
 import WizardShell, { CtaButton } from "./WizardShell";
 
 const PROPERTY_LABELS: Record<string, string> = {
@@ -92,13 +93,15 @@ export default function Step4Review() {
     }
   };
 
+  const cfg = getPropertyConfig(store.propertyType);
+
   return (
     <WizardShell
-      heading="Almost done!"
-      hint="Review your listing and optionally add a description."
+      heading="Review & confirm"
+      hint="Verify details and add an optional note."
       cta={
         <CtaButton
-          label={submitting ? "Submitting…" : `Pay ₹${listingFee} & submit →`}
+          label={submitting ? "Saving…" : "Continue to Free Shoot →"}
           onPress={handleSubmit}
           disabled={submitting}
         />
@@ -106,39 +109,39 @@ export default function Step4Review() {
     >
       {/* Optional description */}
       <Text style={[s.descLabel, { color: C.foreground }]}>
-        Add a description{" "}
+        Description{" "}
         <Text style={{ color: C.mutedForeground, fontWeight: "400", fontSize: 13 }}>(optional)</Text>
-      </Text>
-      <Text style={[s.descHint, { color: C.mutedForeground }]}>
-        A good description gets 3× more inquiries. You can also skip and add it later.
       </Text>
       <TextInput
         value={description}
         onChangeText={(t) => setDescription(t.slice(0, 1000))}
-        placeholder="e.g. Spacious 3 BHK in a well-maintained gated community, close to metro..."
+        placeholder="Key highlights of your property…"
         placeholderTextColor={`${C.mutedForeground}80`}
         multiline
-        numberOfLines={5}
+        numberOfLines={4}
         textAlignVertical="top"
         style={[s.textarea, { borderColor: C.border, backgroundColor: C.card, color: C.foreground }]}
       />
       <Text style={[s.charCount, { color: C.mutedForeground }]}>{description.length} / 1000</Text>
 
       {/* Review */}
-      <Text style={[s.reviewHeading, { color: C.foreground }]}>Review your listing</Text>
+      <Text style={[s.reviewHeading, { color: C.foreground }]}>Summary</Text>
 
       <Section title="Property">
-        <Row label="Type" value={store.listingType === "rent" ? "For Rent" : "For Sale"} />
-        <Row label="Property" value={store.propertyType ? PROPERTY_LABELS[store.propertyType] : null} />
+        <Row label="Purpose" value={store.listingType === "rent" ? "For Rent" : "For Sale"} />
+        <Row label="Category" value={cfg.label} />
         <Row label="Bedrooms" value={store.bedrooms != null ? String(store.bedrooms) : null} />
         <Row label="Area" value={store.carpetArea ? `${store.carpetArea} ${store.areaUnit}` : null} />
         <Row label="Facing" value={store.facing} />
+        {cfg.dynamicFields.map((df) => (
+          <Row key={df.key} label={df.label} value={store.propertySpecs?.[df.key] ? String(store.propertySpecs[df.key]) : null} />
+        ))}
       </Section>
 
       <Section title="Location">
         <Row label="Address" value={store.address || null} />
         <Row label="Floor" value={store.floorNumber != null ? `${store.floorNumber} / ${store.totalFloors ?? "?"}` : null} />
-        <Row label="Society" value={store.societyName || null} />
+        <Row label="Building / Society" value={store.societyName || null} />
       </Section>
 
       <Section title="Price">
@@ -148,14 +151,17 @@ export default function Step4Review() {
         <Row label="Furnishing" value={store.furnishing} />
       </Section>
 
-      {/* Fee card */}
-      <View style={[s.feeCard, { backgroundColor: `${C.primary}0D`, borderColor: `${C.primary}30` }]}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <Text style={[s.feeLabel, { color: C.foreground }]}>Listing fee</Text>
-          <Text style={[s.feeAmount, { color: C.primary }]}>₹{listingFee}</Text>
+      {/* Launch Promo Fee card */}
+      <View style={[s.feeCard, { backgroundColor: "#22C55E12", borderColor: "#22C55E40" }]}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+          <Text style={[s.feeLabel, { color: C.foreground }]}>HD Shoot + Verification</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text style={{ fontSize: 13, color: C.mutedForeground, textDecorationLine: "line-through" }}>₹{listingFee}</Text>
+            <Text style={[s.feeAmount, { color: "#16A34A" }]}>₹0 FREE</Text>
+          </View>
         </View>
         <Text style={[s.feeDesc, { color: C.mutedForeground }]}>
-          Includes professional photography + listing verification. Goes live within 24–48h of photo shoot.
+          3-Month Launch Offer applied — 100% free photography & verification.
         </Text>
       </View>
 

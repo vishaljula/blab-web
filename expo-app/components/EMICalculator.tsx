@@ -364,7 +364,7 @@ const s = StyleSheet.create({
 
   totalRow: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    borderTopWidth: 1, marginTop: 4, paddingTop: 11, paddingHorizontal: 10,
+    borderTopWidth: 1, paddingTop: 11, paddingHorizontal: 10,
     paddingBottom: 11, borderRadius: 7, marginTop: 8,
   } as any,
   totalLabel: { fontSize: 14, fontWeight: "700" },

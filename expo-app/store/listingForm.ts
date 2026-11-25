@@ -9,6 +9,8 @@ export type PropertyType =
   | "villa"
   | "plot"
   | "commercial"
+  | "industrial"
+  | "agricultural"
   | "pg";
 
 export type AreaUnit = "sqft" | "sqm";
@@ -75,6 +77,7 @@ interface ListingFormState {
   furnishing: Furnishing | null;
   preferredTenant: PreferredTenant | null;
   availableFrom: string | null;
+  propertySpecs: Record<string, any>;
 
   // Step 4 (self) — description (optional) + review
   description: string;
@@ -120,6 +123,8 @@ interface ListingFormState {
     furnishing?: Furnishing | null;
     preferredTenant?: PreferredTenant | null;
     availableFrom?: string | null;
+    societyName?: string;
+    propertySpecs?: Record<string, any>;
   }) => void;
   setDescription: (description: string) => void;
   setCreatedListingId: (id: string) => void;
@@ -167,6 +172,7 @@ const INITIAL: Omit<
   furnishing: null,
   preferredTenant: null,
   availableFrom: null,
+  propertySpecs: {},
   description: "",
   createdListingId: null,
   contactName: "",
@@ -211,7 +217,7 @@ export const useListingFormStore = create<ListingFormState>((set) => ({
       address: address ?? s.address,
     })),
 
-  setStep3Self: ({ bedrooms, bathrooms, carpetArea, areaUnit, facing, propertyAge, price, negotiable, securityDeposit, maintenance, furnishing, preferredTenant, availableFrom }) =>
+  setStep3Self: ({ bedrooms, bathrooms, carpetArea, areaUnit, facing, propertyAge, price, negotiable, securityDeposit, maintenance, furnishing, preferredTenant, availableFrom, societyName, propertySpecs }) =>
     set((s) => ({
       bedrooms: bedrooms ?? s.bedrooms,
       bathrooms: bathrooms ?? s.bathrooms,
@@ -226,6 +232,8 @@ export const useListingFormStore = create<ListingFormState>((set) => ({
       furnishing: furnishing ?? null,
       preferredTenant: preferredTenant ?? null,
       availableFrom: availableFrom ?? null,
+      societyName: societyName !== undefined ? societyName : s.societyName,
+      propertySpecs: propertySpecs ?? s.propertySpecs,
     })),
 
   setDescription: (description) => set({ description }),
@@ -283,6 +291,7 @@ export function buildListingPayload(state: ListingFormState): Record<string, unk
     assignedRealtorId: state.assignedRealtorId,
     contactName: state.contactName || null,
     contactPhone: state.contactPhone || null,
+    propertySpecs: state.propertySpecs ?? {},
   };
 }
 

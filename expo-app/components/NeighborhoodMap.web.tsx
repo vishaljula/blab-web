@@ -150,7 +150,7 @@ async function fetchHighlights(lat: number, lng: number): Promise<Poi[]> {
     )
   );
   // Collect all, then deduplicate by poi.id (same place can appear across categories)
-  const seen = new Map<string, Poi>();
+  const seen = new globalThis.Map<string, Poi>();
   results.forEach(r => {
     if (r.status === "fulfilled") {
       r.value.forEach(poi => {

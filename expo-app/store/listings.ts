@@ -108,6 +108,8 @@ interface ListingsState {
   setCurrentZoom: (zoom: number) => void;
   activeBookingId: string | null;
   setActiveBookingId: (id: string | null) => void;
+  preloadedTrack: Record<string, any>;
+  setPreloadedTrack: (bookingId: string, data: any) => void;
 }
 
 
@@ -127,6 +129,7 @@ export const useListingsStore = create<ListingsState>((set) => ({
   token: null,
   user: null,
   activeBookingId: null,
+  preloadedTrack: {},
  
 
   // Reset total alongside listings so stale total never shows while new listings load.
@@ -155,6 +158,10 @@ export const useListingsStore = create<ListingsState>((set) => ({
   bumpMapRefresh: () => set((state) => ({ mapRefreshTick: state.mapRefreshTick + 1 })),
   setDetailModalId: (id) => set({ detailModalId: id }),
   setCurrentZoom: (zoom) => set({ currentZoom: zoom }),
+  setPreloadedTrack: (bookingId, data) =>
+    set((state) => ({
+      preloadedTrack: { ...state.preloadedTrack, [bookingId]: data },
+    })),
   setActiveBookingId: (id) => {
     set({ activeBookingId: id });
     try {

@@ -21,6 +21,7 @@ import { useRouter } from "expo-router";
 import { useColorScheme } from "@/components/useColorScheme";
 import { COLORS, MAP_STYLES, API_BASE_URL } from "@/lib/theme";
 import { useListingFormStore } from "@/store/listingForm";
+import { useListingsStore } from "@/store/listings";
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
 Mapbox.setAccessToken(MAPBOX_TOKEN);
@@ -94,7 +95,7 @@ export default function Step2Location() {
         floorNumber: null,
         totalFloors: null,
       });
-      const token = store.token; // not in scope below — grab from store directly
+      const token = useListingsStore.getState().token;
       await fetch(`${API_BASE_URL}/api/photography/waitlist`, {
         method: 'POST',
         headers: {
@@ -113,7 +114,7 @@ export default function Step2Location() {
     } finally {
       setIsWaitlisting(false);
     }
-  }, [resolvedAddress, center, store.token, setStep2]);
+  }, [resolvedAddress, center, setStep2]);
 
 
   // Search UI
