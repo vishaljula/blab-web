@@ -5,7 +5,8 @@
  *  ┌─ Sticky top ────────────────────────────────────────┐
  *  │  Hero (greeting + score + tier badge)               │
  *  │  3 stat pills (buyer contacts / new 7d / properties)│
- *  │  (free_trial) trial quota bar                       │
+ *  │  (Starter: free_trial + soft_cap) Option-B cap bars │
+ *  │  (pro / pro_plus) compact Pro confirmation strip    │
  *  │  [My Properties] [Site Visits] [Buyer Contacts]     │  ← tab bar
  *  └─────────────────────────────────────────────────────┘
  *  ┌─ Scrollable content ────────────────────────────────┐
@@ -21,7 +22,6 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  Pressable,
   Animated,
   LayoutAnimation,
   ActivityIndicator,
@@ -35,8 +35,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useRouter } from "expo-router";
 import { COLORS, TIER_COLORS, API_BASE_URL } from "@/lib/theme";
+// AUDIT-001 / T3 — raw Pressable is banned in this file by scripts/a11y-guard.mjs;
+// A11yPressable makes a label + role structurally mandatory and applies the 44pt floor.
+import { A11yPressable, HIT } from "@/components/a11y/AccessiblePressable";
 import {
   useRealtorStore,
+  deriveCapState,
+  overflowLabel,
   ManagedListing,
   Enquiry,
   ViewingSlot,
@@ -116,6 +121,35 @@ function viewingTimeLabel(iso?: string | null): string {
   return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
+// ── Viewing status (dot + text label) ────────────────────────────────────────
+// uxd-critique.md §F1 / §H8: the 8x8 `viewingDot` encoded viewing status in colour alone
+// (WCAG 2.2 §1.4.1). The colour stays; a text label now travels with it everywhere.
+
+const VIEWING_STATUS_COLOR: Record<string, string> = {
+  confirmed: "#10B981",
+  pending:   "#F59E0B",
+  completed: "#6B7280",
+};
+const CANCELLED_COLOR = "#EF4444";
+
+function viewingStatusColor(status: string): string {
+  return VIEWING_STATUS_COLOR[status] ?? CANCELLED_COLOR;
+}
+
+function viewingStatusLabel(status: string): string {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/** 8pt status dot plus its text equivalent — never colour on its own. */
+function StatusDot({ status, labelColor }: { status: string; labelColor: string }) {
+  return (
+    <View style={s.statusDotRow}>
+      <View style={[s.viewingDot, { backgroundColor: viewingStatusColor(status) }]} />
+      <Text style={[s.statusDotLabel, { color: labelColor }]}>{viewingStatusLabel(status)}</Text>
+    </View>
+  );
+}
+
 // ── StatPill ──────────────────────────────────────────────────────────────────
 
 function StatPill({
@@ -158,17 +192,21 @@ function TabBar({ active, onSelect, counts, isDark }: {
     { id: "buyerContacts", label: "Buyer Contacts", count: counts.buyerContacts, icon: "mail-outline" },
   ];
   return (
-    <View style={[s.tabBar, { borderBottomColor: colors.border }]}>
+    // §H7: a real tablist, so a screen reader can report which tab is active instead of
+    // leaving that to a 2px underline and a colour shift.
+    <View style={[s.tabBar, { borderBottomColor: colors.border }]} accessibilityRole="tablist">
       {tabs.map((tab) => {
         const isActive = tab.id === active;
         return (
-          <Pressable
+          <A11yPressable
             key={tab.id}
             onPress={() => onSelect(tab.id)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={`${tab.label}, ${tab.count} item${tab.count === 1 ? "" : "s"}`}
             style={[
               s.tabBtn,
               isActive && { borderBottomColor: colors.primary, borderBottomWidth: 2 },
-              Platform.OS === "web" ? { cursor: "pointer" } as any : {},
             ]}
           >
             <Ionicons
@@ -176,7 +214,11 @@ function TabBar({ active, onSelect, counts, isDark }: {
               size={13}
               color={isActive ? colors.primary : colors.mutedForeground}
             />
-            <Text style={[s.tabLabel, { color: isActive ? colors.primary : colors.mutedForeground, fontWeight: isActive ? "700" : "500" }]}>
+            {/* §H7: single line — the 11px label wrapped on 360pt devices. */}
+            <Text
+              numberOfLines={1}
+              style={[s.tabLabel, { color: isActive ? colors.primary : colors.mutedForeground, fontWeight: isActive ? "700" : "500" }]}
+            >
               {tab.label}
             </Text>
             {tab.count > 0 && (
@@ -184,7 +226,7 @@ function TabBar({ active, onSelect, counts, isDark }: {
                 <Text style={[s.tabBadgeText, { color: isActive ? "#fff" : colors.mutedForeground }]}>{tab.count}</Text>
               </View>
             )}
-          </Pressable>
+          </A11yPressable>
         );
       })}
     </View>
@@ -214,16 +256,21 @@ function EnquiryRow({
 
   const initials = (enquiry.requesterName ?? "?")
     .split(" ").slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
+  const buyerName = enquiry.requesterName ?? "Buyer";
 
   return (
     <View style={[s.enquiryRow, { borderTopColor: colors.border }]}>
-      <View style={[s.enquiryAvatar, { backgroundColor: isResponded ? "#D1FAE5" : "#FEF3C7" }]}>
+      {/* The avatar tint duplicates the responded/open state carried in text below, so it
+          is hidden from the screen reader rather than announced as a bare initial. */}
+      <View
+        style={[s.enquiryAvatar, { backgroundColor: isResponded ? "#D1FAE5" : "#FEF3C7" }]}
+        importantForAccessibility="no"
+        accessibilityElementsHidden
+      >
         <Text style={[s.enquiryInitials, { color: isResponded ? "#065F46" : "#92400E" }]}>{initials}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[s.enquiryName, { color: colors.foreground }]}>
-          {enquiry.requesterName ?? "Buyer"}
-        </Text>
+        <Text style={[s.enquiryName, { color: colors.foreground }]}>{buyerName}</Text>
         <Text style={[s.enquiryTime, { color: colors.mutedForeground }]}>
           {timeAgo(enquiry.createdAt)}
           {isResponded ? "  ·  Responded ✓" : ""}
@@ -231,18 +278,24 @@ function EnquiryRow({
       </View>
       {!isResponded && (
         <View style={s.enquiryActions}>
-          <Pressable
+          <A11yPressable
             onPress={handleWhatsApp}
-            style={[s.actionBtn, s.waBtn, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
+            accessibilityRole="button"
+            accessibilityLabel={`WhatsApp ${buyerName}`}
+            accessibilityHint="Opens WhatsApp and marks this contact as responded"
+            style={[s.actionBtn, s.waBtn]}
           >
             <Ionicons name="logo-whatsapp" size={14} color="#25D366" />
-          </Pressable>
-          <Pressable
+          </A11yPressable>
+          <A11yPressable
             onPress={handleCall}
-            style={[s.actionBtn, { borderColor: colors.border }, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
+            accessibilityRole="button"
+            accessibilityLabel={`Call ${buyerName}`}
+            accessibilityHint="Starts a phone call and marks this contact as responded"
+            style={[s.actionBtn, { borderColor: colors.border }]}
           >
             <Ionicons name="call-outline" size={14} color={colors.primary} />
-          </Pressable>
+          </A11yPressable>
         </View>
       )}
     </View>
@@ -254,21 +307,24 @@ function EnquiryRow({
 function ViewingRow({ viewing, isDark }: { viewing: ViewingSlot; isDark: boolean }) {
   const colors = isDark ? COLORS.dark : COLORS.light;
   const isPast = new Date(viewing.scheduledAt) < new Date();
-  const statusColor =
-    viewing.status === "confirmed"  ? "#10B981"
-    : viewing.status === "pending"  ? "#F59E0B"
-    : viewing.status === "completed"? "#6B7280"
-    : "#EF4444";
+  const dateLabel = viewingDateLabel(viewing.scheduledAt);
+  const timeLabel = viewingTimeLabel(viewing.scheduledAt);
   return (
-    <View style={[s.viewingRow, { borderTopColor: colors.border }]}>
-      <View style={[s.viewingDot, { backgroundColor: statusColor }]} />
+    <View
+      style={[s.viewingRow, { borderTopColor: colors.border }]}
+      // One announcement per row rather than four disconnected fragments.
+      accessible
+      accessibilityLabel={`Site visit ${dateLabel}${timeLabel ? ` at ${timeLabel}` : ""}, ${viewing.durationMins} minutes, ${viewingStatusLabel(viewing.status)}${isPast ? ", past" : ""}`}
+    >
+      <View style={[s.viewingDot, { backgroundColor: viewingStatusColor(viewing.status) }]} />
       <View style={{ flex: 1 }}>
         <Text style={[s.viewingDate, { color: isPast ? colors.mutedForeground : colors.foreground }]}>
-          {viewingDateLabel(viewing.scheduledAt)}
-          {viewingTimeLabel(viewing.scheduledAt) ? `  ·  ${viewingTimeLabel(viewing.scheduledAt)}` : ""}
+          {dateLabel}
+          {timeLabel ? `  ·  ${timeLabel}` : ""}
         </Text>
+        {/* Text equivalent for the dot colour (§H8) — already present here, kept. */}
         <Text style={[s.viewingDuration, { color: colors.mutedForeground }]}>
-          {viewing.durationMins} min · {viewing.status.charAt(0).toUpperCase() + viewing.status.slice(1)}
+          {viewing.durationMins} min · {viewingStatusLabel(viewing.status)}
         </Text>
       </View>
       {isPast && <Ionicons name="checkmark-circle-outline" size={16} color={colors.mutedForeground} />}
@@ -284,23 +340,21 @@ function FlatSiteVisitCard({ visit, isDark }: { visit: FlatSiteVisit; isDark: bo
   const isPast = new Date(visit.scheduledAt) < new Date();
   const isSoon = !isPast && (new Date(visit.scheduledAt).getTime() - Date.now()) < 86400000 * 2;
 
-  const statusColor =
-    visit.status === "confirmed"  ? "#10B981"
-    : visit.status === "pending"  ? "#F59E0B"
-    : visit.status === "completed"? "#6B7280"
-    : "#EF4444";
-
   const listingTypeBg    = visit.listingType === "sale" ? "#FEF3C7" : "#EFF6FF";
   const listingTypeColor = visit.listingType === "sale" ? "#92400E" : "#1D4ED8";
   const listingTypeLabel = visit.listingType === "sale" ? "For Sale" : "For Rent";
+  const dateLabel = viewingDateLabel(visit.scheduledAt);
+  const timeLabel = viewingTimeLabel(visit.scheduledAt);
 
   return (
-    <Pressable
+    <A11yPressable
       onPress={() => router.push(`/property/${visit.listingId}` as any)}
+      accessibilityRole="button"
+      accessibilityLabel={`${listingTypeLabel}, ${visit.propertyAddress}, ${visit.propertyCity}. Site visit ${dateLabel}${timeLabel ? ` at ${timeLabel}` : ""}, ${visit.durationMins} minutes, ${viewingStatusLabel(visit.status)}${isSoon ? ", upcoming soon" : ""}`}
+      accessibilityHint="Opens the property detail page"
       style={[
         s.flatCard,
         { backgroundColor: colors.card, borderColor: isSoon ? "#10B981" : colors.border },
-        Platform.OS === "web" ? { cursor: "pointer" } as any : {},
       ]}
     >
       <Image source={{ uri: visit.imageUrl }} style={s.flatThumb} resizeMode="cover" />
@@ -318,21 +372,22 @@ function FlatSiteVisitCard({ visit, isDark }: { visit: FlatSiteVisit; isDark: bo
         <Text style={[s.flatAddress, { color: colors.foreground }]} numberOfLines={1}>
           {visit.propertyAddress}
         </Text>
-        <Text style={[s.flatCity, { color: colors.mutedForeground }]}>
+        <Text style={[s.flatCity, { color: colors.mutedForeground }]} numberOfLines={1}>
           {visit.propertyCity}
         </Text>
-        <View style={[s.flatDateRow]}>
-          <View style={[s.viewingDot, { backgroundColor: statusColor }]} />
+        <View style={s.flatDateRow}>
           <Text style={[s.flatDateText, { color: isPast ? colors.mutedForeground : colors.foreground }]}>
-            {viewingDateLabel(visit.scheduledAt)}
-            {viewingTimeLabel(visit.scheduledAt) ? `  ·  ${viewingTimeLabel(visit.scheduledAt)}` : ""}
+            {dateLabel}
+            {timeLabel ? `  ·  ${timeLabel}` : ""}
           </Text>
           <Text style={[s.flatDuration, { color: colors.mutedForeground }]}>
             · {visit.durationMins} min
           </Text>
         </View>
+        {/* §H8: this dot previously had NO text equivalent anywhere in the card. */}
+        <StatusDot status={visit.status} labelColor={colors.mutedForeground} />
       </View>
-    </Pressable>
+    </A11yPressable>
   );
 }
 
@@ -364,15 +419,19 @@ function FlatBuyerContactCard({ contact, token, isDark }: {
   const listingTypeBg    = contact.listingType === "sale" ? "#FEF3C7" : "#EFF6FF";
   const listingTypeColor = contact.listingType === "sale" ? "#92400E" : "#1D4ED8";
   const listingTypeLabel = contact.listingType === "sale" ? "For Sale" : "For Rent";
+  const buyerName = contact.requesterName ?? "Buyer";
 
   return (
     <View style={[s.flatCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <Image source={{ uri: contact.imageUrl }} style={s.flatThumb} resizeMode="cover" />
       <View style={{ flex: 1, padding: 10, gap: 4 }}>
         {/* Property context */}
-        <Pressable
+        <A11yPressable
           onPress={() => router.push(`/property/${contact.listingId}` as any)}
-          style={Platform.OS === "web" ? { cursor: "pointer" } as any : {}}
+          accessibilityRole="button"
+          accessibilityLabel={`${listingTypeLabel}, ${contact.propertyAddress}, ${contact.propertyCity}`}
+          accessibilityHint="Opens the property detail page"
+          style={s.flatContextBtn}
         >
           <View style={s.flatTagRow}>
             <View style={[s.tag, { backgroundColor: listingTypeBg }]}>
@@ -382,17 +441,21 @@ function FlatBuyerContactCard({ contact, token, isDark }: {
           <Text style={[s.flatAddress, { color: colors.foreground }]} numberOfLines={1}>
             {contact.propertyAddress}
           </Text>
-          <Text style={[s.flatCity, { color: colors.mutedForeground }]}>{contact.propertyCity}</Text>
-        </Pressable>
+          <Text style={[s.flatCity, { color: colors.mutedForeground }]} numberOfLines={1}>
+            {contact.propertyCity}
+          </Text>
+        </A11yPressable>
         {/* Buyer row */}
         <View style={[s.enquiryRow, { borderTopColor: colors.border, marginTop: 4 }]}>
-          <View style={[s.enquiryAvatar, { backgroundColor: isResponded ? "#D1FAE5" : "#FEF3C7" }]}>
+          <View
+            style={[s.enquiryAvatar, { backgroundColor: isResponded ? "#D1FAE5" : "#FEF3C7" }]}
+            importantForAccessibility="no"
+            accessibilityElementsHidden
+          >
             <Text style={[s.enquiryInitials, { color: isResponded ? "#065F46" : "#92400E" }]}>{initials}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[s.enquiryName, { color: colors.foreground }]}>
-              {contact.requesterName ?? "Buyer"}
-            </Text>
+            <Text style={[s.enquiryName, { color: colors.foreground }]}>{buyerName}</Text>
             <Text style={[s.enquiryTime, { color: colors.mutedForeground }]}>
               {timeAgo(contact.createdAt)}
               {isResponded ? "  ·  Responded ✓" : ""}
@@ -400,18 +463,24 @@ function FlatBuyerContactCard({ contact, token, isDark }: {
           </View>
           {!isResponded && (
             <View style={s.enquiryActions}>
-              <Pressable
+              <A11yPressable
                 onPress={handleWhatsApp}
-                style={[s.actionBtn, s.waBtn, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
+                accessibilityRole="button"
+                accessibilityLabel={`WhatsApp ${buyerName} about ${contact.propertyAddress}`}
+                accessibilityHint="Opens WhatsApp and marks this contact as responded"
+                style={[s.actionBtn, s.waBtn]}
               >
                 <Ionicons name="logo-whatsapp" size={14} color="#25D366" />
-              </Pressable>
-              <Pressable
+              </A11yPressable>
+              <A11yPressable
                 onPress={handleCall}
-                style={[s.actionBtn, { borderColor: colors.border }, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
+                accessibilityRole="button"
+                accessibilityLabel={`Call ${buyerName} about ${contact.propertyAddress}`}
+                accessibilityHint="Starts a phone call and marks this contact as responded"
+                style={[s.actionBtn, { borderColor: colors.border }]}
               >
                 <Ionicons name="call-outline" size={14} color={colors.primary} />
-              </Pressable>
+              </A11yPressable>
             </View>
           )}
         </View>
@@ -461,6 +530,20 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
 
   const hasActivity = listing.enquiryCount > 0 || listing.totalViewingCount > 0;
 
+  // Spoken summary of the count chips, which are otherwise read as loose fragments.
+  const activitySummary = hasActivity
+    ? [
+        listing.enquiryCount > 0
+          ? `${listing.enquiryCount} buyer ${listing.enquiryCount === 1 ? "contact" : "contacts"}${listing.openEnquiryCount > 0 ? `, ${listing.openEnquiryCount} new` : ""}`
+          : null,
+        listing.upcomingViewingCount > 0
+          ? `${listing.upcomingViewingCount} upcoming site ${listing.upcomingViewingCount === 1 ? "visit" : "visits"}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(", ")
+    : "No contacts or visits yet";
+
   return (
     <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       {/*
@@ -468,8 +551,13 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
         When !hasActivity: outer Pressable navigates directly to listing.
         Avoids nesting a Pressable inside a Pressable (iOS touch conflict).
       */}
-      <Pressable
+      <A11yPressable
         onPress={hasActivity ? toggle : () => router.push(`/property/${listing.id}` as any)}
+        accessibilityRole="button"
+        accessibilityLabel={`${listing.address}, ${listing.city}, ${formatPrice(listing.price)}, ${listingTypeLabel}${listing.status === "draft" ? ", new owner handoff" : ""}. ${activitySummary}`}
+        accessibilityHint={hasActivity ? "Expands buyer contacts and site visits for this property" : "Opens the property detail page"}
+        // Expanded state must be announced, not inferred from the chevron glyph.
+        accessibilityState={hasActivity ? { expanded } : undefined}
         style={s.cardHeader}
         android_ripple={{ color: `${colors.border}40` }}
       >
@@ -502,26 +590,19 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
           </View>
 
           {listing.status === "draft" && (
-            <Pressable
+            <A11yPressable
               onPress={handlePublishDraft}
               disabled={publishing}
-              style={{
-                marginTop: 8,
-                alignSelf: "flex-start",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 6,
-                backgroundColor: colors.primary,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderRadius: 8,
-              }}
+              accessibilityRole="button"
+              accessibilityLabel={publishing ? "Booking shoot" : `Accept handoff and schedule shoot for ${listing.address}`}
+              accessibilityState={{ disabled: publishing, busy: publishing }}
+              style={[s.publishDraftBtn, { backgroundColor: colors.primary }]}
             >
               <Ionicons name="camera-outline" size={13} color="#fff" />
-              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
+              <Text style={s.publishDraftText}>
                 {publishing ? "Booking Shoot…" : "Accept & Schedule Shoot"}
               </Text>
-            </Pressable>
+            </A11yPressable>
           )}
 
           <View style={s.cardCountRow}>
@@ -565,18 +646,20 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
             <Ionicons name="arrow-forward-circle-outline" size={20} color={colors.mutedForeground} />
           )}
         </View>
-      </Pressable>
+      </A11yPressable>
 
       {/* Expanded section */}
       {expanded && (
         <View style={[s.expandedSection, { borderTopColor: colors.border }]}>
-          <Pressable
+          <A11yPressable
             onPress={() => router.push(`/property/${listing.id}` as any)}
-            style={[s.viewListingBtn, { borderColor: colors.border }, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
+            accessibilityRole="button"
+            accessibilityLabel={`View listing for ${listing.address}`}
+            style={[s.viewListingBtn, { borderColor: colors.border }]}
           >
             <Ionicons name="home-outline" size={13} color={colors.primary} />
             <Text style={[s.viewListingText, { color: colors.primary }]}>View listing</Text>
-          </Pressable>
+          </A11yPressable>
 
           {listing.recentEnquiries.length > 0 && (
             <View style={s.expandedGroup}>
@@ -633,22 +716,33 @@ export default function RealtorDashboard({ token }: Props) {
       <View style={[s.centered, { backgroundColor: colors.background }]}>
         <Ionicons name="alert-circle-outline" size={48} color={colors.mutedForeground} />
         <Text style={[s.loadingText, { color: colors.mutedForeground }]}>Couldn't load dashboard</Text>
-        <Pressable
+        <A11yPressable
           onPress={() => fetchDashboard(token)}
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading dashboard"
           style={[s.retryBtn, { borderColor: colors.border }]}
         >
           <Text style={{ color: colors.foreground, fontWeight: "600" }}>Retry</Text>
-        </Pressable>
+        </A11yPressable>
       </View>
     );
   }
 
-  const { realtor, stats, myListings } = dashboard;
+  const { realtor, foundingProgram, stats, myListings } = dashboard;
   const tierMeta  = TIER_COLORS[realtor.subscriptionTier] ?? TIER_COLORS.free_trial;
   const hour      = new Date().getHours();
   const greeting  = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = realtor.name.split(" ")[0];
-  const isTrial   = realtor.subscriptionTier === "free_trial";
+
+  // ── Server-authoritative Option-B cap state (Protected Surface #4) ────────
+  // Every cap number below comes from the server via `deriveCapState`; nothing
+  // is re-computed here and `myListings.length` is never used as an active-count
+  // proxy (AUDIT-001 / E1, E2). See `store/realtorCaps.ts` for the full contract.
+  const {
+    isPaidPro, listingCap, handoffCap,
+    activeListings, activeHandoffs, overflowCount,
+    listingFill, handoffFill,
+  } = deriveCapState(realtor);
 
   // ── Flatten data for the two flat tabs ───────────────────────────────────
   const allSiteVisits: FlatSiteVisit[] = myListings
@@ -693,7 +787,13 @@ export default function RealtorDashboard({ token }: Props) {
           <View style={s.heroTopRow}>
 
             {/* ── Avatar: double ring + active dot ──────────────────── */}
-            <View style={s.avatarRingOuter}>
+            {/* The green `avatarDot` is colour-only, so the online state is spoken here. */}
+            <View
+              style={s.avatarRingOuter}
+              accessible
+              accessibilityRole="image"
+              accessibilityLabel={`${realtor.name}, online`}
+            >
               <View style={s.avatarRingInner}>
                 {realtor.photoUrl ? (
                   <Image
@@ -718,7 +818,11 @@ export default function RealtorDashboard({ token }: Props) {
               <Text style={s.greeting}>{greeting}</Text>
               <Text style={s.heroName}>{firstName} 👋</Text>
               {/* Score + tier badge on same row */}
-              <View style={s.scoreRow}>
+              <View
+                style={s.scoreRow}
+                accessible
+                accessibilityLabel={`Realtor score ${(realtor.realtorScore ?? 0).toLocaleString()} points, ${tierMeta.label} tier`}
+              >
                 <Ionicons name="trending-up-outline" size={12} color="rgba(255,255,255,0.65)" />
                 <Text style={s.scoreValue}>{(realtor.realtorScore ?? 0).toLocaleString()}</Text>
                 <Text style={s.scoreLabel}>pts</Text>
@@ -735,23 +839,27 @@ export default function RealtorDashboard({ token }: Props) {
         </View>
       </View>
 
-      {/* Stat pills */}
+      {/* Stat pills — §F3: the hardcoded "\n" is gone; `statLabel.lineHeight` wraps it now,
+          so the label reflows at larger text sizes instead of breaking at a fixed point. */}
       <View style={s.statRow}>
-        <StatPill label="Buyer Contacts"            value={myListings.reduce((acc, l) => acc + l.enquiryCount, 0)} icon="mail-outline"      color="#EF4444"        isDark={isDark} />
-        <StatPill label={"New Contacts\n(7 days)"}  value={stats.newEnquiries7d}                                   icon="bar-chart-outline" color="#3B82F6"        isDark={isDark} />
-        <StatPill label="My Properties"             value={myListings.length}                                      icon="home-outline"      color={colors.primary} isDark={isDark} />
+        <StatPill label="Buyer Contacts"          value={myListings.reduce((acc, l) => acc + l.enquiryCount, 0)} icon="mail-outline"      color="#EF4444"        isDark={isDark} />
+        <StatPill label="New Contacts (7 days)"   value={stats.newEnquiries7d}                                   icon="bar-chart-outline" color="#3B82F6"        isDark={isDark} />
+        <StatPill label="My Properties"           value={myListings.length}                                      icon="home-outline"      color={colors.primary} isDark={isDark} />
       </View>
 
-      {/* Starter Tier / Founding 500 Pro Banner */}
-      {isTrial ? (
+      {/* Starter Tier / Founding 500 Pro Banner — gated on server capacity, not tier */}
+      {!isPaidPro ? (
         <View style={[s.trialRow, { borderColor: "#1E293B", backgroundColor: "#0F172A" }]}>
           <View style={s.trialHeader}>
             <Ionicons name="flash" size={13} color="#F97316" />
             <Text style={[s.trialTitle, { color: "rgba(255,255,255,0.95)" }]}>
-              Starter Tier (2 Active · 1 Handoff Cap)
+              Starter Tier ({listingCap} Active · {handoffCap} Handoff Cap)
             </Text>
-            <Pressable
-              style={[s.upgradeChip, Platform.OS === "web" ? { cursor: "pointer" } as any : {}]}
+            <A11yPressable
+              accessibilityRole="button"
+              accessibilityLabel="Claim your Founding 500 seat — free until 31 March 2027"
+              accessibilityHint="Locks in ₹10,000 per year instead of ₹3,000 per month"
+              style={s.upgradeChip}
               onPress={async () => {
                 await fetch(`${API_BASE_URL}/api/realtors/dashboard`, {
                   method: "POST",
@@ -762,8 +870,8 @@ export default function RealtorDashboard({ token }: Props) {
               }}
             >
               <Text style={s.upgradeCrownIcon}>👑</Text>
-              <Text style={s.upgradeChipText}>Founding 500 · ₹0 till Mar 31</Text>
-            </Pressable>
+              <Text style={s.upgradeChipText} numberOfLines={1}>Founding 500 · ₹0 till Mar 31</Text>
+            </A11yPressable>
           </View>
           <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.72)", marginBottom: 8 }}>
             First 500 Realtors lock in ₹10,000/yr after Mar 31 (vs ₹3,000/mo standard) + 5 Free HD & Reel Shoots.
@@ -772,24 +880,30 @@ export default function RealtorDashboard({ token }: Props) {
             <View style={s.trialBarGroup}>
               <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Active Map Listings</Text>
               <View style={[s.trialBarTrack, { backgroundColor: "rgba(255,255,255,0.12)" }]}>
-                <View style={[s.trialBarFill, { width: `${Math.min(myListings.length / 2, 1) * 100}%`, backgroundColor: "#F97316" }]} />
+                <View style={[s.trialBarFill, { width: `${listingFill * 100}%`, backgroundColor: "#F97316" }]} />
               </View>
               <Text style={[s.trialBarCount, { color: "#fff" }]}>
-                {Math.min(myListings.length, 2)} of 2 Free Cap ({myListings.length > 2 ? `${myListings.length - 2} in Owner Fallback` : "0 overflow"})
+                {activeListings} of {listingCap} Free Cap ({overflowLabel(overflowCount)})
               </Text>
             </View>
             <View style={[s.trialBarGroup, { marginLeft: 16 }]}>
               <Text style={[s.trialBarLabel, { color: "rgba(255,255,255,0.6)" }]}>Seller Handoff Slot</Text>
               <View style={[s.trialBarTrack, { backgroundColor: "rgba(255,255,255,0.12)" }]}>
-                <View style={[s.trialBarFill, { width: `${Math.min(myListings.length, 1) * 100}%`, backgroundColor: "#3B82F6" }]} />
+                <View style={[s.trialBarFill, { width: `${handoffFill * 100}%`, backgroundColor: "#3B82F6" }]} />
               </View>
               <Text style={[s.trialBarCount, { color: "#fff" }]}>
-                {Math.min(myListings.length, 1)} of 1 Active · 🔥 4 nearby handoffs this week
+                {activeHandoffs} of {handoffCap} Active
+                {/* D3: live 14-day count, not the hardcoded "🔥 4 … this week" literal */}
+                {foundingProgram
+                  ? ` · ${foundingProgram.nearbyHandoffs14d} nearby handoffs in the last 14 days`
+                  : ""}
               </Text>
             </View>
           </View>
         </View>
       ) : (
+        /* Reachable only for `pro` / `pro_plus` (999/999 server capacity).
+           "Unlimited" may never be asserted for free_trial or soft_cap — CEO D1. */
         <View style={[s.trialRow, { borderColor: "#065F46", backgroundColor: "#064E3B", paddingVertical: 10 }]}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -918,7 +1032,7 @@ const s = StyleSheet.create({
   root:        { flex: 1 },
   centered:    { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
   loadingText: { fontSize: 14, marginTop: 8 },
-  retryBtn:    { marginTop: 8, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, borderWidth: 1 },
+  retryBtn:    { marginTop: 8, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, borderWidth: 1, alignItems: "center", justifyContent: "center" },
 
   // Hero
   hero: {
@@ -988,11 +1102,14 @@ const s = StyleSheet.create({
   heroName:  { color: "#fff", fontSize: 26, fontWeight: "800", letterSpacing: -0.5, marginBottom: 4 },
 
   // Score + tier pill on same row
-  scoreRow:     { flexDirection: "row", alignItems: "center", gap: 5 },
+  scoreRow:     { flexDirection: "row", alignItems: "center", gap: 5, flexWrap: "wrap" },
   scoreValue:   { color: "#fff", fontSize: 13, fontWeight: "700" },
-  scoreLabel:   { color: "rgba(255,255,255,0.55)", fontSize: 12 },
+  // §F2 contrast: 0.55 alpha measured 3.70:1 on #8B2500 and failed AA for normal text;
+  // 0.78 measured 5.97:1 and passes. Verified by scripts/a11y-guard contrast output in the PR.
+  scoreLabel:   { color: "rgba(255,255,255,0.78)", fontSize: 12 },
   tierPill:     { flexDirection: "row", alignItems: "center", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, borderWidth: 1, marginLeft: 4 },
-  tierPillText: { fontSize: 10, fontWeight: "700" },
+  // 10px -> 11px floor (§F3).
+  tierPillText: { fontSize: 11, fontWeight: "700" },
 
   // Keep old names as aliases so nothing else breaks
   tierBadge:    { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1, flexDirection: "row", alignItems: "center" },
@@ -1021,7 +1138,8 @@ const s = StyleSheet.create({
   statTopRow:   { flexDirection: "row", alignItems: "center", gap: 10 },
   statIconWrap: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   statValue:    { fontSize: 28, fontWeight: "800", letterSpacing: -1 },
-  statLabel:    { fontSize: 12, fontWeight: "600" },
+  // §F3: `lineHeight` replaces the hardcoded "\n" in "New Contacts (7 days)".
+  statLabel:    { fontSize: 12, fontWeight: "600", lineHeight: 16 },
 
   // Trial quota
   trialRow:      { marginHorizontal: 14, borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 2 },
@@ -1029,14 +1147,16 @@ const s = StyleSheet.create({
   trialTitle:    { fontSize: 12, fontWeight: "700", flex: 1 },
   upgradeChip:   {
     backgroundColor: "#0F172A",
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 4,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.15)",
+    flexShrink: 1,
     ...Platform.select({
       ios:     { shadowColor: "#0F172A", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 6 },
       android: { elevation: 3 },
@@ -1044,23 +1164,24 @@ const s = StyleSheet.create({
     }),
   },
   upgradeCrownIcon: { fontSize: 12 },
-  upgradeChipText: { fontSize: 12, fontWeight: "700", color: "#fff", letterSpacing: 0.2 },
+  upgradeChipText: { fontSize: 12, fontWeight: "700", color: "#fff", letterSpacing: 0.2, flexShrink: 1 },
   trialBars:     { flexDirection: "row" },
   trialBarGroup: { flex: 1, gap: 4 },
-  trialBarLabel: { fontSize: 11 },
+  trialBarLabel: { fontSize: 11, lineHeight: 15 },
   trialBarTrack: { height: 6, borderRadius: 3, overflow: "hidden" },
   trialBarFill:  { height: 6, borderRadius: 3 },
-  trialBarCount: { fontSize: 11, fontWeight: "600" },
+  trialBarCount: { fontSize: 11, lineHeight: 15, fontWeight: "600" },
 
-  // Tab bar
+  // Tab bar — §H7: was ~33pt tall (paddingVertical 10 + 13px icon).
   tabBar: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth, marginTop: 4, marginHorizontal: 14 },
   tabBtn: {
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 4, paddingVertical: 10, paddingHorizontal: 4,
+    gap: 4, paddingVertical: 10, paddingHorizontal: 4, minHeight: HIT,
   },
-  tabLabel: { fontSize: 11, letterSpacing: 0.1 },
-  tabBadge: { paddingHorizontal: 5, paddingVertical: 1, borderRadius: 8, minWidth: 18, alignItems: "center" },
-  tabBadgeText: { fontSize: 10, fontWeight: "700" },
+  tabLabel: { fontSize: 11, letterSpacing: 0.1, flexShrink: 1 },
+  // 10px -> 11px floor (§F3); minWidth raised to keep the pill circular at 11px.
+  tabBadge: { paddingHorizontal: 5, paddingVertical: 1, borderRadius: 9, minWidth: 20, alignItems: "center" },
+  tabBadgeText: { fontSize: 11, fontWeight: "700" },
 
   // Scrollable content
   listContent: { paddingHorizontal: 14, paddingTop: 12, paddingBottom: 40, gap: 10 },
@@ -1083,21 +1204,32 @@ const s = StyleSheet.create({
   cardCountRow:{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
   cardRight:   { justifyContent: "center", paddingRight: 10 },
 
+  // §F3 / §H8: the draft CTA was ~25pt tall.
+  publishDraftBtn: {
+    marginTop: 8, alignSelf: "flex-start", flexDirection: "row", alignItems: "center",
+    justifyContent: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 8, minHeight: HIT,
+  },
+  publishDraftText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+
   tag:     { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 5 },
   tagText: { fontSize: 11, fontWeight: "600" },
   countChip:   { flexDirection: "row", alignItems: "center", gap: 3 },
-  countText:   { fontSize: 11, fontWeight: "600" },
-  nextViewing: { fontSize: 11 },
+  countText:   { fontSize: 11, lineHeight: 15, fontWeight: "600" },
+  nextViewing: { fontSize: 11, lineHeight: 15 },
 
   // Expanded section (accordion)
   expandedSection: { borderTopWidth: 1, paddingHorizontal: 12, paddingBottom: 12 },
+  // ~23pt -> HIT (§F3).
   viewListingBtn:  {
-    flexDirection: "row", alignItems: "center", gap: 5, alignSelf: "flex-start",
-    marginVertical: 10, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, borderWidth: 1,
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, alignSelf: "flex-start",
+    marginVertical: 10, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8, borderWidth: 1,
+    minHeight: HIT,
   },
   viewListingText:    { fontSize: 12, fontWeight: "600" },
   expandedGroup:      { marginTop: 8 },
-  expandedGroupLabel: { fontSize: 10, fontWeight: "800", letterSpacing: 0.8, marginBottom: 4 },
+  // 10px -> 11px floor (§F3).
+  expandedGroupLabel: { fontSize: 11, fontWeight: "800", letterSpacing: 0.8, marginBottom: 4 },
 
   // Flat cards (Site Visits + Buyer Contacts tabs)
   flatCard: {
@@ -1111,27 +1243,35 @@ const s = StyleSheet.create({
   flatThumb:    { width: 72, alignSelf: "stretch" },
   flatTagRow:   { flexDirection: "row", gap: 5, marginBottom: 2 },
   flatAddress:  { fontSize: 13, fontWeight: "700" },
-  flatCity:     { fontSize: 11 },
-  flatDateRow:  { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 4 },
+  flatCity:     { fontSize: 11, lineHeight: 15 },
+  flatDateRow:  { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 4, flexWrap: "wrap" },
   flatDateText: { fontSize: 12, fontWeight: "600" },
-  flatDuration: { fontSize: 11 },
-  flatGroupHeader: { fontSize: 10, fontWeight: "800", letterSpacing: 1, marginBottom: 6 },
+  flatDuration: { fontSize: 11, lineHeight: 15 },
+  // 10px -> 11px floor (§F3).
+  flatGroupHeader: { fontSize: 11, fontWeight: "800", letterSpacing: 1, marginBottom: 6 },
+  flatContextBtn:  { justifyContent: "center" },
 
   // Enquiry row (shared between accordion + flat)
   enquiryRow:      { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, borderTopWidth: StyleSheet.hairlineWidth },
   enquiryAvatar:   { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   enquiryInitials: { fontSize: 12, fontWeight: "700" },
   enquiryName:     { fontSize: 13, fontWeight: "600" },
-  enquiryTime:     { fontSize: 11, marginTop: 1 },
+  enquiryTime:     { fontSize: 11, lineHeight: 15, marginTop: 1 },
   enquiryActions:  { flexDirection: "row", gap: 6 },
-  actionBtn:       { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "transparent" },
+  // §H8 / §F3: 30x30 -> HIT. This is the buyer-contact path Invariant #1 protects, so it
+  // was the single most serious target violation on the screen.
+  actionBtn:       { width: HIT, height: HIT, borderRadius: HIT / 2, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "transparent" },
   waBtn:           { backgroundColor: "#F0FFF4" },
 
   // Viewing row (accordion nested)
   viewingRow:     { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8, borderTopWidth: StyleSheet.hairlineWidth },
   viewingDot:     { width: 8, height: 8, borderRadius: 4 },
   viewingDate:    { fontSize: 13, fontWeight: "600" },
-  viewingDuration:{ fontSize: 11, marginTop: 1 },
+  viewingDuration:{ fontSize: 11, lineHeight: 15, marginTop: 1 },
+
+  // Status dot + its text equivalent (§H8 — no colour-only status).
+  statusDotRow:   { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 },
+  statusDotLabel: { fontSize: 11, lineHeight: 15, fontWeight: "600" },
 
   // Empty states
   emptyState: { alignItems: "center", paddingTop: 48, gap: 8 },

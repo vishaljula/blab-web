@@ -4,6 +4,10 @@
  */
 import { create } from "zustand";
 import { API_BASE_URL } from "@/lib/theme";
+import { normalizeDashboard } from "./realtorCaps";
+
+export { deriveCapState, overflowLabel } from "./realtorCaps";
+export type { CapState } from "./realtorCaps";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -21,8 +25,31 @@ export interface RealtorProfile {
   trialRentalLeadsUsed: number;
   trialSaleLeadsMax: number;
   trialRentalLeadsMax: number;
+  /**
+   * Server-authoritative Option-B cap fields (`/api/realtors/dashboard`).
+   * NEVER re-derive these on the client — `myListings.length` includes `draft`
+   * rows and over-reports the cap (AUDIT-001 / E2). Protected Surface #4.
+   */
   activeListingCount: number;
   maxListingCapacity: number;
+  maxHandoffCapacity: number;
+  starterOverflowCount: number;
+}
+
+/**
+ * Founding-500 program economics — all values server-computed.
+ * Never retype these as client string literals (AUDIT-001 / D1, D4).
+ */
+export interface FoundingProgram {
+  totalCap: number;
+  claimedCount: number;
+  annualPriceInr: number;
+  standardMonthlyInr: number;
+  /** ISO date (`YYYY-MM-DD`) the free period runs through. */
+  freeTrialThrough: string;
+  freeShootsIncluded: number;
+  /** Live count of handoffs assigned nearby in the last **14 days** (not "this week"). */
+  nearbyHandoffs14d: number;
 }
 
 /** A buyer's enquiry about a specific listing. */
@@ -75,6 +102,8 @@ export interface DashboardStats {
 
 export interface RealtorDashboard {
   realtor: RealtorProfile;
+  /** `null` when the server omits the block — consumers must hide, never fabricate. */
+  foundingProgram: FoundingProgram | null;
   stats: DashboardStats;
   myListings: ManagedListing[];
 }
@@ -103,8 +132,9 @@ export const useRealtorStore = create<RealtorState>((set, get) => ({
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch dashboard");
-      const data = await res.json();
-      set({ dashboard: data, isLoadingDashboard: false });
+      const dashboard = normalizeDashboard(await res.json());
+      if (!dashboard) throw new Error("Malformed dashboard response");
+      set({ dashboard, isLoadingDashboard: false });
     } catch (e: any) {
       set({ error: e.message, isLoadingDashboard: false });
     }
