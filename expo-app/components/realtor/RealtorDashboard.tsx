@@ -660,7 +660,7 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
         BLA-12 Layer-2 QA FAIL #1; BLA-14 §6 option 1.
       */}
       {listing.status === "draft" && (
-        <View style={s.draftCtaRow}>
+        <View style={[s.draftCtaRow, { borderTopColor: colors.border }]}>
           <A11yPressable
             onPress={handlePublishDraft}
             disabled={publishing}
@@ -1235,9 +1235,11 @@ const s = StyleSheet.create({
   cardCountRow:{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
   cardRight:   { justifyContent: "center", paddingRight: 10 },
 
-  // Hoisted out of `cardHeader` (BLA-14). Left inset = cardThumb width (88) +
-  // cardInfo padding (10), so the CTA stays optically aligned with the address.
-  draftCtaRow: { paddingLeft: 98, paddingRight: 10, paddingBottom: 10 },
+  // Hoisted out of `cardHeader` (BLA-14). Once the CTA leaves the header, the
+  // full-height thumbnail no longer runs behind it, so the row carries the same
+  // hairline-topped footer treatment as `expandedSection` below it — that turns
+  // the thumbnail's bottom edge into a deliberate boundary instead of a gap.
+  draftCtaRow: { borderTopWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
 
   // §F3 / §H8: the draft CTA was ~25pt tall.
   publishDraftBtn: {
