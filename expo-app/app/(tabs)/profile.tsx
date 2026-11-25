@@ -170,8 +170,14 @@ export default function ProfileScreen() {
     >
       {/* Compact Header */}
       <View style={[styles.headerCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <View style={[styles.avatar, { backgroundColor: `${colors.primary}18` }]}>
-          <Text style={[styles.avatarText, { color: colors.primary }]}>
+        {/* Initials are decorative — the full name is announced immediately below, so they
+            are exempted from font scaling rather than clipped out of a fixed 48pt circle. */}
+        <View
+          style={[styles.avatar, { backgroundColor: `${colors.primary}18` }]}
+          importantForAccessibility="no"
+          accessibilityElementsHidden
+        >
+          <Text style={[styles.avatarText, { color: colors.primary }]} allowFontScaling={false}>
             {(user?.name || "BM").slice(0, 2).toUpperCase()}
           </Text>
         </View>

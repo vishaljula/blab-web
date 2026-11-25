@@ -267,7 +267,7 @@ function EnquiryRow({
         importantForAccessibility="no"
         accessibilityElementsHidden
       >
-        <Text style={[s.enquiryInitials, { color: isResponded ? "#065F46" : "#92400E" }]}>{initials}</Text>
+        <Text style={[s.enquiryInitials, { color: isResponded ? "#065F46" : "#92400E" }]} allowFontScaling={false}>{initials}</Text>
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[s.enquiryName, { color: colors.foreground }]}>{buyerName}</Text>
@@ -452,7 +452,7 @@ function FlatBuyerContactCard({ contact, token, isDark }: {
             importantForAccessibility="no"
             accessibilityElementsHidden
           >
-            <Text style={[s.enquiryInitials, { color: isResponded ? "#065F46" : "#92400E" }]}>{initials}</Text>
+            <Text style={[s.enquiryInitials, { color: isResponded ? "#065F46" : "#92400E" }]} allowFontScaling={false}>{initials}</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[s.enquiryName, { color: colors.foreground }]}>{buyerName}</Text>
@@ -803,7 +803,9 @@ export default function RealtorDashboard({ token }: Props) {
                   />
                 ) : (
                   <View style={[s.avatarImage, s.avatarFallback]}>
-                    <Text style={s.avatarInitials}>
+                    {/* Decorative: the name is spoken by the ring's label. Exempt from font
+                        scaling so it cannot clip out of the fixed 76pt ring. */}
+                    <Text style={s.avatarInitials} allowFontScaling={false}>
                       {realtor.name.split(" ").slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? "").join("")}
                     </Text>
                   </View>
