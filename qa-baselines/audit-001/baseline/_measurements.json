@@ -1,0 +1,82 @@
+{
+  "B8_roleCard_width_1440": {
+    "element": "roleCard(Member)",
+    "widthPx": 697,
+    "heightPx": 93,
+    "viewportPx": 1440
+  },
+  "B8_statPill_width_1440": {
+    "element": "StatPill(My Properties)",
+    "widthPx": 464,
+    "viewportPx": 1440
+  },
+  "H1_gutter_delta_profile_vs_dashboard_1440": {
+    "profileContentLeftPx": 18,
+    "dashboardStatPillLeftPx": 962,
+    "dashboardTabBarLeftPx": 14,
+    "dashboardTierBannerLeftPx": 46,
+    "deltaPx_profile_vs_dashboardTabBar": 4,
+    "verdict": "CONFIRMED: Profile content gutter 18px vs Dashboard tab-bar gutter 14px = 4px shift, matching the ~4pt H1 prediction in qa-baseline.md §2.3.",
+    "note": "Several Dashboard reference points are recorded because the tier banner (46px), stat row and tab bar (14px) do not share one gutter — which is itself the H1 finding."
+  },
+  "H4_first_property_card_top_iphone15_393x852": {
+    "firstCardTopPx": 458,
+    "tabBarBottomPx": 852,
+    "note": "Validates the \"~340pt before content\" claim and the ~44pt §H4 recovery target."
+  },
+  "H4_first_property_card_top_iphoneSE_375x667": {
+    "firstCardTopPx": 488,
+    "tabBarBottomPx": 667,
+    "note": "Validates the \"~340pt before content\" claim and the ~44pt §H4 recovery target."
+  },
+  "G8_tabLabel_wrap_375": {
+    "My Properties": {
+      "heightPx": 26,
+      "lineHeightPx": 13,
+      "wraps": true
+    },
+    "Site Visits": {
+      "heightPx": 13,
+      "lineHeightPx": 13,
+      "wraps": false
+    },
+    "Buyer Contacts": {
+      "heightPx": 26,
+      "lineHeightPx": 13,
+      "wraps": true
+    }
+  },
+  "F_contrast_hero": {
+    "greeting": {
+      "color": "rgba(255, 255, 255, 0.7)",
+      "backdrop": "rgb(139, 37, 0)",
+      "fontSize": "13px",
+      "fontWeight": "400",
+      "contrastRatio": 5.09,
+      "passesAA_normalText": true,
+      "passesAA_largeText": true
+    },
+    "scoreLabel": {
+      "color": "rgba(255, 255, 255, 0.55)",
+      "backdrop": "rgb(139, 37, 0)",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "contrastRatio": 3.7,
+      "passesAA_normalText": false,
+      "passesAA_largeText": true
+    },
+    "_note": "qa-baseline.md §2.3 records computed 3.4:1 / 2.2:1 and asks to confirm. uxd-review-addendum.md §5.1 claims `greeting` passes AA; this is the machine measurement."
+  },
+  "F2_dynamic_type_XXL_clipping": {
+    "status": "BLOCKED",
+    "reason": "Dynamic Type is an iOS-only accessibility setting; not reproducible on the Expo web build. Requires the iOS Simulator capture path, which is blocked (see BASELINE-INDEX.md §Blocked)."
+  },
+  "B7_dark_card_light_literals": {
+    "status": "CAPTURED_VISUALLY",
+    "frames": [
+      "dashboard-free_trial-web1440-dark.png",
+      "dashboard-free_trial-web390-dark.png"
+    ],
+    "reason": "The 8 hardcoded light-mode literals are visible in the dark frames; no numeric measurement defined by §2.3."
+  }
+}
