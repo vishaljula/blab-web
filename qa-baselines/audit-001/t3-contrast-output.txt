@@ -1,3 +1,8 @@
+AUDIT-001 / T3 contrast evidence — regenerate with BOTH scripts:
+  python3 qa-baselines/audit-001/tools/verify-contrast-t3.py        # the pair table below
+  python3 qa-baselines/audit-001/tools/verify-contrast-t3-dark.py   # the light/dark mode table
+Updated under BLA-13 (F3): the mode table now carries all SIX deferred text pairs.
+
 pair                                                   ratio  req   verdict
 ----------------------------------------------------------------------------------
 greeting  rgba(255,255,255,0.70) on #8B2500             5.09  4.5  PASS
@@ -50,6 +55,17 @@ statusBadge PENDING / draft tag       2.90    4.38   FAIL/FAIL
    candidate fix                      6.45    1.97   PASS/FAIL
 promo '0 till Mar 31'                 3.30    5.28   FAIL/PASS
    candidate fix                      7.13    2.44   PASS/FAIL
+countText contacts  :612 EF4444       3.76    4.62   FAIL/PASS
+   candidate fix                      6.47    2.69   PASS/FAIL
+countText visits    :621 10B981       2.54    6.86   FAIL/PASS
+   candidate fix                      5.48    3.17   PASS/FAIL
 --------------------------------------------------------------
-Conclusion: every candidate that fixes light mode drops dark mode to ~2.0:1.
-These four pairs require mode-aware SEMANTIC tokens -> Ticket 4 scope.
+Conclusion: every candidate that fixes light mode drops dark mode below 4.5:1.
+These SIX text pairs require mode-aware SEMANTIC tokens -> Ticket 4 scope.
+
+Not carried to T4 — the two `viewingDot` non-text FAILs (1.4.11):
+  viewingDot #10B981 2.54 and #F59E0B 2.15 on #FFFFFF are below the 3.0 non-text
+  bar, but 1.4.11 covers graphics *required to understand* content. `StatusDot`
+  (RealtorDashboard.tsx:144) now renders the dot with its text label beside it in
+  both call sites, so the colour is decorative reinforcement, not the only channel.
+  1.4.1 (colour alone) was the real defect there and it is fixed in T3.

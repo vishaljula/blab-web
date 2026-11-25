@@ -1,24 +1,61 @@
+a11y-guard tokenizer — blankNonCode() on the positions that broke it (BLA-11 F1)
+
+  ok    JSX text apostrophe     
+  ok    two JSX apostrophes     
+  ok    expr close then text    
+  ok    leading apostrophe      
+  ok    JSX text double quote   
+  ok    named import            
+  ok    deep specifier          
+  ok    banned tag in string    
+  ok    banned tag in comment   
+  ok    concat w/ line comment  
+  ok    nested template         
+  ok    escaped apostrophe      
+  ok    object + array literals 
+  ok    unterminated string     
+
 a11y-guard coverage — can the guard see every line it claims to guard?
 
-file                                                  lines  blind  blind ranges
+file                                                  lines  blind  desync  blind ranges
 ----------------------------------------------------------------------------------------------------
-expo-app/app/(tabs)/profile.tsx                         501      0  —
-expo-app/components/realtor/RealtorDashboard.tsx       1283    292  550-552, 719-729, 731-735, 741-745, 748-759, 761-772, 774-775, 777-778, 780, 782-787, 789-805, 908, 1017-1029, 1033-1037, 1040-1050, 1054-1066, 1068-1089, 1091-1099, 1101, 1103-1104, 1107-1108, 1111-1112, 1114, 1117-1118, 1121-1142, 1144, 1147-1175, 1178-1183, 1185-1186, 1189, 1192-1207, 1210-1215, 1217-1221, 1224, 1226-1232, 1234, 1237-1251, 1253-1254, 1257-1262, 1265-1266, 1269-1272, 1275-1276, 1279-1282
+expo-app/app/(tabs)/profile.tsx                         501      0       0  —
+expo-app/components/realtor/RealtorDashboard.tsx       1283      0       0  —
 
-A/B injection — identical raw <Pressable>, two positions in expo-app/components/realtor/RealtorDashboard.tsx
+A/B injection — raw <Pressable> at code positions throughout each guarded file
 ----------------------------------------------------------------------------------------------------
-  injected at sighted line 1                           guard FAILS (correct)
-  injected at blind   line 1096                        guard passes (BUG — control is invisible)
+  expo-app/app/(tabs)/profile.tsx:2                                           guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:69                                          guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:131                                         guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:208                                         guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:264                                         guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:329                                         guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:386                                         guard FAILS (correct)
+  expo-app/app/(tabs)/profile.tsx:500                                         guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:20                         guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:202                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:372                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:531                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:701                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:719            [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:763            [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:860                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1017           [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1020           [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1063           [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1282                       guard FAILS (correct)
+
+Namespace-import probe (F2) — import * as RN + <RN.Pressable>
+----------------------------------------------------------------------------------------------------
+  import * as RN alone                                                        guard FAILS (correct)
+  import + <RN.Pressable>                                                     guard FAILS (correct)
+
+Fail-closed probe — unterminated string literal must be an error, not silence
+----------------------------------------------------------------------------------------------------
+  const __probe = 'unterminated                                               guard FAILS with `guard desync` (correct)
 
 ====================================================================================================
-FAIL — 292 line(s) of guarded code are blanked before matching, so the guard
-       cannot see them. A banned control placed on any of these lines is reported clean.
-
-Root cause: blankNonCode() treats an apostrophe in JSX text as a string delimiter.
-Reproduce the cause: each JSX-text apostrophe below opens a phantom string that ends at
-the next apostrophe anywhere later in the file; everything between is blanked.
-
-  expo-app/components/realtor/RealtorDashboard.tsx:718  <Text style={[s.loadingText, { color: colors.mutedForeground }]}>Couldn't load dashboard
-  expo-app/components/realtor/RealtorDashboard.tsx:806  {/* Decorative: the name is spoken by the ring's label. Exempt from font
-  expo-app/components/realtor/RealtorDashboard.tsx:1016  When buyers enquire about your properties, they'll appear here.
-  expo-app/components/realtor/RealtorDashboard.tsx:1100  borderColor: "#8B2500",       // matches hero bg so it 'cuts out'
+PASS — blankNonCode() blanks no code, reports no desync, and the guard fails on every
+       injected bypass: raw <Pressable> at code positions throughout both guarded files
+       (including the two bands that were blind before BLA-13), the namespace import,
+       the qualified <RN.Pressable> tag, and an unterminated string literal.

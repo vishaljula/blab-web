@@ -17,9 +17,14 @@ def ratio(a, b):
     return (hi+0.05)/(lo+0.05)
 
 # ── T3 boundary check: can a single literal satisfy BOTH colour modes? ────────
-# These four pairs sit on `colors.card`, which is #FFFFFF light / #1A1A1A dark.
+# These six text pairs sit on `colors.card`, which is #FFFFFF light / #1A1A1A dark.
 # If no single hex passes in both modes, the pair needs a mode-aware SEMANTIC
 # token and therefore belongs to Ticket 4, not Ticket 3.
+#
+# The two `countText` rows were added in BLA-13 (F3): the light-mode run already listed
+# them FAIL, but the mode table — and the PR §5 that inherits from it — carried only four
+# pairs, so T4 would have dropped them. They are normal-text 1.4.3 failures in exactly the
+# same mode-dependent shape as the other four.
 W = (255, 255, 255)
 
 def r_on(fg, stack):
@@ -40,6 +45,10 @@ ROWS = [
     ("   candidate fix",                "92400E", [A]),
     ("promo '0 till Mar 31'",           "16A34A", []),
     ("   candidate fix",                "166534", []),
+    ("countText contacts  :612 EF4444", "EF4444", []),
+    ("   candidate fix",                "B91C1C", []),
+    ("countText visits    :621 10B981", "10B981", []),
+    ("   candidate fix",                "047857", []),
 ]
 
 print()
@@ -51,5 +60,12 @@ for name, fg, tint in ROWS:
     mark = lambda v: "PASS" if v >= 4.5 else "FAIL"
     print(f"{name:34} {l:7.2f} {d:7.2f}   {mark(l)}/{mark(d)}")
 print("-" * 62)
-print("Conclusion: every candidate that fixes light mode drops dark mode to ~2.0:1.")
-print("These four pairs require mode-aware SEMANTIC tokens -> Ticket 4 scope.")
+print("Conclusion: every candidate that fixes light mode drops dark mode below 4.5:1.")
+print("These SIX text pairs require mode-aware SEMANTIC tokens -> Ticket 4 scope.")
+print()
+print("Not carried to T4 — the two `viewingDot` non-text FAILs (1.4.11):")
+print("  viewingDot #10B981 2.54 and #F59E0B 2.15 on #FFFFFF are below the 3.0 non-text")
+print("  bar, but 1.4.11 covers graphics *required to understand* content. `StatusDot`")
+print("  (RealtorDashboard.tsx:144) now renders the dot with its text label beside it in")
+print("  both call sites, so the colour is decorative reinforcement, not the only channel.")
+print("  1.4.1 (colour alone) was the real defect there and it is fixed in T3.")
