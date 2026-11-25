@@ -1,0 +1,67 @@
+# AUDIT-001 / T2 (BLA-6) — PRE-FIX gate output
+# Captured 2026-11-25 on branch agent/uxd-audit @ 7cb50b0
+# Command: TMPDIR=/tmp npx tsx qa-baselines/audit-001/tools/verify-t2-scarcity.mts
+# Exit code: 1 (expected — T2 not yet implemented; every FAIL is a live defect)
+
+
+AUDIT-001 / T2 (BLA-6) — Founding-500 gate harness
+repo: /Users/adi/Projects/blab-web-agents
+
+Gate 1 — D2 / Invariant #5: claimedCount under BOTH BLAB_ENV branches
+        mode: path B — shipped expression scraped from src/app/api/realtors/dashboard/route.ts: Math.min(499, (st.founding_pro_claimed ?? 1) + 42)
+  FAIL  D2-PROD-REAL  BLAB_ENV=production returns the real founding_pro_claimed — no +42 offset
+        founding_pro_claimed=21 under BLAB_ENV=production rendered 63 — 42 seats of fabricated scarcity shown to a PROD realtor (Invariant #5).
+  FAIL  D2-PROD-NO-FLOOR  BLAB_ENV=production applies no synthetic floor (0 real claims must read 0)
+        founding_pro_claimed=0 under BLAB_ENV=production rendered 42
+  FAIL  D2-PROD-CLAMP  BLAB_ENV=production clamps to totalCap (500), not 499
+        founding_pro_claimed=10000 under BLAB_ENV=production rendered 499 — a genuinely full program can never render "500 / 500 CLAIMED".
+  FAIL  D2-UAT-CLAMP  BLAB_ENV!=production may keep the simulated offset but clamps to totalCap (500) too
+        founding_pro_claimed=10000 under BLAB_ENV=uat rendered 499
+  FAIL  D2-BRANCHES-DIVERGE  the two branches are genuinely distinct code paths (env is actually read)
+        BLAB_ENV=production -> 63; BLAB_ENV=uat -> 63 — identical, so no env branch is being evaluated at all.
+  PASS  D2-NO-FLAG-LEAK  no simulation/env flag is serialised into the foundingProgram client payload
+        foundingProgram exposes only render data.
+  NOTE  CARRY-D2-FLOOR  nearbyHandoffs14d floor — flag in the PR description, do not fix
+        src/app/api/realtors/dashboard/route.ts -> nearbyHandoffs14d: Math.max(3, st.nearby_handoffs_14d ?? 3)  (a realtor with 0 or 2 real nearby handoffs still reads 3)
+
+Gate 2 — D1: cap and 'unlimited' may never coexist as current entitlements
+  PASS  D1-FUTURE-TENSE  any 'unlimited' line in the Starter panel sits under "What you get when you claim:"
+        no 'unlimited' assertion in the Starter branch (currently correct; re-checked after the rebuild).
+  FAIL  D1-FREE-TIER-HEAD  the Starter panel carries the FREE TIER — 2 LISTINGS / 1 HANDOFF heading
+        heading absent — required by ceo-decision-log.md §1 D1 for free_trial and soft_cap.
+
+Gate 3 — D1/D4/§J3: every price and date string comes from `foundingProgram`
+  FAIL  D4-NO-LITERALS  no hardcoded price/date literal inside the panel
+        6 literal(s) still hardcoded: "₹10,000", "₹3,000", "₹0 till", "Mar 31", "31 March 2027", "500 Realtors"
+  FAIL  J3-DATE-SOURCE  the trial end date renders from `freeTrialThrough`
+        panel never reads freeTrialThrough — §J3 standardisation not applied.
+
+Gate 4 — §H5 Zone 1: the server's scarcity count reaches the screen
+  FAIL  H5-SCARCITY-RENDERED  the panel renders `claimedCount` / `totalCap`
+        claimedCount reaches the store (realtorCaps.ts:88) but no UI renders it — D1 defect still live.
+
+Gate 5 — §H5 Zone 3: the claim CTA confirms, pends, checks, and recovers
+  FAIL  H5-CTA-RESPONSE-CHECKED  the upgrade POST response is checked before the panel claims success
+        fire-and-forget `await fetch(...)` with no status check — a failed billing commitment reads as success.
+  FAIL  H5-CTA-PENDING  the CTA disables itself and shows an ActivityIndicator while pending
+        no pending state — the CTA is double-tappable during a billing-tier POST.
+  FAIL  H5-CTA-CONFIRM  a confirm step precedes the POST (billing-tier commitment)
+        no confirm step — one tap commits the realtor to a billing tier.
+  FAIL  H5-CTA-ERROR  a retryable inline error path exists
+        no catch/error state — a network failure is silent.
+
+Gate 6 — invariants the rebuild must not disturb
+  PASS  INV3-OVERFLOW-STRING  the verbatim "N in Owner Fallback" string is preserved
+        Option-B overflow copy (Invariant #3) located.
+  PASS  D3-NO-FAKE-WINDOW  the fabricated "this week" FOMO window and 🔥 emoji stay removed
+        honest 14-day window only.
+
+────────────────────────────────────────────────────────────────────────
+passed: 4    failed: 13
+open gates: D2-PROD-REAL, D2-PROD-NO-FLOOR, D2-PROD-CLAMP, D2-UAT-CLAMP, D2-BRANCHES-DIVERGE, D1-FREE-TIER-HEAD, D4-NO-LITERALS, J3-DATE-SOURCE, H5-SCARCITY-RENDERED, H5-CTA-RESPONSE-CHECKED, H5-CTA-PENDING, H5-CTA-CONFIRM, H5-CTA-ERROR
+
+A non-zero exit BEFORE the T2 commit is the expected result: each FAIL
+above is a re-runnable reproduction of a defect named in BLA-6. The same
+command must exit 0 on the T2 PR head.
+────────────────────────────────────────────────────────────────────────
+
