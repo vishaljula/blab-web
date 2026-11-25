@@ -22,6 +22,10 @@ file                                                  lines  blind  desync  blin
 expo-app/app/(tabs)/profile.tsx                         501      0       0  —
 expo-app/components/realtor/RealtorDashboard.tsx       1283      0       0  —
 
+Mirror liveness — did the mirrored guard run at all? (exit 0 alone does not prove it)
+----------------------------------------------------------------------------------------------------
+  mirror baseline                                                           guard ran and is clean (correct)
+
 A/B injection — raw <Pressable> at code positions throughout each guarded file
 ----------------------------------------------------------------------------------------------------
   expo-app/app/(tabs)/profile.tsx:2                                           guard FAILS (correct)

@@ -32,6 +32,12 @@
  *   4. FAIL-CLOSED PROBE — an unterminated string literal must produce a `guard desync`
  *      error, not a silently blanked remainder of the file.
  *
+ * Checks 2-4 are preceded by a MIRROR LIVENESS assertion, because they spawn the guard from a
+ * scratch mirror and read "not caught" as a bypass. If the guard silently no-ops there — e.g.
+ * an entry-point gate comparing `argv[1]` to `import.meta.url` without `realpathSync()`, which
+ * breaks under a symlinked tmpdir — then every probe reports "not caught" and the report reads
+ * as *the guard catches nothing* rather than *the guard never ran*.
+ *
  * Usage:  node qa-baselines/audit-001/tools/verify-a11y-guard-coverage.mjs
  * Exit 0 = the guard sees every guarded line and still fails on every bypass.
  */
@@ -187,7 +193,7 @@ try {
    * and on several CI layouts; an entry-point gate that string-compares `argv[1]` against
    * `import.meta.url` without `realpathSync()` silently no-ops there. With that bug every
    * probe below reports "not caught", so the whole report reads as *the guard catches
-   * nothing* when the truth is *the guard never started*. Check 0 separates the two.
+   * nothing* when the truth is *the guard never started*. This check separates the two.
    */
   const CLEAN_MARKER = /a11y-guard: \d+ guarded file\(s\) clean/;
 
@@ -204,8 +210,8 @@ try {
     return L.join("\n");
   };
 
-  // ── Check 0: the mirrored guard actually RUNS (not merely exits 0) ──────────
-  note("\nCheck 0 — did the mirrored guard run at all? (exit 0 alone does not prove it)");
+  // ── Mirror liveness: the mirrored guard actually RUNS (not merely exits 0) ──
+  note("\nMirror liveness — did the mirrored guard run at all? (exit 0 alone does not prove it)");
   note("-".repeat(100));
   const baseline = runGuard();
   if (baseline.caught) {
