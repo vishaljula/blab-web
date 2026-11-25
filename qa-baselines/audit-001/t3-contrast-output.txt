@@ -1,0 +1,55 @@
+pair                                                   ratio  req   verdict
+----------------------------------------------------------------------------------
+greeting  rgba(255,255,255,0.70) on #8B2500             5.09  4.5  PASS
+scoreLabel BEFORE rgba(..,0.55) on #8B2500              3.70  4.5  FAIL
+scoreLabel AFTER  rgba(..,0.78) on #8B2500              5.97  4.5  PASS
+scoreRow icon rgba(..,0.65) on #8B2500 (non-text)       4.59  3.0  PASS
+heroName #fff on #8B2500                                8.89  4.5  PASS
+trialTitle rgba(..,0.95) on #0F172A                    16.14  4.5  PASS
+trial body rgba(..,0.72) on #0F172A                     9.60  4.5  PASS
+trialBarLabel BEFORE rgba(..,0.60) on #0F172A           7.00  4.5  PASS
+trialBarLabel AFTER  rgba(..,0.72) on #0F172A           9.60  4.5  PASS
+pro banner #ECFDF5 on #064E3B                           9.23  4.5  PASS
+pro banner #A7F3D0 on #064E3B                           7.58  4.5  PASS
+ops title #F8FAFC on #0F172A                           17.06  4.5  PASS
+ops sub BEFORE #94A3B8 on #0F172A                       6.96  4.5  PASS
+ops sub AFTER  #CBD5E1 on #0F172A                      12.02  4.5  PASS
+tag For Sale  #92400E on #FEF3C7                        6.37  4.5  PASS
+tag For Rent  #1D4ED8 on #EFF6FF                        6.16  4.5  PASS
+tag Upcoming  #065F46 on #ECFDF5                        7.29  4.5  PASS
+enquiry initials responded #065F46 on #D1FAE5           6.78  4.5  PASS
+enquiry initials open      #92400E on #FEF3C7           6.37  4.5  PASS
+freeTagText #16A34A on #22C55E20/#FFFFFF                2.96  4.5  FAIL
+statusBadge LIVE #16A34A on #22C55E20/#FFF              2.96  4.5  FAIL
+statusBadge PEND #D97706 on #F59E0B20/#FFF              2.90  4.5  FAIL
+promo ₹0 #16A34A on #FFFFFF                             3.30  4.5  FAIL
+[T4] countText #EF4444 on light card #FFFFFF            3.76  4.5  FAIL
+[T4] countText #10B981 on light card #FFFFFF            2.54  4.5  FAIL
+[T4] viewingDot #10B981 on #FFFFFF (non-text)           2.54  3.0  FAIL
+[T4] viewingDot #F59E0B on #FFFFFF (non-text)           2.15  3.0  FAIL
+[T4] viewingDot #6B7280 on #FFFFFF (non-text)           4.83  3.0  PASS
+[T4] viewingDot #EF4444 on #FFFFFF (non-text)           3.76  3.0  PASS
+[T4] mutedForeground #6B6B6B on #FFFFFF                 5.33  4.5  PASS
+----------------------------------------------------------------------------------
+9 failing pair(s):
+  - scoreLabel BEFORE rgba(..,0.55) on #8B2500
+  - freeTagText #16A34A on #22C55E20/#FFFFFF
+  - statusBadge LIVE #16A34A on #22C55E20/#FFF
+  - statusBadge PEND #D97706 on #F59E0B20/#FFF
+  - promo ₹0 #16A34A on #FFFFFF
+  - [T4] countText #EF4444 on light card #FFFFFF
+  - [T4] countText #10B981 on light card #FFFFFF
+  - [T4] viewingDot #10B981 on #FFFFFF (non-text)
+  - [T4] viewingDot #F59E0B on #FFFFFF (non-text)
+
+pair                                 LIGHT    DARK   (need 4.50 in both)
+--------------------------------------------------------------
+freeTagText / statusBadge LIVE        2.96    4.30   FAIL/FAIL
+   candidate fix                      6.41    1.99   PASS/FAIL
+statusBadge PENDING / draft tag       2.90    4.38   FAIL/FAIL
+   candidate fix                      6.45    1.97   PASS/FAIL
+promo '0 till Mar 31'                 3.30    5.28   FAIL/PASS
+   candidate fix                      7.13    2.44   PASS/FAIL
+--------------------------------------------------------------
+Conclusion: every candidate that fixes light mode drops dark mode to ~2.0:1.
+These four pairs require mode-aware SEMANTIC tokens -> Ticket 4 scope.
