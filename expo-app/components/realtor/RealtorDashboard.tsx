@@ -530,6 +530,12 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
 
   const hasActivity = listing.enquiryCount > 0 || listing.totalViewingCount > 0;
 
+  // Owner-handoff drafts are genuinely unpriced (price = 0), so both the visible
+  // line and the spoken label drop the price segment rather than claiming "₹0".
+  // BLA-14 §5 — would occur in PROD, not just on UAT fixtures.
+  const isUnpricedDraft = listing.status === "draft" && !listing.price;
+  const priceLabel = isUnpricedDraft ? null : formatPrice(listing.price);
+
   // Spoken summary of the count chips, which are otherwise read as loose fragments.
   const activitySummary = hasActivity
     ? [
@@ -549,12 +555,19 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
       {/*
         When hasActivity: outer Pressable toggles accordion.
         When !hasActivity: outer Pressable navigates directly to listing.
-        Avoids nesting a Pressable inside a Pressable (iOS touch conflict).
+
+        Nothing pressable may be nested inside this header. On iOS `accessible`
+        defaults to true on Pressable, so UIKit treats the header as an
+        accessibility leaf and never exposes its descendants; an explicit
+        accessibilityLabel here also short-circuits child-label aggregation.
+        A nested CTA would be both unfocusable and unannounced, and its press
+        would route to this handler. The draft CTA is therefore a sibling
+        below the header, not a child. BLA-14 §2 / §6 option 1.
       */}
       <A11yPressable
         onPress={hasActivity ? toggle : () => router.push(`/property/${listing.id}` as any)}
         accessibilityRole="button"
-        accessibilityLabel={`${listing.address}, ${listing.city}, ${formatPrice(listing.price)}, ${listingTypeLabel}${listing.status === "draft" ? ", new owner handoff" : ""}. ${activitySummary}`}
+        accessibilityLabel={`${listing.address}, ${listing.city}${priceLabel ? `, ${priceLabel}` : ""}, ${listingTypeLabel}${listing.status === "draft" ? ", new owner handoff" : ""}. ${activitySummary}`}
         accessibilityHint={hasActivity ? "Expands buyer contacts and site visits for this property" : "Opens the property detail page"}
         // Expanded state must be announced, not inferred from the chevron glyph.
         accessibilityState={hasActivity ? { expanded } : undefined}
@@ -570,7 +583,7 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
             {listing.address}
           </Text>
           <Text style={[s.cardCity, { color: colors.mutedForeground }]} numberOfLines={1}>
-            {listing.city}  ·  {formatPrice(listing.price)}
+            {listing.city}{priceLabel ? `  ·  ${priceLabel}` : ""}
           </Text>
 
           <View style={s.cardTagRow}>
@@ -588,22 +601,6 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
               </View>
             )}
           </View>
-
-          {listing.status === "draft" && (
-            <A11yPressable
-              onPress={handlePublishDraft}
-              disabled={publishing}
-              accessibilityRole="button"
-              accessibilityLabel={publishing ? "Booking shoot" : `Accept handoff and schedule shoot for ${listing.address}`}
-              accessibilityState={{ disabled: publishing, busy: publishing }}
-              style={[s.publishDraftBtn, { backgroundColor: colors.primary }]}
-            >
-              <Ionicons name="camera-outline" size={13} color="#fff" />
-              <Text style={s.publishDraftText}>
-                {publishing ? "Booking Shoot…" : "Accept & Schedule Shoot"}
-              </Text>
-            </A11yPressable>
-          )}
 
           <View style={s.cardCountRow}>
             {listing.enquiryCount > 0 && (
@@ -647,6 +644,38 @@ function PropertyActivityCard({ listing, token, isDark, onRefresh }: {
           )}
         </View>
       </A11yPressable>
+
+      {/*
+        Accept-handoff CTA — a SIBLING of the header, never a child of it.
+        See the header comment above: nesting makes this unreachable to
+        VoiceOver, which would leave a screen-reader Realtor unable to accept
+        an owner handoff at all (adjacent to Marketplace Invariants #2/#3).
+        Left-inset to line up with the info column rather than the thumbnail.
+
+        Nesting also broke web, independently of iOS: accessibilityRole="button"
+        makes react-native-web render a real <button> element (roleComponents in
+        AccessibilityUtil/propsToAccessibilityComponent), so a nested CTA emitted
+        <button> inside <button> — invalid HTML plus React's "cannot be a
+        descendant of" hydration warning on every dashboard render.
+        BLA-12 Layer-2 QA FAIL #1; BLA-14 §6 option 1.
+      */}
+      {listing.status === "draft" && (
+        <View style={s.draftCtaRow}>
+          <A11yPressable
+            onPress={handlePublishDraft}
+            disabled={publishing}
+            accessibilityRole="button"
+            accessibilityLabel={publishing ? "Booking shoot" : `Accept handoff and schedule shoot for ${listing.address}`}
+            accessibilityState={{ disabled: publishing, busy: publishing }}
+            style={[s.publishDraftBtn, { backgroundColor: colors.primary }]}
+          >
+            <Ionicons name="camera-outline" size={13} color="#fff" />
+            <Text style={s.publishDraftText}>
+              {publishing ? "Booking Shoot…" : "Accept & Schedule Shoot"}
+            </Text>
+          </A11yPressable>
+        </View>
+      )}
 
       {/* Expanded section */}
       {expanded && (
@@ -1206,9 +1235,13 @@ const s = StyleSheet.create({
   cardCountRow:{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
   cardRight:   { justifyContent: "center", paddingRight: 10 },
 
+  // Hoisted out of `cardHeader` (BLA-14). Left inset = cardThumb width (88) +
+  // cardInfo padding (10), so the CTA stays optically aligned with the address.
+  draftCtaRow: { paddingLeft: 98, paddingRight: 10, paddingBottom: 10 },
+
   // §F3 / §H8: the draft CTA was ~25pt tall.
   publishDraftBtn: {
-    marginTop: 8, alignSelf: "flex-start", flexDirection: "row", alignItems: "center",
+    alignSelf: "flex-start", flexDirection: "row", alignItems: "center",
     justifyContent: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 6,
     borderRadius: 8, minHeight: HIT,
   },

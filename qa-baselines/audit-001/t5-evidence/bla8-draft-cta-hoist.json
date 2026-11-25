@@ -1,0 +1,74 @@
+{
+  "generatedFor": "BLA-8 (T5) — hoisted draft CTA, post-BLA-14 fix",
+  "fixture": "realtor_pro / +919100000045 (1 draft listing = repro condition)",
+  "widths": [
+    {
+      "width": 320,
+      "count": 1,
+      "hScroll": false,
+      "minH": 44,
+      "anyBelow44": false,
+      "anyOverflowCard": false,
+      "anyOverflowViewport": false,
+      "anyWrapped": false,
+      "anyNested": false,
+      "sample": {
+        "w": 182,
+        "h": 44,
+        "left": 99,
+        "right": 295,
+        "cardRight": 306,
+        "overflowsCard": false,
+        "overflowsViewport": false,
+        "textWrapped": false,
+        "nestedInButton": false
+      }
+    },
+    {
+      "width": 360,
+      "count": 1,
+      "hScroll": false,
+      "minH": 44,
+      "anyBelow44": false,
+      "anyOverflowCard": false,
+      "anyOverflowViewport": false,
+      "anyWrapped": false,
+      "anyNested": false,
+      "sample": {
+        "w": 195,
+        "h": 44,
+        "left": 99,
+        "right": 308,
+        "cardRight": 346,
+        "overflowsCard": false,
+        "overflowsViewport": false,
+        "textWrapped": false,
+        "nestedInButton": false
+      }
+    },
+    {
+      "width": 390,
+      "count": 1,
+      "hScroll": false,
+      "minH": 44,
+      "anyBelow44": false,
+      "anyOverflowCard": false,
+      "anyOverflowViewport": false,
+      "anyWrapped": false,
+      "anyNested": false,
+      "sample": {
+        "w": 192,
+        "h": 44,
+        "left": 99,
+        "right": 305,
+        "cardRight": 376,
+        "overflowsCard": false,
+        "overflowsViewport": false,
+        "textWrapped": false,
+        "nestedInButton": false
+      }
+    }
+  ],
+  "vacuous": false,
+  "verdict": "PASS - CTA is a sibling (not nested), 44pt floor holds, no overflow/wrap/h-scroll at 320/360/390"
+}
