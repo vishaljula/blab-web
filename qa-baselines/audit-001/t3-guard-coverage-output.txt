@@ -24,7 +24,7 @@ a11y-guard coverage — can the guard see every line it claims to guard?
 file                                                  lines  blind  desync  blind ranges
 ----------------------------------------------------------------------------------------------------
 expo-app/app/(tabs)/profile.tsx                         501      0       0  —
-expo-app/components/realtor/RealtorDashboard.tsx       1316      0       0  —
+expo-app/components/realtor/RealtorDashboard.tsx       1318      0       0  —
 
 Mirror liveness — did the mirrored guard run at all? (exit 0 alone does not prove it)
 ----------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ A/B injection — raw <Pressable> at code positions throughout each guarded file
   expo-app/components/realtor/RealtorDashboard.tsx:889                        guard FAILS (correct)
   expo-app/components/realtor/RealtorDashboard.tsx:1017           [was blind] guard FAILS (correct)
   expo-app/components/realtor/RealtorDashboard.tsx:1050           [was blind] guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:1315                       guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1317                       guard FAILS (correct)
 
 Namespace-import probe (F2) — import * as RN + <RN.Pressable>
 ----------------------------------------------------------------------------------------------------
