@@ -1,0 +1,1158 @@
+{
+  "generatedFor": "BLA-12 Layer-2 QA",
+  "hit": 44,
+  "sections": {
+    "s2_hitTargets": {
+      "measuredControls": 11,
+      "distinctLabels": 11,
+      "below44": [
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w390",
+          "i": 0,
+          "tag": "div",
+          "role": null,
+          "label": "",
+          "w": 38,
+          "h": 38,
+          "cssMinW": "0px",
+          "cssMinH": "0px",
+          "cursor": "pointer",
+          "nestedIn": "HA Harish Sharma +919100000045 · REALTOR ",
+          "ariaSelected": null,
+          "ariaExpanded": null,
+          "ariaChecked": null,
+          "ariaBusy": null,
+          "ariaDisabled": null,
+          "parentRole": null
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w390",
+          "i": 6,
+          "tag": "input",
+          "role": "textbox(native)",
+          "label": "Sharma Infra",
+          "w": 168,
+          "h": 40,
+          "cssMinW": "auto",
+          "cssMinH": "auto",
+          "cursor": "text",
+          "nestedIn": "",
+          "ariaSelected": null,
+          "ariaExpanded": null,
+          "ariaChecked": null,
+          "ariaBusy": null,
+          "ariaDisabled": null,
+          "parentRole": null
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w390",
+          "i": 7,
+          "tag": "input",
+          "role": "textbox(native)",
+          "label": "TSRERA/AGT/00045",
+          "w": 168,
+          "h": 40,
+          "cssMinW": "auto",
+          "cssMinH": "auto",
+          "cursor": "text",
+          "nestedIn": "",
+          "ariaSelected": null,
+          "ariaExpanded": null,
+          "ariaChecked": null,
+          "ariaBusy": null,
+          "ariaDisabled": null,
+          "parentRole": null
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w390",
+          "i": 8,
+          "tag": "div",
+          "role": null,
+          "label": "Update Realtor Profile",
+          "w": 324,
+          "h": 42,
+          "cssMinW": "0px",
+          "cssMinH": "0px",
+          "cursor": "pointer",
+          "nestedIn": "Founding 500 Pass (₹10k/yr) ₹36,000/yr ₹0 till Mar 31 Update",
+          "ariaSelected": null,
+          "ariaExpanded": null,
+          "ariaChecked": null,
+          "ariaBusy": null,
+          "ariaDisabled": null,
+          "parentRole": null
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w390",
+          "i": 9,
+          "tag": "div",
+          "role": null,
+          "label": "My Listings (0)",
+          "w": 173,
+          "h": 38,
+          "cssMinW": "0px",
+          "cssMinH": "0px",
+          "cursor": "pointer",
+          "nestedIn": "My Listings (0) My Shoots (0)",
+          "ariaSelected": null,
+          "ariaExpanded": null,
+          "ariaChecked": null,
+          "ariaBusy": null,
+          "ariaDisabled": null,
+          "parentRole": null
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w390",
+          "i": 10,
+          "tag": "div",
+          "role": null,
+          "label": "My Shoots (0)",
+          "w": 173,
+          "h": 38,
+          "cssMinW": "0px",
+          "cssMinH": "0px",
+          "cursor": "pointer",
+          "nestedIn": "My Listings (0) My Shoots (0)",
+          "ariaSelected": null,
+          "ariaExpanded": null,
+          "ariaChecked": null,
+          "ariaBusy": null,
+          "ariaDisabled": null,
+          "parentRole": null
+        }
+      ],
+      "verdict": "FAIL",
+      "cardHeaderFloor": [],
+      "cardHeaderVerdict": "NOT_OBSERVED"
+    },
+    "s3_dynamicType": {
+      "scalesTested": [
+        "L-default",
+        "xxxLarge",
+        "AX3",
+        "AX5-max"
+      ],
+      "clipped": [
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "₹0 till Mar 31",
+          "axis": "horizontal",
+          "cutPx": 158.3,
+          "fontSizePx": 30.6,
+          "textBox": [
+            325,
+            977,
+            193,
+            36
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "auto",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "FREE 3M",
+          "axis": "horizontal",
+          "cutPx": 24.4,
+          "fontSizePx": 28.1,
+          "textBox": [
+            267,
+            1024,
+            117,
+            33
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "auto",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "₹36,000/yr",
+          "axis": "horizontal",
+          "cutPx": 46.4,
+          "fontSizePx": 37.4,
+          "textBox": [
+            219,
+            1584,
+            188,
+            44
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "auto",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "₹0 till Mar 31",
+          "axis": "horizontal",
+          "cutPx": 306.5,
+          "fontSizePx": 40.5,
+          "textBox": [
+            412,
+            1582,
+            254,
+            48
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "auto",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        }
+      ],
+      "overlaps": [
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX3",
+          "a": "Builder",
+          "b": "Explore",
+          "overlapFrac": 0.27,
+          "aBox": [
+            31,
+            785,
+            131,
+            39
+          ],
+          "bBox": [
+            5,
+            782,
+            80,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX3",
+          "a": "Builder",
+          "b": "Post",
+          "overlapFrac": 0.4,
+          "aBox": [
+            31,
+            785,
+            131,
+            39
+          ],
+          "bBox": [
+            111,
+            782,
+            48,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX3",
+          "a": "Shutterbug",
+          "b": "Dashboard",
+          "overlapFrac": 0.34,
+          "aBox": [
+            198,
+            785,
+            131,
+            78
+          ],
+          "bBox": [
+            185,
+            782,
+            80,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX3",
+          "a": "Shutterbug",
+          "b": "Profile",
+          "overlapFrac": 0.28,
+          "aBox": [
+            198,
+            785,
+            131,
+            78
+          ],
+          "bBox": [
+            281,
+            782,
+            69,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "1,000-Listing Blitz · Founding 500 Realtors · UAT ",
+          "b": "Post",
+          "overlapFrac": 1,
+          "aBox": [
+            76,
+            593,
+            202,
+            280
+          ],
+          "bBox": [
+            103,
+            782,
+            63,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "1,000-Listing Blitz · Founding 500 Realtors · UAT ",
+          "b": "Dashboard",
+          "overlapFrac": 1,
+          "aBox": [
+            76,
+            593,
+            202,
+            280
+          ],
+          "bBox": [
+            185,
+            782,
+            80,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "Update Realtor Profile",
+          "b": "My Listings (0)",
+          "overlapFrac": 0.3,
+          "aBox": [
+            33,
+            1711,
+            294,
+            96
+          ],
+          "bBox": [
+            18,
+            1760,
+            158,
+            144
+          ],
+          "fixedOverlayInvolved": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "Update Realtor Profile",
+          "b": "My Shoots (0)",
+          "overlapFrac": 0.3,
+          "aBox": [
+            33,
+            1711,
+            294,
+            96
+          ],
+          "bBox": [
+            184,
+            1760,
+            158,
+            144
+          ],
+          "fixedOverlayInvolved": false
+        }
+      ],
+      "verdict": "REVIEW"
+    },
+    "s4_screenReader": {
+      "tree": [
+        {
+          "frame": "profile-realtor-rera",
+          "tree": [
+            {
+              "role": "tablist",
+              "name": "",
+              "parentRole": "RootWebArea"
+            },
+            {
+              "role": "tab",
+              "name": "  Explore",
+              "parentRole": "tablist",
+              "selected": false
+            },
+            {
+              "role": "tab",
+              "name": "  Post",
+              "parentRole": "tablist",
+              "selected": false
+            },
+            {
+              "role": "tab",
+              "name": "  Dashboard",
+              "parentRole": "tablist",
+              "selected": false
+            },
+            {
+              "role": "tab",
+              "name": "  Profile",
+              "parentRole": "tablist",
+              "selected": true
+            },
+            {
+              "role": "textbox",
+              "name": "Agency / Builder Name",
+              "parentRole": "RootWebArea"
+            },
+            {
+              "role": "textbox",
+              "name": "RERA ID",
+              "parentRole": "RootWebArea"
+            }
+          ]
+        }
+      ],
+      "emptyNames": [
+        {
+          "frame": "profile-realtor-rera",
+          "role": "tablist",
+          "name": "",
+          "parentRole": "RootWebArea"
+        }
+      ],
+      "unlabelledDom": []
+    },
+    "s5_colourOnly": {
+      "dotsObserved": 4,
+      "dotsWithoutTextEquivalent": [],
+      "detail": [
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "light",
+          "dots": [
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            },
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            }
+          ]
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "dots": [
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            },
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            }
+          ]
+        }
+      ],
+      "verdict": "PASS"
+    },
+    "s6_contrast": {
+      "pairsMeasured": 56,
+      "failures": [
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "light",
+          "sample": "FREE 3M",
+          "color": "rgb(22, 163, 74)",
+          "backdrop": "rgb(215, 230, 213)",
+          "fontSizePx": 9,
+          "fontWeight": "800",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 2.54,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "light",
+          "sample": "FREE 3M",
+          "color": "rgb(22, 163, 74)",
+          "backdrop": "rgb(226, 247, 234)",
+          "fontSizePx": 9,
+          "fontWeight": "800",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 2.94,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "light",
+          "sample": "₹0 till Mar 31",
+          "color": "rgb(22, 163, 74)",
+          "backdrop": "rgb(255, 255, 255)",
+          "fontSizePx": 13,
+          "fontWeight": "900",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.3,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "sample": "HA",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(41, 31, 26)",
+          "fontSizePx": 18,
+          "fontWeight": "800",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.46,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "sample": "",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(28, 20, 16)",
+          "fontSizePx": 20,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.9,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "sample": "Realtor",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(28, 20, 16)",
+          "fontSizePx": 14,
+          "fontWeight": "800",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.9,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "sample": "FREE 3M",
+          "color": "rgb(22, 163, 74)",
+          "backdrop": "rgb(27, 48, 35)",
+          "fontSizePx": 9,
+          "fontWeight": "800",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 4.27,
+          "passes": false
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "sample": "Profile",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(26, 26, 26)",
+          "fontSizePx": 10,
+          "fontWeight": "600",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.74,
+          "passes": false
+        }
+      ],
+      "lightFailures": 3,
+      "darkFailures": 5,
+      "all": [
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "light",
+          "pairs": [
+            {
+              "sample": "HA",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(245, 235, 232)",
+              "fontSizePx": 18,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Harish Sharma",
+              "color": "rgb(26, 26, 26)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 17,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "+919100000045 · REALTOR",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 16,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(56, 189, 248)",
+              "backdrop": "rgb(20, 45, 69)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founder Ops Command Center",
+              "color": "rgb(248, 250, 252)",
+              "backdrop": "rgb(15, 23, 42)",
+              "fontSizePx": 13,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "1,000-Listing Blitz · Founding 500 Realtors ",
+              "color": "rgb(148, 163, 184)",
+              "backdrop": "rgb(15, 23, 42)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(148, 163, 184)",
+              "backdrop": "rgb(15, 23, 42)",
+              "fontSizePx": 16,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "WORKSPACE MODE",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(250, 250, 248)",
+              "fontSizePx": 11,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 20,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Member",
+              "color": "rgb(26, 26, 26)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 14,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Buy · Rent · Sell",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(242, 235, 231)",
+              "fontSizePx": 20,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "FREE 3M",
+              "color": "rgb(22, 163, 74)",
+              "backdrop": "rgb(215, 230, 213)",
+              "fontSizePx": 9,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Realtor",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(242, 235, 231)",
+              "fontSizePx": 14,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founding 500 · ₹10k/yr",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(242, 235, 231)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "FREE 3M",
+              "color": "rgb(22, 163, 74)",
+              "backdrop": "rgb(226, 247, 234)",
+              "fontSizePx": 9,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founding 500 Pass (₹10k/yr)",
+              "color": "rgb(26, 26, 26)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "₹0 till Mar 31",
+              "color": "rgb(22, 163, 74)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 13,
+              "fontWeight": "900",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Update Realtor Profile",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "My Listings (0)",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "My Shoots (0)",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(250, 250, 248)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "No listings posted yet.",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Explore",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 29,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Profile",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            }
+          ]
+        },
+        {
+          "frame": "profile-realtor-rera",
+          "scheme": "dark",
+          "pairs": [
+            {
+              "sample": "HA",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(41, 31, 26)",
+              "fontSizePx": 18,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Harish Sharma",
+              "color": "rgb(245, 245, 243)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 17,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "+919100000045 · REALTOR",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 16,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(56, 189, 248)",
+              "backdrop": "rgb(20, 45, 69)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founder Ops Command Center",
+              "color": "rgb(248, 250, 252)",
+              "backdrop": "rgb(15, 23, 42)",
+              "fontSizePx": 13,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "1,000-Listing Blitz · Founding 500 Realtors ",
+              "color": "rgb(148, 163, 184)",
+              "backdrop": "rgb(15, 23, 42)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(148, 163, 184)",
+              "backdrop": "rgb(15, 23, 42)",
+              "fontSizePx": 16,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "WORKSPACE MODE",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(15, 15, 15)",
+              "fontSizePx": 11,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 20,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Member",
+              "color": "rgb(245, 245, 243)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 14,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Buy · Rent · Sell",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(28, 20, 16)",
+              "fontSizePx": 20,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "FREE 3M",
+              "color": "rgb(22, 163, 74)",
+              "backdrop": "rgb(28, 43, 26)",
+              "fontSizePx": 9,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Realtor",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(28, 20, 16)",
+              "fontSizePx": 14,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founding 500 · ₹10k/yr",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(28, 20, 16)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "FREE 3M",
+              "color": "rgb(22, 163, 74)",
+              "backdrop": "rgb(27, 48, 35)",
+              "fontSizePx": 9,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founding 500 Pass (₹10k/yr)",
+              "color": "rgb(245, 245, 243)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "₹0 till Mar 31",
+              "color": "rgb(22, 163, 74)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 13,
+              "fontWeight": "900",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Update Realtor Profile",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(196, 80, 26)",
+              "fontSizePx": 13,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "My Listings (0)",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(196, 80, 26)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "My Shoots (0)",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(15, 15, 15)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "No listings posted yet.",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Explore",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 29,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Profile",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "pageErrors": []
+}

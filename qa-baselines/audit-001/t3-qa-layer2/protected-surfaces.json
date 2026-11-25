@@ -1,0 +1,43 @@
+[
+  {
+    "surface": 2,
+    "name": "Multi-Unit Society Dynamic Switcher",
+    "route": "/property/2969f948-3bb3-4561-9736-74b1773ecce8",
+    "rendered": true,
+    "missingExpectedStrings": [],
+    "errors": [],
+    "textHead": "    1 / 7  View all photos FOR SALE COMMERCIAL ₹9.5 Crores 8.4% Cap Rate · 1,023 sqft · Pre-Leased tenancy Kondapur, Hyderabad Est. EMI: ₹6,59,54",
+    "note": "DEVELOPER UNITS / OWNER UNITS headings only render for multi-unit societies"
+  },
+  {
+    "surface": 3,
+    "name": "Express Shoot & Zero-Flash Navigation",
+    "route": "/post",
+    "rendered": true,
+    "missingExpectedStrings": [],
+    "errors": [],
+    "textHead": " Post a Property List your property for sale or rent. Reach thousands of verified buyers.  Create Listing   Explore   Post   Profile"
+  },
+  {
+    "surface": 5,
+    "name": "Founder Ops Command Center",
+    "route": "/ops",
+    "rendered": true,
+    "missingExpectedStrings": [],
+    "errors": [],
+    "textHead": " Founder Command Center UAT SANDBOX Hyderabad Pre-Seed Blitz · 7 Shutterbugs · 200 Realtors → 1,000 Listings   UAT Multi-Actor Market Simulator Dis"
+  },
+  {
+    "surface": 1,
+    "name": "Live 3D Shutterbug Tracking",
+    "route": "/tracking/f63addfe-2256-410a-91b4-88d8ee3b4363",
+    "rendered": true,
+    "missingExpectedStrings": [
+      "ARRIVAL",
+      "939981"
+    ],
+    "errors": [],
+    "textHead": "󰟇  Main Road 64, Hyderabad, 500095, India  Shoot complete Your HD property photos are being processed  SHOOT LOCATION Main Road 64, Hyderabad, 500",
+    "note": "resolved from the member fixture's own shoot; the Gate Code pill is the §1 preserved string"
+  }
+]

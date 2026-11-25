@@ -1,0 +1,1969 @@
+{
+  "generatedFor": "BLA-12 Layer-2 QA",
+  "hit": 44,
+  "sections": {
+    "s2_hitTargets": {
+      "measuredControls": 8,
+      "distinctLabels": 8,
+      "below44": [],
+      "verdict": "PASS",
+      "cardHeaderFloor": [],
+      "cardHeaderVerdict": "NOT_OBSERVED"
+    },
+    "s3_dynamicType": {
+      "scalesTested": [
+        "L-default",
+        "xxxLarge",
+        "AX3",
+        "AX5-max"
+      ],
+      "clipped": [
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "L-default",
+          "text": "Unlimited Listings & Handoffs",
+          "axis": "horizontal",
+          "cutPx": 153.9,
+          "fontSizePx": 11,
+          "textBox": [
+            460,
+            258,
+            54,
+            52
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "xxxLarge",
+          "text": "Unlimited Listings & Handoffs",
+          "axis": "horizontal",
+          "cutPx": 298,
+          "fontSizePx": 14.9,
+          "textBox": [
+            588,
+            295,
+            70,
+            68
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "xxxLarge",
+          "text": "New Owner Handoff",
+          "axis": "horizontal",
+          "cutPx": 44.8,
+          "fontSizePx": 14.9,
+          "textBox": [
+            246,
+            513,
+            144,
+            17
+          ],
+          "cropperBox": [
+            15,
+            450,
+            330,
+            177
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "179px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "Unlimited Listings & Handoffs",
+          "axis": "horizontal",
+          "cutPx": 721.9,
+          "fontSizePx": 25.9,
+          "textBox": [
+            966,
+            571,
+            116,
+            120
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "",
+          "axis": "horizontal",
+          "cutPx": 25.9,
+          "fontSizePx": 30.6,
+          "textBox": [
+            -26,
+            731,
+            31,
+            34
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "My Properties",
+          "axis": "vertical",
+          "cutPx": 38,
+          "fontSizePx": 25.9,
+          "textBox": [
+            9,
+            718,
+            127,
+            60
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "",
+          "axis": "vertical",
+          "cutPx": 26,
+          "fontSizePx": 30.6,
+          "textBox": [
+            116,
+            732,
+            31,
+            34
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "Site Visits",
+          "axis": "vertical",
+          "cutPx": 39,
+          "fontSizePx": 25.9,
+          "textBox": [
+            151,
+            719,
+            63,
+            60
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "",
+          "axis": "vertical",
+          "cutPx": 26,
+          "fontSizePx": 30.6,
+          "textBox": [
+            207,
+            732,
+            31,
+            34
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "Buyer Contacts",
+          "axis": "vertical",
+          "cutPx": 39,
+          "fontSizePx": 25.9,
+          "textBox": [
+            241,
+            719,
+            105,
+            60
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "New Owner Handoff",
+          "axis": "horizontal",
+          "cutPx": 196.1,
+          "fontSizePx": 25.9,
+          "textBox": [
+            303,
+            898,
+            238,
+            30
+          ],
+          "cropperBox": [
+            15,
+            804,
+            330,
+            325
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "327px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "2 contacts (2 new)",
+          "axis": "horizontal",
+          "cutPx": 16.4,
+          "fontSizePx": 25.9,
+          "textBox": [
+            142,
+            1425,
+            220,
+            30
+          ],
+          "cropperBox": [
+            15,
+            1294,
+            330,
+            171
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "173px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "text": "Apartment",
+          "axis": "horizontal",
+          "cutPx": 15.1,
+          "fontSizePx": 25.9,
+          "textBox": [
+            234,
+            1722,
+            126,
+            30
+          ],
+          "cropperBox": [
+            15,
+            1630,
+            330,
+            141
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "143px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "Pro",
+          "axis": "horizontal",
+          "cutPx": 28.9,
+          "fontSizePx": 31.2,
+          "textBox": [
+            340,
+            312,
+            49,
+            37
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            378
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "378px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "New Contacts (7 days)",
+          "axis": "vertical",
+          "cutPx": 125,
+          "fontSizePx": 37.4,
+          "textBox": [
+            143,
+            513,
+            74,
+            352
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "Unlimited Listings & Handoffs",
+          "axis": "horizontal",
+          "cutPx": 1053.3,
+          "fontSizePx": 34.3,
+          "textBox": [
+            1260,
+            903,
+            153,
+            160
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "",
+          "axis": "vertical",
+          "cutPx": 413,
+          "fontSizePx": 40.5,
+          "textBox": [
+            -53,
+            1107,
+            41,
+            46
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "My Properties",
+          "axis": "vertical",
+          "cutPx": 430,
+          "fontSizePx": 34.3,
+          "textBox": [
+            -9,
+            1090,
+            167,
+            80
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "",
+          "axis": "vertical",
+          "cutPx": 414,
+          "fontSizePx": 40.5,
+          "textBox": [
+            99,
+            1108,
+            41,
+            46
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "Site Visits",
+          "axis": "vertical",
+          "cutPx": 431,
+          "fontSizePx": 34.3,
+          "textBox": [
+            143,
+            1091,
+            84,
+            80
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "",
+          "axis": "vertical",
+          "cutPx": 414,
+          "fontSizePx": 40.5,
+          "textBox": [
+            183,
+            1108,
+            41,
+            46
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "Buyer Contacts",
+          "axis": "vertical",
+          "cutPx": 431,
+          "fontSizePx": 34.3,
+          "textBox": [
+            227,
+            1091,
+            139,
+            80
+          ],
+          "cropperBox": [
+            0,
+            0,
+            360,
+            740
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "740px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "New Owner Handoff",
+          "axis": "horizontal",
+          "cutPx": 318.7,
+          "fontSizePx": 34.3,
+          "textBox": [
+            349,
+            1313,
+            315,
+            40
+          ],
+          "cropperBox": [
+            15,
+            1196,
+            330,
+            491
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "493px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "House",
+          "axis": "horizontal",
+          "cutPx": 19.4,
+          "fontSizePx": 34.3,
+          "textBox": [
+            264,
+            1814,
+            101,
+            40
+          ],
+          "cropperBox": [
+            15,
+            1699,
+            330,
+            174
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "176px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "House",
+          "axis": "horizontal",
+          "cutPx": 19.4,
+          "fontSizePx": 34.3,
+          "textBox": [
+            264,
+            2000,
+            101,
+            40
+          ],
+          "cropperBox": [
+            15,
+            1885,
+            330,
+            214
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "216px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "2 contacts (2 new)",
+          "axis": "horizontal",
+          "cutPx": 95.1,
+          "fontSizePx": 34.3,
+          "textBox": [
+            150,
+            2049,
+            290,
+            40
+          ],
+          "cropperBox": [
+            15,
+            1885,
+            330,
+            214
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "216px"
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "text": "Apartment",
+          "axis": "horizontal",
+          "cutPx": 85.9,
+          "fontSizePx": 34.3,
+          "textBox": [
+            264,
+            2412,
+            167,
+            40
+          ],
+          "cropperBox": [
+            15,
+            2297,
+            330,
+            174
+          ],
+          "cropperTag": "div",
+          "cropperAriaLabel": "",
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "cropperStyleMinH": "0px",
+          "cropperStyleH": "176px"
+        }
+      ],
+      "overlaps": [
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "L-default",
+          "a": "Falaknuma",
+          "b": "Post",
+          "overlapFrac": 1,
+          "aBox": [
+            113,
+            772,
+            196,
+            17
+          ],
+          "bBox": [
+            124,
+            782,
+            22,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "L-default",
+          "a": "Falaknuma",
+          "b": "Dashboard",
+          "overlapFrac": 1,
+          "aBox": [
+            113,
+            772,
+            196,
+            17
+          ],
+          "bBox": [
+            198,
+            782,
+            55,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "L-default",
+          "a": "Falaknuma",
+          "b": "Profile",
+          "overlapFrac": 0.32,
+          "aBox": [
+            113,
+            772,
+            196,
+            17
+          ],
+          "bBox": [
+            299,
+            782,
+            33,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "xxxLarge",
+          "a": "Hyderabad · ₹2.5Cr",
+          "b": "Post",
+          "overlapFrac": 0.8,
+          "aBox": [
+            113,
+            783,
+            190,
+            19
+          ],
+          "bBox": [
+            120,
+            782,
+            29,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "xxxLarge",
+          "a": "Hyderabad · ₹2.5Cr",
+          "b": "Dashboard",
+          "overlapFrac": 0.8,
+          "aBox": [
+            113,
+            783,
+            190,
+            19
+          ],
+          "bBox": [
+            189,
+            782,
+            71,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX3",
+          "a": "5",
+          "b": "Site Visits",
+          "overlapFrac": 0.57,
+          "aBox": [
+            145,
+            734,
+            15,
+            28
+          ],
+          "bBox": [
+            151,
+            719,
+            63,
+            60
+          ],
+          "fixedOverlayInvolved": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "New Contacts (7 days)",
+          "b": "Post",
+          "overlapFrac": 0.37,
+          "aBox": [
+            143,
+            513,
+            74,
+            352
+          ],
+          "bBox": [
+            103,
+            782,
+            63,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "New Contacts (7 days)",
+          "b": "Dashboard",
+          "overlapFrac": 0.4,
+          "aBox": [
+            143,
+            513,
+            74,
+            352
+          ],
+          "bBox": [
+            185,
+            782,
+            80,
+            5
+          ],
+          "fixedOverlayInvolved": true
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "5",
+          "b": "Site Visits",
+          "overlapFrac": 1,
+          "aBox": [
+            167,
+            1112,
+            20,
+            37
+          ],
+          "bBox": [
+            143,
+            1091,
+            84,
+            80
+          ],
+          "fixedOverlayInvolved": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "viewport": "w360",
+          "scale": "AX5-max",
+          "a": "3",
+          "b": "Buyer Contacts",
+          "overlapFrac": 1,
+          "aBox": [
+            236,
+            1113,
+            20,
+            37
+          ],
+          "bBox": [
+            227,
+            1091,
+            139,
+            80
+          ],
+          "fixedOverlayInvolved": false
+        }
+      ],
+      "verdict": "REVIEW"
+    },
+    "s4_screenReader": {
+      "tree": [
+        {
+          "frame": "dashboard-pro",
+          "tree": [
+            {
+              "role": "tablist",
+              "name": "",
+              "parentRole": "RootWebArea"
+            },
+            {
+              "role": "tab",
+              "name": "  Explore",
+              "parentRole": "tablist",
+              "selected": false
+            },
+            {
+              "role": "tab",
+              "name": "  Post",
+              "parentRole": "tablist",
+              "selected": false
+            },
+            {
+              "role": "tab",
+              "name": "  Dashboard",
+              "parentRole": "tablist",
+              "selected": true
+            },
+            {
+              "role": "tab",
+              "name": "  Profile",
+              "parentRole": "tablist",
+              "selected": false
+            }
+          ]
+        }
+      ],
+      "emptyNames": [
+        {
+          "frame": "dashboard-pro",
+          "role": "tablist",
+          "name": "",
+          "parentRole": "RootWebArea"
+        }
+      ],
+      "unlabelledDom": []
+    },
+    "s5_colourOnly": {
+      "dotsObserved": 4,
+      "dotsWithoutTextEquivalent": [],
+      "detail": [
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "dots": [
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            },
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            }
+          ]
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "dots": [
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            },
+            {
+              "color": "rgb(245, 158, 11)",
+              "sizePx": 7,
+              "siblingText": "",
+              "subtreeText": "",
+              "hasTextEquivalent": true
+            }
+          ]
+        }
+      ],
+      "verdict": "PASS"
+    },
+    "s6_contrast": {
+      "pairsMeasured": 74,
+      "failures": [
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "pts",
+          "color": "rgba(255, 255, 255, 0.55)",
+          "backdrop": "rgb(139, 37, 0)",
+          "fontSizePx": 12,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.7,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "",
+          "color": "rgb(239, 68, 68)",
+          "backdrop": "rgb(254, 238, 238)",
+          "fontSizePx": 18,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.35,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "",
+          "color": "rgb(59, 130, 246)",
+          "backdrop": "rgb(237, 244, 254)",
+          "fontSizePx": 18,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.32,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "👑",
+          "color": "rgb(0, 0, 0)",
+          "backdrop": "rgb(6, 78, 59)",
+          "fontSizePx": 13,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 2.16,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "New Owner Handoff",
+          "color": "rgb(217, 119, 6)",
+          "backdrop": "rgb(254, 242, 223)",
+          "fontSizePx": 11,
+          "fontWeight": "600",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 2.88,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "",
+          "color": "rgb(239, 68, 68)",
+          "backdrop": "rgb(255, 255, 255)",
+          "fontSizePx": 11,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.76,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "sample": "2 contacts (2 new)",
+          "color": "rgb(239, 68, 68)",
+          "backdrop": "rgb(255, 255, 255)",
+          "fontSizePx": 11,
+          "fontWeight": "600",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.76,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "pts",
+          "color": "rgba(255, 255, 255, 0.55)",
+          "backdrop": "rgb(139, 37, 0)",
+          "fontSizePx": 12,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.7,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "",
+          "color": "rgb(239, 68, 68)",
+          "backdrop": "rgb(45, 30, 30)",
+          "fontSizePx": 18,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 4.24,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "",
+          "color": "rgb(59, 130, 246)",
+          "backdrop": "rgb(29, 35, 46)",
+          "fontSizePx": 18,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 4.29,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(41, 31, 26)",
+          "fontSizePx": 18,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.46,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "👑",
+          "color": "rgb(0, 0, 0)",
+          "backdrop": "rgb(6, 78, 59)",
+          "fontSizePx": 13,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 2.16,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(15, 15, 15)",
+          "fontSizePx": 13,
+          "fontWeight": "400",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 4.12,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "My Properties",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(15, 15, 15)",
+          "fontSizePx": 11,
+          "fontWeight": "700",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 4.12,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "Villa",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(38, 30, 26)",
+          "fontSizePx": 11,
+          "fontWeight": "600",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.51,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "New Owner Handoff",
+          "color": "rgb(217, 119, 6)",
+          "backdrop": "rgb(54, 43, 24)",
+          "fontSizePx": 11,
+          "fontWeight": "600",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 4.35,
+          "passes": false
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "sample": "Dashboard",
+          "color": "rgb(196, 80, 26)",
+          "backdrop": "rgb(26, 26, 26)",
+          "fontSizePx": 10,
+          "fontWeight": "600",
+          "largeText": false,
+          "threshold": 4.5,
+          "contrast": 3.74,
+          "passes": false
+        }
+      ],
+      "lightFailures": 7,
+      "darkFailures": 10,
+      "all": [
+        {
+          "frame": "dashboard-pro",
+          "scheme": "light",
+          "pairs": [
+            {
+              "sample": "Good morning",
+              "color": "rgba(255, 255, 255, 0.7)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Harish 👋",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 26,
+              "fontWeight": "800",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "",
+              "color": "rgba(255, 255, 255, 0.65)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "5,442",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "pts",
+              "color": "rgba(255, 255, 255, 0.55)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Pro",
+              "color": "rgb(29, 78, 216)",
+              "backdrop": "rgb(239, 246, 255)",
+              "fontSizePx": 10,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(239, 68, 68)",
+              "backdrop": "rgb(254, 238, 238)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "2",
+              "color": "rgb(26, 26, 26)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 28,
+              "fontWeight": "800",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Buyer Contacts",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 12,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(59, 130, 246)",
+              "backdrop": "rgb(237, 244, 254)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(245, 235, 232)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "👑",
+              "color": "rgb(0, 0, 0)",
+              "backdrop": "rgb(6, 78, 59)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founding 500 Pro Active · Free through Mar 3",
+              "color": "rgb(236, 253, 245)",
+              "backdrop": "rgb(6, 78, 59)",
+              "fontSizePx": 12,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Unlimited Listings & Handoffs",
+              "color": "rgb(167, 243, 208)",
+              "backdrop": "rgb(6, 78, 59)",
+              "fontSizePx": 11,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(250, 250, 248)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "My Properties",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(250, 250, 248)",
+              "fontSizePx": 11,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "5",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 10,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(250, 250, 248)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Site Visits",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(250, 250, 248)",
+              "fontSizePx": 11,
+              "fontWeight": "500",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "3",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(245, 243, 239)",
+              "fontSizePx": 10,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Ps 1194، 500027 Hyderabad، India",
+              "color": "rgb(26, 26, 26)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 14,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Ps 1194، 500027 Hyderabad، India · ₹0",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "For Sale",
+              "color": "rgb(146, 64, 14)",
+              "backdrop": "rgb(254, 243, 199)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Villa",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(247, 240, 237)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "New Owner Handoff",
+              "color": "rgb(217, 119, 6)",
+              "backdrop": "rgb(254, 242, 223)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Accept & Schedule Shoot",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 12,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "No contacts or visits yet",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 20,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 16,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(239, 68, 68)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "2 contacts (2 new)",
+              "color": "rgb(239, 68, 68)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Explore",
+              "color": "rgb(107, 107, 107)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 29,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Dashboard",
+              "color": "rgb(139, 37, 0)",
+              "backdrop": "rgb(255, 255, 255)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            }
+          ]
+        },
+        {
+          "frame": "dashboard-pro",
+          "scheme": "dark",
+          "pairs": [
+            {
+              "sample": "Good morning",
+              "color": "rgba(255, 255, 255, 0.7)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Harish 👋",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 26,
+              "fontWeight": "800",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "",
+              "color": "rgba(255, 255, 255, 0.65)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "5,442",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 13,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "pts",
+              "color": "rgba(255, 255, 255, 0.55)",
+              "backdrop": "rgb(139, 37, 0)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Pro",
+              "color": "rgb(29, 78, 216)",
+              "backdrop": "rgb(239, 246, 255)",
+              "fontSizePx": 10,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(239, 68, 68)",
+              "backdrop": "rgb(45, 30, 30)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "2",
+              "color": "rgb(245, 245, 243)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 28,
+              "fontWeight": "800",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Buyer Contacts",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 12,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(59, 130, 246)",
+              "backdrop": "rgb(29, 35, 46)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(41, 31, 26)",
+              "fontSizePx": 18,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "👑",
+              "color": "rgb(0, 0, 0)",
+              "backdrop": "rgb(6, 78, 59)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Founding 500 Pro Active · Free through Mar 3",
+              "color": "rgb(236, 253, 245)",
+              "backdrop": "rgb(6, 78, 59)",
+              "fontSizePx": 12,
+              "fontWeight": "800",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Unlimited Listings & Handoffs",
+              "color": "rgb(167, 243, 208)",
+              "backdrop": "rgb(6, 78, 59)",
+              "fontSizePx": 11,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(15, 15, 15)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "My Properties",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(15, 15, 15)",
+              "fontSizePx": 11,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "5",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(196, 80, 26)",
+              "fontSizePx": 10,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(15, 15, 15)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Site Visits",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(15, 15, 15)",
+              "fontSizePx": 11,
+              "fontWeight": "500",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "3",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(36, 36, 36)",
+              "fontSizePx": 10,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Ps 1194، 500027 Hyderabad، India",
+              "color": "rgb(245, 245, 243)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 14,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Ps 1194، 500027 Hyderabad، India · ₹0",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 12,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "For Sale",
+              "color": "rgb(146, 64, 14)",
+              "backdrop": "rgb(254, 243, 199)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Villa",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(38, 30, 26)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "New Owner Handoff",
+              "color": "rgb(217, 119, 6)",
+              "backdrop": "rgb(54, 43, 24)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(196, 80, 26)",
+              "fontSizePx": 13,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "Accept & Schedule Shoot",
+              "color": "rgb(255, 255, 255)",
+              "backdrop": "rgb(196, 80, 26)",
+              "fontSizePx": 12,
+              "fontWeight": "700",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "No contacts or visits yet",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 20,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 16,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(239, 68, 68)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 11,
+              "fontWeight": "400",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "2 contacts (2 new)",
+              "color": "rgb(239, 68, 68)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 11,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 25,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Explore",
+              "color": "rgb(160, 160, 160)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            },
+            {
+              "sample": "",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 29,
+              "fontWeight": "400",
+              "largeText": true,
+              "threshold": 3
+            },
+            {
+              "sample": "Dashboard",
+              "color": "rgb(196, 80, 26)",
+              "backdrop": "rgb(26, 26, 26)",
+              "fontSizePx": 10,
+              "fontWeight": "600",
+              "largeText": false,
+              "threshold": 4.5
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "pageErrors": []
+}

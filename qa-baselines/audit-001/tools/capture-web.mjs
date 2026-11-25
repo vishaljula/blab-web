@@ -18,9 +18,16 @@ const require = createRequire(ROOT + "/package.json");
 const { chromium } = require("playwright");
 const { neon } = require("@neondatabase/serverless");
 
-const OUT = path.join(ROOT, "qa-baselines/audit-001/baseline");
-const WEB = "http://localhost:8081";
-const API = "http://localhost:3000";
+// BLA-12 (Layer-2 QA): allow re-capture into a comparison directory so the attested
+// Ticket-0 baseline is never overwritten by a regression run.
+const OUT = process.env.CAPTURE_OUT
+  ? path.resolve(process.env.CAPTURE_OUT)
+  : path.join(ROOT, "qa-baselines/audit-001/baseline");
+// BLA-15 (Layer-2 QA): allow pointing at a second Expo dev server so an "after"
+// branch can be captured from its own worktree while the shared 8081 server keeps
+// serving the branch another run is using.
+const WEB = process.env.CAPTURE_WEB || "http://localhost:8081";
+const API = process.env.CAPTURE_API || "http://localhost:3000";
 
 const env = fs.readFileSync(ROOT + "/.env.local", "utf8");
 const envGet = (k) =>
@@ -109,6 +116,38 @@ const FRAMES = [
 const args = process.argv.slice(2);
 const probe = args.includes("--probe");
 
+// ── CORS repair for off-8081 capture (BLA-15) ─────────────────────────────
+// `src/middleware.ts:14-19` only reflects Access-Control-Allow-Origin for
+// `http://localhost:8081`, `http://localhost:3000` and private LAN IPs. A capture
+// served from any other port therefore gets an API response with no ACAO header,
+// the browser drops it, and every authenticated surface silently renders its
+// empty/error state — `Couldn't load dashboard`, `My Listings (0)` — with
+// `pageErrors: []`, so the frames look captured but are worthless.
+//
+// This repairs the response headers in the browser context only. It changes no
+// server state, no app source, and no response BODY: `route.fetch()` performs the
+// real request and the real payload is passed through untouched.
+//
+// REQUIRED whenever CAPTURE_WEB points at anything other than :8081.
+const CORS_FIX = process.env.CAPTURE_CORS_FIX === "1";
+
+async function applyCorsRepair(ctx) {
+  const pageOrigin = new URL(WEB).origin;
+  const cors = {
+    "access-control-allow-origin": pageOrigin,
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "access-control-allow-headers": "Content-Type, Authorization, Cookie",
+  };
+  await ctx.route(`${API}/**`, async (route) => {
+    if (route.request().method() === "OPTIONS") {
+      return route.fulfill({ status: 204, headers: cors });
+    }
+    const res = await route.fetch();
+    await route.fulfill({ response: res, headers: { ...res.headers(), ...cors } });
+  });
+}
+
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
 
@@ -131,6 +170,8 @@ async function main() {
           colorScheme: scheme,
           deviceScaleFactor: 2,
         });
+
+        if (CORS_FIX) await applyCorsRepair(ctx);
 
         const a = frame.auth ? tokens[frame.auth] : null;
         await ctx.addInitScript(
