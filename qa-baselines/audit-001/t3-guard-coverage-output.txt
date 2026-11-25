@@ -14,13 +14,17 @@ a11y-guard tokenizer — blankNonCode() on the positions that broke it (BLA-11 F
   ok    escaped apostrophe      
   ok    object + array literals 
   ok    unterminated string     
+  ok    URL in JSX text         
+  ok    URL in arrow-fn string  
+  ok    protocol-relative URL   
+  ok    non-star block comment  
 
 a11y-guard coverage — can the guard see every line it claims to guard?
 
 file                                                  lines  blind  desync  blind ranges
 ----------------------------------------------------------------------------------------------------
 expo-app/app/(tabs)/profile.tsx                         501      0       0  —
-expo-app/components/realtor/RealtorDashboard.tsx       1283      0       0  —
+expo-app/components/realtor/RealtorDashboard.tsx       1316      0       0  —
 
 Mirror liveness — did the mirrored guard run at all? (exit 0 alone does not prove it)
 ----------------------------------------------------------------------------------------------------
@@ -38,16 +42,15 @@ A/B injection — raw <Pressable> at code positions throughout each guarded file
   expo-app/app/(tabs)/profile.tsx:500                                         guard FAILS (correct)
   expo-app/components/realtor/RealtorDashboard.tsx:20                         guard FAILS (correct)
   expo-app/components/realtor/RealtorDashboard.tsx:202                        guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:372                        guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:531                        guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:701                        guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:719            [was blind] guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:763            [was blind] guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:860                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:373                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:537                        guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:722            [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:730            [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:772            [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:889                        guard FAILS (correct)
   expo-app/components/realtor/RealtorDashboard.tsx:1017           [was blind] guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:1020           [was blind] guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:1063           [was blind] guard FAILS (correct)
-  expo-app/components/realtor/RealtorDashboard.tsx:1282                       guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1050           [was blind] guard FAILS (correct)
+  expo-app/components/realtor/RealtorDashboard.tsx:1315                       guard FAILS (correct)
 
 Namespace-import probe (F2) — import * as RN + <RN.Pressable>
 ----------------------------------------------------------------------------------------------------

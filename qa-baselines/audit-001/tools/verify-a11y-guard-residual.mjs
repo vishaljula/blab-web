@@ -186,6 +186,17 @@ try {
         `      const __r5ns = await import("react-native");` +
         ` const __r5 = React.createElement(__r5ns.Pressable, {});`,
     },
+    {
+      // Added while closing R1-R5: the `://` rule does not cover a protocol-relative `//host`,
+      // which is indistinguishable from a comment without a real parser. The tokenizer still
+      // blanks that tail, so the canary has to be the layer that notices. It is only allowed
+      // to trust a `//` comment that OPENS its line; a mid-line one is reported as a desync.
+      // Fail closed, not silently clean — the F1 rule applied to the residual case.
+      id: "R6",
+      title: "blind tail — protocol-relative //host, control after it on the same line",
+      expectOpen: true,
+      snippet: `      const __r6 = <><Text>at //blab.in</Text><Pressable onPress={() => {}} /></>;`,
+    },
   ];
 
   note("\nResidual probes against the real guard (mirror of RealtorDashboard.tsx, line 300)");

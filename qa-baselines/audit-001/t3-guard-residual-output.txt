@@ -8,20 +8,12 @@ Mirror liveness — did the mirrored guard run at all? (exit 0 alone does not pr
 Residual probes against the real guard (mirror of RealtorDashboard.tsx, line 300)
 ----------------------------------------------------------------------------------------------------
   R0  control — bare <Pressable> at a plain code position                         guard FAILS (correct)
-  R1  blind tail — URL in JSX text, control after it on the same line             guard reports CLEAN — bypass (hole open)
-  R2  blind tail — URL in a string opensString() rejects (after `=>`)             guard reports CLEAN — bypass (hole open)
-  R3  false-positive desync — banned tag named in a non-star block comment        guard reports a FALSE desync (hole open)
-      expo-app/components/realtor/RealtorDashboard.tsx:301  error  guard desync — <Pressable is present in the source but was blanked before matching; the guard cannot vouch for this file (see qa-baselines/audit-001/tools/verify-a11y-guard-coverage.mjs)  [a11y-guard]
-  R4  empty accessible name — accessibilityLabel={""} passes type + guard         guard reports CLEAN — bypass (hole open)
-  R5  dynamic import — await import("react-native") + createElement(RN.Pressable)  guard reports CLEAN — bypass (hole open)
+  R1  blind tail — URL in JSX text, control after it on the same line             guard FAILS (correct)
+  R2  blind tail — URL in a string opensString() rejects (after `=>`)             guard FAILS (correct)
+  R3  false-positive desync — banned tag named in a non-star block comment        guard stays quiet (correct)
+  R4  empty accessible name — accessibilityLabel={""} passes type + guard         guard FAILS (correct)
+  R5  dynamic import — await import("react-native") + createElement(RN.Pressable)  guard FAILS (correct)
+  R6  blind tail — protocol-relative //host, control after it on the same line    guard FAILS (correct)
 
 ====================================================================================================
-5 residual hole(s) OPEN — expected at 7cb50b0; this script is the
-acceptance test for the a11y-guard hardening follow-up, not a regression in T3:
-  - R1 — blind tail — URL in JSX text, control after it on the same line
-  - R2 — blind tail — URL in a string opensString() rejects (after `=>`)
-  - R3 — false-positive desync — banned tag named in a non-star block comment
-  - R4 — empty accessible name — accessibilityLabel={""} passes type + guard
-  - R5 — dynamic import — await import("react-native") + createElement(RN.Pressable)
-
-None of these is live in either guarded file today; see the header for the measurements.
+PASS — every residual hole raised in the BLA-11 re-review is closed.

@@ -57,7 +57,9 @@ const REQUIRED_PROPS = {
  * `}` and `>` are deliberately absent: `<Text>{name}'s listings</Text>` and
  * `<Text>'tis</Text>` are JSX text, not expression position.
  */
-const QUOTE_OPENER_PUNCT = new Set(["=", "(", ",", "[", "{", ":", ";", "?", "&", "|", "!", "+"]);
+const QUOTE_OPENER_PUNCT = new Set([
+  "=", "(", ",", "[", "{", ":", ";", "?", "&", "|", "!", "+", "-", "*", "%", "<",
+]);
 
 /** Keywords that can legally precede a string literal (`from "react-native"`). */
 const QUOTE_OPENER_KEYWORDS = new Set([
@@ -82,6 +84,10 @@ function opensString(out, pos) {
   if (k < 0) return true; // start of file
   const c = out[k];
   if (QUOTE_OPENER_PUNCT.has(c)) return true;
+  // `>` alone is JSX (`<Text>'tis</Text>`), but `=>` is unambiguously an operator, so a string
+  // may follow it: `() => "https://…"`. Without this, that string stays unblanked and the `//`
+  // inside it is read as a line comment, blanking the rest of the line (BLA-11 R2).
+  if (c === ">" && out[k - 1] === "=") return true;
   if (!/[A-Za-z0-9_$]/.test(c)) return false; // `}`, `>`, `)`, `]`, a letter-less symbol
   // Preceding token is a word: a string may follow a keyword, never an identifier.
   let w = k;
@@ -93,29 +99,39 @@ function opensString(out, pos) {
  * Strip comments and string/template literals so matches inside prose or copy are not
  * mistaken for code. Replaces with same-length blanks to keep line numbers intact.
  *
- * Returns `{ src, desync }`. `desync` holds tokenizer failures — a `'`/`"` that opened in
- * expression position but found no partner before end of line. The guard FAILS on those
- * rather than blanking the rest of the file: silent blindness is the failure mode this
+ * Returns `{ src, desync, comments }`. `desync` holds tokenizer failures — a `'`/`"` that
+ * opened in expression position but found no partner before end of line. The guard FAILS on
+ * those rather than blanking the rest of the file: silent blindness is the failure mode this
  * function has to rule out, so anything it cannot tokenise is an error, not an assumption.
+ *
+ * `comments` is the list of `[start, end)` ranges blanked as comments. The canary in
+ * `collectViolations()` needs to tell "blanked because it is a comment" (fine) from "blanked
+ * because the tokenizer lost the thread" (a desync), and only this function knows which.
  */
 export function blankNonCode(src) {
   const out = src.split("");
   const desync = [];
+  const comments = [];
   let i = 0;
   const blank = (from, to) => {
     for (let k = from; k < to; k++) if (out[k] !== "\n") out[k] = " ";
   };
   while (i < src.length) {
     const two = src.slice(i, i + 2);
-    if (two === "//") {
+    // `://` is a URL, not a comment. Blanking from there to end of line hid every control
+    // that followed a link on the same line, and the canary below used to skip exactly those
+    // lines — the F1 shape, narrowed to one line (BLA-11 R1).
+    if (two === "//" && src[i - 1] !== ":") {
       let j = src.indexOf("\n", i);
       if (j === -1) j = src.length;
       blank(i, j);
+      comments.push([i, j]);
       i = j;
     } else if (two === "/*") {
       let j = src.indexOf("*/", i + 2);
       j = j === -1 ? src.length : j + 2;
       blank(i, j);
+      comments.push([i, j]);
       i = j;
     } else if (src[i] === "`") {
       // Template literals legitimately span lines; `${}` interiors are blanked with them,
@@ -154,7 +170,7 @@ export function blankNonCode(src) {
       i++;
     }
   }
-  return { src: out.join(""), desync };
+  return { src: out.join(""), desync, comments };
 }
 
 const lineOf = (src, index) => src.slice(0, index).split("\n").length;
@@ -181,6 +197,17 @@ function readOpeningTag(src, start) {
  */
 const jsxTag = (name) => new RegExp(`<(?:[A-Za-z_$][\\w$]*\\.)?${name}(?![A-Za-z0-9_])`, "g");
 
+/**
+ * Matches `prop` carrying a statically empty value: `=""`, `={""}`, `={''}`, `={``}`, `={}`,
+ * `={undefined}`, `={null}`, and the whitespace-only variants. An empty accessible name is a
+ * `string`, so Layer 1 accepts it and the mere-presence check used to as well (BLA-11 R4).
+ * Must be tested against the *raw* tag text — blanking empties every string body.
+ */
+const emptyProp = (prop) =>
+  new RegExp(
+    `(^|\\s)${prop}\\s*=\\s*(?:(["'\`])\\s*\\2|\\{\\s*(?:(["'\`])\\s*\\3|undefined|null|)\\s*\\})`
+  );
+
 /** Strip the optional `Ns.` qualifier so a match can be reported by its bare tag name. */
 const bareTag = (text) => text.replace(/^<(?:[A-Za-z_$][\w$]*\.)?/, "<");
 
@@ -201,7 +228,24 @@ export function collectViolations(files = GUARDED_FILES, root = REPO_ROOT) {
       });
       continue;
     }
-    const { src, desync } = blankNonCode(raw);
+    const { src, desync, comments } = blankNonCode(raw);
+
+    /**
+     * Was `idx` blanked as a comment the canary is willing to trust?
+     *
+     * Block comments are trusted wholesale — their extent is unambiguous. A *line* comment is
+     * trusted only when its `//` opens the line, because a mid-line `//` is the one place the
+     * tokenizer can still be wrong: `<Text>at //blab.in</Text>` blanks the rest of that line.
+     * So a banned tag written after a mid-line `//` is reported as a desync rather than
+     * assumed to be prose — fail closed, the F1 rule. Documenting a banned tag in a trailing
+     * comment therefore needs the comment on its own line, which the message says.
+     */
+    const inTrustedComment = (idx) =>
+      comments.some(([s, e]) => {
+        if (idx < s || idx >= e) return false;
+        if (raw.slice(s, s + 2) !== "//") return true;
+        return !raw.slice(raw.lastIndexOf("\n", s - 1) + 1, s).trim();
+      });
 
     // 0. Fail closed: if the scanner lost the thread, say so instead of reporting green over
     //    whatever it blanked. This is the BLA-13 regression — 292 lines were silently blind.
@@ -223,21 +267,23 @@ export function collectViolations(files = GUARDED_FILES, root = REPO_ROOT) {
     }
 
     // 1b. Belt-and-braces canary: run the same matchers over the *unblanked* source. Any hit
-    //     the blanked pass missed on a non-comment line means blanking ate real code — report
-    //     it as a desync rather than trusting the clean result.
-    const rawLines = raw.split("\n");
+    //     the blanked pass missed outside a comment means blanking ate real code — report it
+    //     as a desync rather than trusting the clean result.
+    //
+    //     "Is it a comment?" is answered by the exact ranges blankNonCode() blanked as
+    //     comments, not by re-guessing from the line text. The old line-shape heuristic
+    //     required a block-comment line to start with `*`, so naming a banned tag in a
+    //     plain block comment raised a bogus `guard desync` whose obvious "fix" is to
+    //     weaken this canary — the one layer F1's closure rests on (BLA-11 R3).
     for (const banned of Object.keys(BANNED)) {
       for (const m of raw.matchAll(jsxTag(banned))) {
         const line = lineOf(raw, m.index);
         if (seenBannedLines.has(`${banned}:${line}`)) continue;
-        const text = rawLines[line - 1] ?? "";
-        const col = m.index - raw.lastIndexOf("\n", m.index - 1) - 1;
-        const commented = /^\s*(\/\/|\*|\/\*)/.test(text) || text.slice(0, col).includes("//");
-        if (commented) continue;
+        if (inTrustedComment(m.index)) continue;
         violations.push({
           file: rel,
           line,
-          msg: `guard desync — ${bareTag(m[0])} is present in the source but was blanked before matching; the guard cannot vouch for this file (see qa-baselines/audit-001/tools/verify-a11y-guard-coverage.mjs)`,
+          msg: `guard desync — ${bareTag(m[0])} is present in the source but was blanked before matching, so the guard cannot vouch for this file; if it is prose, move it to its own \`//\` line or a /* block */ comment (see qa-baselines/audit-001/tools/verify-a11y-guard-coverage.mjs)`,
         });
       }
     }
@@ -264,6 +310,9 @@ export function collectViolations(files = GUARDED_FILES, root = REPO_ROOT) {
       [/import\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s*["']react-native["']/g, (m) => `import * as ${m[1]}`],
       [/import\s+([A-Za-z_$][\w$]*)\s*(?:,|\s+from)\s*(?:\{[^}]*\}\s*from\s*)?["']react-native["']/g, (m) => `default import ${m[1]}`],
       [/require\(\s*["']react-native["']\s*\)/g, () => `require("react-native")`],
+      // `await import("react-native")` hands back the same namespace object as `import * as`,
+      // so banning only the static forms left one door open (BLA-11 R5).
+      [/\bimport\s*\(\s*["']react-native["']\s*\)/g, () => `import("react-native")`],
     ];
     for (const [re, describe] of WHOLE_MODULE) {
       for (const m of raw.matchAll(re)) {
@@ -275,10 +324,13 @@ export function collectViolations(files = GUARDED_FILES, root = REPO_ROOT) {
       }
     }
 
-    // 2. Every wrapper call site carries its required accessibility props.
+    // 2. Every wrapper call site carries its required accessibility props, non-empty.
     for (const [component, required] of Object.entries(REQUIRED_PROPS)) {
       for (const m of src.matchAll(jsxTag(component))) {
         const tag = readOpeningTag(src, m.index);
+        // Brace tracking needs the blanked text, but the *values* only survive in `raw`.
+        // Blanking is length-preserving, so the same offsets slice the same tag.
+        const rawTag = raw.slice(m.index, m.index + tag.length);
         const line = lineOf(src, m.index);
         if (/\{\s*\.\.\./.test(tag)) {
           violations.push({
@@ -291,6 +343,12 @@ export function collectViolations(files = GUARDED_FILES, root = REPO_ROOT) {
         for (const prop of required) {
           if (!new RegExp(`(^|\\s)${prop}\\s*=`).test(tag)) {
             violations.push({ file: rel, line, msg: `<${component}> is missing required prop "${prop}"` });
+          } else if (emptyProp(prop).test(rawTag)) {
+            violations.push({
+              file: rel,
+              line,
+              msg: `<${component}> passes an empty "${prop}" — it satisfies the type system but announces the control as unlabelled, which is the defect this guard exists to prevent; pass real user-facing text`,
+            });
           }
         }
       }

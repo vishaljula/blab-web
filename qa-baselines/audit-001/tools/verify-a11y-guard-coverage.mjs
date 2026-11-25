@@ -126,6 +126,16 @@ const TOKENIZER_CASES = [
   ["escaped apostrophe",      "const a = 'it\\'s';\n<Pressable/>",                          { desync: 0, sees: "<Pressable" }],
   ["object + array literals", "const o = { k: 'v', l: ['a', \"b\"] };\n<Pressable/>",       { desync: 0, sees: "<Pressable" }],
   ["unterminated string",     "const bad = 'oops\nconst ok = 1;",                           { desync: 1 }],
+  // BLA-11 R1/R2/R3 — `//` is a comment opener everywhere EXCEPT after `:`, and a string may
+  // follow `=>`. Both were blind tails: the rest of the line vanished after a URL.
+  ["URL in JSX text",         "<Text>see https://blab.in</Text><Pressable/>",               { desync: 0, sees: "<Pressable" }],
+  ["URL in arrow-fn string",  'const u = () => "https://blab.in";\n<Pressable/>',           { desync: 0, sees: "<Pressable" }],
+  // A `//` with no `:` in front is indistinguishable from a comment without a real parser, so
+  // the tokenizer still blanks this tail — by design. The canary is what covers it: see probe
+  // R6 in verify-a11y-guard-residual.mjs, which asserts the guard reports a desync there
+  // rather than silently passing. This case pins the accepted tokenizer limitation.
+  ["protocol-relative URL",   "<Text>at //blab.in <Pressable/></Text>",                     { desync: 0, hides: "<Pressable" }],
+  ["non-star block comment",  "/* note:\n<Pressable/> is banned here\n*/\n<A11yPressable/>", { desync: 0, hides: "<Pressable" }],
 ];
 
 note("a11y-guard tokenizer — blankNonCode() on the positions that broke it (BLA-11 F1)\n");
