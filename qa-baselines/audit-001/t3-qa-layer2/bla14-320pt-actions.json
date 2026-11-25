@@ -1,0 +1,182 @@
+{
+  "generatedFor": "BLA-14",
+  "fixture": "+919100000045",
+  "cases": {
+    "w320_fs100": {
+      "viewportWidth": 320,
+      "documentScrollWidth": 320,
+      "horizontalScrollPresent": false,
+      "buttons": [
+        {
+          "label": "WhatsApp Vikram Rao about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 245,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "Call Vikram Rao about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 295,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "WhatsApp Divya Thomas about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 245,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "Call Divya Thomas about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 295,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        }
+      ]
+    },
+    "w320_fs200": {
+      "viewportWidth": 320,
+      "documentScrollWidth": 320,
+      "horizontalScrollPresent": false,
+      "buttons": [
+        {
+          "label": "WhatsApp Vikram Rao about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 245,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "Call Vikram Rao about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 295,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "WhatsApp Divya Thomas about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 245,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "Call Divya Thomas about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 295,
+          "cardRightEdge": 320,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        }
+      ]
+    },
+    "w390_fs100": {
+      "viewportWidth": 390,
+      "documentScrollWidth": 390,
+      "horizontalScrollPresent": false,
+      "buttons": [
+        {
+          "label": "WhatsApp Vikram Rao about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 315,
+          "cardRightEdge": 390,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "Call Vikram Rao about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 365,
+          "cardRightEdge": 390,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "WhatsApp Divya Thomas about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 315,
+          "cardRightEdge": 390,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        },
+        {
+          "label": "Call Divya Thomas about Bibinagar",
+          "width": 44,
+          "height": 44,
+          "meets44": true,
+          "rightEdge": 365,
+          "cardRightEdge": 390,
+          "overflowsCardRight": false,
+          "overflowsViewport": false,
+          "clippedHorizontally": false,
+          "overlapsNameColumn": false
+        }
+      ]
+    }
+  },
+  "summary": {
+    "casesRun": 3,
+    "buttonsMeasured": 12,
+    "anyBelow44": false,
+    "anyOverflowCard": false,
+    "anyOverflowViewport": false,
+    "anyClipped": false,
+    "anyOverlapName": false,
+    "anyHorizontalScroll": false,
+    "verdict": "PASS — 44pt targets hold at 320pt with no overflow, clipping or h-scroll"
+  }
+}

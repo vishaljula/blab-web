@@ -1,0 +1,99 @@
+{
+  "generatedFor": "BLA-14",
+  "fixture": "+919100000045",
+  "results": {
+    "C0_repro_state": {
+      "ctaRenderedOnPage": true,
+      "detail": "\"Accept & Schedule Shoot\" is on screen — draft card present, repro state reached"
+    },
+    "C1_dom_nesting": {
+      "ancestorChainFromCTA": [
+        {
+          "tag": "button",
+          "role": "button",
+          "tabindex": "0",
+          "ariaHidden": null,
+          "ariaLabel": "Accept handoff and schedule shoot for Ps 1194، 500027 Hyderabad، India",
+          "ariaExpanded": null
+        },
+        {
+          "tag": "button",
+          "role": "button",
+          "tabindex": "0",
+          "ariaHidden": null,
+          "ariaLabel": "Ps 1194، 500027 Hyderabad، India, Ps 1194، 500027 Hyderabad، India, ₹0",
+          "ariaExpanded": null
+        }
+      ],
+      "layoutOnlyRungsOmitted": 10,
+      "buttonRolesInChain": 2,
+      "nestedButtonInsideButton": true,
+      "ctaAriaLabel": "Accept handoff and schedule shoot for Ps 1194، 500027 Hyderabad، India",
+      "headerAriaLabel": "Ps 1194، 500027 Hyderabad، India, Ps 1194، 500027 Hyderabad، India, ₹0"
+    },
+    "C2_ax_tree_cdp": {
+      "totalAxNodes": 330,
+      "ctaByAccessibleName": [
+        {
+          "role": "button",
+          "name": "Accept handoff and schedule shoot for Ps 1194، 500027 Hyderabad، India",
+          "ignored": false,
+          "ignoredReasons": []
+        }
+      ],
+      "ctaByVisibleText": [
+        {
+          "role": "StaticText",
+          "name": "Accept & Schedule Shoot",
+          "ignored": false,
+          "ignoredReasons": []
+        },
+        {
+          "role": "InlineTextBox",
+          "name": "Accept & Schedule Shoot",
+          "ignored": false,
+          "ignoredReasons": []
+        }
+      ],
+      "ctaExposedToAT": true,
+      "ctaAncestorRoles": [
+        [
+          "button",
+          "RootWebArea"
+        ]
+      ],
+      "headerByAccessibleName": [
+        {
+          "role": "button",
+          "name": "Ps 1194، 500027 Hyderabad، India, Ps 1194، 500027 Hyderabad، India, ₹0, For Sale, new owner handoff. No contacts or visi",
+          "ignored": false,
+          "ignoredReasons": []
+        }
+      ],
+      "headerExposedToAT": true
+    },
+    "C3_keyboard_reachability": {
+      "ctaHasTabindex": "0",
+      "ctaIsInFocusableSet": true,
+      "focusableCountOnPage": 13
+    },
+    "C4_handler_routing": {
+      "publishAttemptsIntercepted": 1,
+      "verdict": "CTA handler fired (publish_and_schedule attempted, then ABORTED — no UAT mutation)",
+      "pageTextChanged": false,
+      "navigatedAway": false
+    },
+    "C5_ios_source_trace": {
+      "reactNativeVersion": "0.83.6",
+      "links": {
+        "1_pressable_defaults_accessible_true": true,
+        "2_accessible_maps_to_isAccessibilityElement": true,
+        "3_accessibilityElement_is_self": true,
+        "4_explicit_label_short_circuits_child_label_aggregation": true,
+        "5_children_only_reexposed_via_opt_in_accessibilityOrder": true
+      },
+      "allLinksHold": true,
+      "inference": "cardHeader renders isAccessibilityElement=YES. UIKit treats such a view as a LEAF, so the nested CTA is not a separate VoiceOver element; and because cardHeader sets an explicit accessibilityLabel, RCTRecursiveAccessibilityLabel is never called, so the CTA's label is not folded into the parent announcement either. Doubly unreachable."
+    }
+  }
+}
