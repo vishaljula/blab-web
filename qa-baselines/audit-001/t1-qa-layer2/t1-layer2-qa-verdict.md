@@ -428,3 +428,71 @@ regression gate for that fix.
 | `t1-qa-layer2/_t1-layer2-results.json` | Tier matrix, 6 scenarios, 48 chip measurements |
 | `t1-qa-layer2/_t1-invariant1.json` | Invariant #1, data + device |
 | `t1-qa-layer2/_t1-followups.json` | Panel geometry, soft_cap reachability |
+
+---
+
+## 5. F-QA1 / BLA-21 — CLOSED, gate green
+
+Fixed by `a6530eb` (`agent/uxd-audit`) and `1eccf05` (`agent/mobile-web/t1-server-authoritative-caps`,
+PR #1). Same two-file change on both branches: `expo-app/store/realtorCaps.ts` +
+`qa-baselines/audit-001/tools/verify-t1-caps.mts`.
+
+**Root cause.** `num()` routed every non-number through `Number()`. `Number(null) === 0`
+is finite, so `null` passed the `Number.isFinite` gate and returned `0` rather than the
+fallback; `Math.max(1, 0)` then floored the Starter grant to **1**. `num()` now accepts
+only a finite `number` or a non-blank numeric `string` — the latter retained because
+node-postgres returns `bigint` / `numeric` columns as strings. `null`, `""`, `"   "`,
+`false`, `true`, `[]` and `[5]` all degrade.
+
+Two inputs beyond the four in the ticket were also broken and are now covered:
+`"   "` returned `0` and `true` returned `1`.
+
+**Why Layer-1 scored 35/35 over it.** The degradation loop passed `listing` and `handoff`
+as both the `got` and the `want` side of a single assertion, so neither field could ever
+fail; the only real check was `!/NaN|undefined|Infinity|null/`, and a cap of `1` contains
+no such token. The gap was assertion strength, not coverage. Expectations are now declared
+literal strings — including the panel title, which had no template in the harness at all —
+plus a direct `num()` contract block. **Guard proof:** against the pre-fix `num()` body the
+strengthened harness fails **10** assertions; with the fix it is **58/58**.
+
+### Verification — all four acceptance criteria
+
+| # | Criterion | Result |
+| :--- | :--- | :--- |
+| 1 | `num(null/""/false/[], f) === f`, existing cases unchanged | 20/20 in §C2 |
+| 2 | Null grant renders `Starter Tier (2 Active · 1 Handoff Cap)` / `0 of 2 Free Cap (0 overflow)` | Rendered on device, `frames/S3-malformed-caps-after-w390.png` |
+| 3 | Layer-1 asserts the rendered cap **string** for the null case | Declared literals; fails 10 on pre-fix code |
+| 4 | Layer-2 gate green | **25/25, exit 0** |
+
+```
+TMPDIR=/tmp npx tsx qa-baselines/audit-001/tools/verify-t1-caps.mts     # 58 passed, 0 failed
+BEFORE_WEB=http://localhost:8082 AFTER_WEB=http://localhost:8084 \
+  node qa-baselines/audit-001/tools/verify-t1-qa-layer2.mjs            # 25/25, exit 0
+cd expo-app && npx tsc --noEmit                                        # 0 errors
+curl -s localhost:3000/api/ops/qa-runner                               # ALL_PASS
+```
+
+S3 on device, before → after: `(no Starter panel; "Unlimited" strip)` → `Starter Tier
+(2 Active · 1 Handoff Cap)` + `0 of 2 Free Cap (0 overflow)`. Chip sweep re-run at 48
+measurements: **net new clipping introduced by T1 = 0**, unchanged from the first pass.
+S5 retry still recovers.
+
+### Rig note (affects anyone re-running this gate)
+
+The two rigs must have **self-contained** `node_modules`. Symlinking them to the main
+checkout breaks expo-router's app-root resolution and the rig silently serves Expo's
+default "Welcome to Expo" page instead of the app — which presents as `intercepted=0`
+and every `expect-before` assertion failing, looking like a code regression rather than
+a rig fault. On APFS, `cp -Rc` clones both trees instantly at no disk cost:
+
+```bash
+git worktree add --detach /tmp/bla21-t0 853cba7
+git worktree add          /tmp/bla21-t1 agent/mobile-web/t1-server-authoritative-caps
+for d in /tmp/bla21-t0 /tmp/bla21-t1; do
+  cp -Rc node_modules $d/node_modules
+  cp -Rc expo-app/node_modules $d/expo-app/node_modules
+  cp expo-app/.env $d/expo-app/.env
+done
+(cd /tmp/bla21-t0/expo-app && TMPDIR=/tmp npx expo start --web --port 8082)
+(cd /tmp/bla21-t1/expo-app && TMPDIR=/tmp npx expo start --web --port 8084)
+```
