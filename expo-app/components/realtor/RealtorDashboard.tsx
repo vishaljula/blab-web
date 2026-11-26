@@ -201,6 +201,48 @@ function TabBar({ active, onSelect, counts, isDark }: {
     { id: "siteVisits",    label: "Site Visits",    short: "Visits",     count: counts.siteVisits },
     { id: "buyerContacts", label: "Buyer Contacts", short: "Contacts",   count: counts.buyerContacts },
   ];
+  // ── Reveal path for off-screen tabs — BLA-33 Layer-2 F3 ────────────────────
+  // Once the strip overflows, tabs 2–3 sit outside the viewport. The browser does not
+  // focus-scroll this particular scroller (measured: real Tab keypresses move
+  // `document.activeElement` onto the off-screen tab while `scrollLeft` stays 0, so it stays
+  // clipped by up to 158px — yet the same browser scrolls an injected overflow-x scroller
+  // 650px on focus). RN's `ScrollView` also implements no WAI-ARIA roving-tabindex arrow-key
+  // pattern, so there is no second keyboard path either. We therefore drive the reveal
+  // ourselves, from the geometry the layout already reports — which works identically on
+  // native, where the platform does not auto-reveal on focus either.
+  const scroller = useRef<ScrollView>(null);
+  const tabFrames = useRef<Partial<Record<TabId, { x: number; width: number }>>>({});
+  const scrollX = useRef(0);
+  const viewport = useRef(0);
+  const contentWidth = useRef(0);
+  // Rendered, not a ref: the scrollbar is a visual affordance and has to re-render to appear.
+  const [overflows, setOverflows] = useState(false);
+
+  // `animated` is false on the focus path on purpose. A reveal has to be complete by the time
+  // the focus ring is painted — the platform's own focus-scroll is instant for the same
+  // reason — and an animated scroll is observably incomplete for the length of the tween: at
+  // `animated: true` a focus needing 116px of scroll measured 3px of it. Press-driven reveals
+  // animate, because there the user already knows where they are going.
+  const reveal = useCallback((id: TabId, animated: boolean) => {
+    const frame = tabFrames.current[id];
+    const w = viewport.current;
+    if (!frame || w <= 0) return;
+    // Scroll only when the tab is actually out of view, and only by the shortfall — a tab
+    // already fully visible must not be yanked to an edge. A tab WIDER than the viewport
+    // (reachable at AX5-max on a 320pt device) cannot be made fully visible by any offset;
+    // aligning its start edge is the best available answer and keeps the label's first
+    // letter — the half F1 showed is the one that actually goes missing.
+    let x = scrollX.current;
+    if (frame.width >= w || frame.x < x) x = frame.x;
+    else if (frame.x + frame.width > x + w) x = frame.x + frame.width - w;
+    else return;
+    const max = Math.max(0, contentWidth.current - w);
+    scroller.current?.scrollTo({ x: Math.min(Math.max(0, x), max), animated });
+  }, []);
+
+  // Selecting a half-visible tab should complete its reveal, not leave it clipped.
+  useEffect(() => { reveal(active, true); }, [active, reveal]);
+
   return (
     // §H7: a real tablist, so a screen reader can report which tab is active instead of
     // leaving that to a 2px underline and a colour shift.
@@ -213,8 +255,22 @@ function TabBar({ active, onSelect, counts, isDark }: {
     // container and the tab keeps the equal-thirds layout whenever they do fit, so nothing
     // changes at default type.
     <ScrollView
+      ref={scroller}
       horizontal
-      showsHorizontalScrollIndicator={false}
+      // F3, second half: hiding the indicator unconditionally left no cue that tabs 2–3
+      // exist at all. Shown only while the strip actually overflows, so the default-type
+      // layout the CEO reviewed is untouched and the cue appears exactly when it is true.
+      showsHorizontalScrollIndicator={overflows}
+      onLayout={(e) => {
+        viewport.current = e.nativeEvent.layout.width;
+        setOverflows(contentWidth.current > viewport.current + 1);
+      }}
+      onContentSizeChange={(w) => {
+        contentWidth.current = w;
+        setOverflows(w > viewport.current + 1);
+      }}
+      onScroll={(e) => { scrollX.current = e.nativeEvent.contentOffset.x; }}
+      scrollEventThrottle={16}
       style={[s.tabBar, { borderBottomColor: colors.border }]}
       contentContainerStyle={s.tabBarContent}
       accessibilityRole="tablist"
@@ -225,6 +281,8 @@ function TabBar({ active, onSelect, counts, isDark }: {
           <A11yPressable
             key={tab.id}
             onPress={() => onSelect(tab.id)}
+            onLayout={(e) => { tabFrames.current[tab.id] = e.nativeEvent.layout; }}
+            onFocus={() => reveal(tab.id, false)}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={`${tab.label}, ${tab.count} item${tab.count === 1 ? "" : "s"}`}
@@ -1241,12 +1299,49 @@ const s = StyleSheet.create({
   // of ellipsising. `flexGrow: 0` on the ScrollView itself stops it claiming vertical space.
   tabBar: { flexGrow: 0, borderBottomWidth: StyleSheet.hairlineWidth, marginTop: 4, marginHorizontal: 14 },
   tabBarContent: { flexGrow: 1 },
-  // flexBasis: 0 (not "auto") — "auto" distributes only the SURPLUS on top of each label's
-  // intrinsic width, which made the three tabs unequal at default type (111/81/100 at
-  // 320pt instead of 97/97/97). From a 0 basis the whole width is shared equally, so the
-  // equal thirds are preserved whenever the labels fit.
+  // ON WEB ONLY, flexBasis: 0 (not "auto") — "auto" distributes only the SURPLUS on top of
+  // each label's intrinsic width, which made the three tabs unequal at default type
+  // (111/81/100 at 320pt instead of 97/97/97). From a 0 basis the whole width is shared
+  // equally, so the equal thirds are preserved whenever the labels fit.
+  //
+  // ON NATIVE THIS LINE IS INERT, and that is accepted rather than worked around — BLA-33
+  // Layer-2 F4, measured through RN 0.83.6's own bundled Yoga. `CalculateLayout.cpp:97`
+  // honours `flexBasis` only `&& yoga::isDefined(mainAxisSize)`, and `:159` has a Scroll
+  // node decline to impose its width on children along the MAIN axis — so a horizontal
+  // ScrollView measures its content with width undefined, the flexBasis branch is skipped,
+  // and every tab falls through to MaxContent and is content-sized. `flexBasis: 0` and
+  // `"auto"` are byte-identical at all 16 width × scale on native, both giving 111/81/100 at
+  // 320pt. Native therefore went from equal thirds to content-proportional when this strip
+  // became a ScrollView. Accepted: it is the same content-sizing web adopts above the
+  // default-type ceiling, it is what makes native immune to F1/F2 below, and the alternative
+  // — defining the main axis to resurrect the thirds — would cost native the reflow that is
+  // the whole point of the ScrollView. Equal thirds at default type is a web-only claim.
   tabBtn: {
     flexGrow: 1, flexShrink: 0, flexBasis: 0,
+    // F1/F2 — the clip this fix exists to remove. `flexBasis: 0` sizes the tab to a third
+    // while `flexShrink: 0` on the label keeps the label at its intrinsic width, so above
+    // the ceiling the content is wider than its own box; `justifyContent: "center"` then
+    // pushes the excess out BOTH sides. The left half of tab 1 lands before the scroller's
+    // start edge, which for LTR is not in the scrollable overflow region at all —
+    // `scrollLeft = -500` clamps straight back to 0 — so that text is unreachable, not
+    // merely off-screen ("Properties" rendering as "roperties", clipped 10.28px at AX3 and
+    // 14.80px at AX5-max). The same overflow put tab 1's count badge inside tab 2's hit
+    // target, so a tap on the visible "5" selected Site Visits (F2).
+    // `max-content` floors the box at its own content, so there is no excess to push out:
+    // clip and cross-hit both go to 0 at AX3 and AX5-max on 320/360/390, L-default and
+    // 390/xxxLarge stay byte-identical to the reviewed layout, and `scrollableBy` is
+    // unchanged so the last tab is exactly as reachable as before. The one cost is unequal
+    // tabs at 320/xxxLarge (109/87/96) — a 2px clip traded for visibly unequal thirds at one
+    // point, which is the right side of that trade: unequal is legible, clipped is not.
+    // Web-only: it is a CSS intrinsic-sizing keyword Yoga does not implement, and native
+    // needs no F1/F2 fix because it already content-sizes (see above). Cast because RN's
+    // `DimensionValue` has no intrinsic-keyword member; react-native-web passes it through
+    // to `min-width` verbatim. NB `A11yPressable` must not overwrite this — see
+    // `withHitFloor`.
+    ...Platform.select({
+      web: { minWidth: "max-content" as unknown as number },
+      default: {},
+    }),
     flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 4, paddingVertical: 10, paddingHorizontal: 4, minHeight: HIT,
   },

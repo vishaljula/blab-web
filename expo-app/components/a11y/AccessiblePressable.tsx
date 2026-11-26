@@ -48,11 +48,37 @@ const webCursor = Platform.OS === "web" ? ({ cursor: "pointer" } as ViewStyle) :
  * a flat `minHeight: 44` last would *shrink* it. Appending it first would instead let a call
  * site declare `minHeight: 30` and win. Flattening and taking the max is the only merge that
  * is correct in both directions.
+ *
+ * NON-NUMERIC MIN SIZES ARE HONOURED, NOT OVERWRITTEN — BLA-33 Layer-2 F1.
+ * The old `typeof === "number" ? max(HIT, v) : HIT` ternary silently replaced an
+ * intrinsic-sizing keyword (`"max-content"`, `"auto"`) with the flat 44, because such a
+ * keyword is not a number. The dashboard tab strip needs `minWidth: "max-content"` to stop a
+ * flex item clipping its own label, and routing it through this wrapper is the only way in —
+ * `scripts/a11y-guard.mjs` bans raw `Pressable` in the guarded files. Under the old ternary
+ * the keyword vanished with no error and the clip stayed.
+ *
+ * There is no CSS that expresses `max(44px, max-content)` — `max()` takes lengths, not
+ * intrinsic keywords, and the whole declaration is dropped if you try. So the floor and the
+ * keyword cannot be composed, and one has to win. The keyword wins: an intrinsic minimum is
+ * *also* a floor, just a content-derived one, and a control explicitly asking to be at least
+ * as wide as its own content is not the thin-target case §F3 exists to prevent. The HIT floor
+ * still applies to every call site that does not name a minimum, and `minHeight` — the axis
+ * that actually governs thumb reach in these row layouts — is unaffected.
  */
 function withHitFloor(style: StyleProp<ViewStyle>): StyleProp<ViewStyle> {
   const flat = StyleSheet.flatten(style) ?? {};
-  const minWidth = typeof flat.minWidth === "number" ? Math.max(HIT, flat.minWidth) : HIT;
-  const minHeight = typeof flat.minHeight === "number" ? Math.max(HIT, flat.minHeight) : HIT;
+  const minWidth =
+    typeof flat.minWidth === "number"
+      ? Math.max(HIT, flat.minWidth)
+      : flat.minWidth !== undefined
+        ? flat.minWidth
+        : HIT;
+  const minHeight =
+    typeof flat.minHeight === "number"
+      ? Math.max(HIT, flat.minHeight)
+      : flat.minHeight !== undefined
+        ? flat.minHeight
+        : HIT;
   return [webCursor, style, { minWidth, minHeight }];
 }
 

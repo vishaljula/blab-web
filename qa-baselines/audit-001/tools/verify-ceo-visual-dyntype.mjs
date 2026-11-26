@@ -154,16 +154,47 @@ const PROBE_DASH_TABS = () => {
     const label = leaves.find((el) => !/^\d+$/.test((el.innerText || "").trim()));
     const lr = label ? label.getBoundingClientRect() : null;
     const lcs = label ? getComputedStyle(label) : null;
+    const tcs = getComputedStyle(tab);
+    const padL = parseFloat(tcs.paddingLeft) || 0;
+    const padR = parseFloat(tcs.paddingRight) || 0;
+    // BLA-33 Layer-2 F1 closed a hole in this probe, so measure the hole, not around it.
+    // `truncatedPx` (scrollWidth - clientWidth) can only see an ellipsis, and a label with
+    // `flexShrink: 0` sizes its box to its own content, so there is never one to see.
+    // `overflowsTab` then looked only at the label's RIGHT edge — while `justifyContent:
+    // center` on an over-full tab pushes the excess out BOTH sides, and the LEFT side is the
+    // dangerous one: for LTR it falls outside the scroller's overflow region and cannot be
+    // scrolled to at all. Between them the two checks reported ALL_PASS over a tab visibly
+    // rendering as "roperties". So: measure every child of the row, on both edges, against
+    // the tab's content box AND against the strip's own start edge.
+    const strip = tab.closest('[role="tablist"]');
+    const stripLeft = strip ? strip.getBoundingClientRect().left : r.left;
+    const px = (v) => Math.round(Math.max(0, v) * 10) / 10;
+    const kids = leaves.map((el) => {
+      const kr = el.getBoundingClientRect();
+      return {
+        text: (el.innerText || "").trim().slice(0, 20),
+        pastTabBoxLeftPx: px((r.left + padL) - kr.left),
+        pastTabBoxRightPx: px(kr.right - (r.right - padR)),
+        // Lost text, not merely off-screen: left of the scroller's start edge is unreachable.
+        clippedByStripStartPx: px(stripLeft - kr.left),
+      };
+    });
     return {
       ariaLabel: (tab.getAttribute("aria-label") || "").slice(0, 60),
       tabBox: [Math.round(r.width), Math.round(r.height)],
+      // Unrounded, so an equal-thirds claim can be reconciled instead of asserted — a 0.3px
+      // disagreement between two runs is either rounding or two different trees (BLA-33 W1b).
+      tabWidthPx: Math.round(r.width * 1000) / 1000,
       labelText: label ? (label.innerText || "").trim() : null,
       labelBox: lr ? [Math.round(lr.width), Math.round(lr.height)] : null,
       scrollWidth: label ? label.scrollWidth : null,
       clientWidth: label ? label.clientWidth : null,
       truncatedPx: label ? Math.max(0, label.scrollWidth - label.clientWidth) : null,
       fontSizePx: lcs ? Math.round(parseFloat(lcs.fontSize) * 10) / 10 : null,
-      overflowsTab: lr ? Math.round(Math.max(0, lr.right - (r.right - (parseFloat(getComputedStyle(tab).paddingRight) || 0))) * 10) / 10 : null,
+      overflowsTab: lr ? px(lr.right - (r.right - padR)) : null,
+      kids,
+      rowOverflowPx: Math.max(0, ...kids.map((k) => Math.max(k.pastTabBoxLeftPx, k.pastTabBoxRightPx))),
+      clippedByStripStartPx: Math.max(0, ...kids.map((k) => k.clippedByStripStartPx)),
     };
   });
   return { found: true, tabs: out };
@@ -375,6 +406,43 @@ async function main() {
       .map((m) => `w${m.width}/${m.scale} +${m.scrollableBy}px`);
     add("D2g", "The strip does NOT scroll at L-default or xxxLarge (reviewed layout unchanged)",
       earlyScroll.length === 0, earlyScroll.length === 0 ? "0 scroll at default/xxxLarge" : earlyScroll.join(" | "));
+
+    // D2h/D2i — the two checks that would have caught BLA-33 F1/F2 at Layer-1.
+    // D2c+D2d could both pass over a visibly cut word, so these do not reuse their inputs:
+    // D2h measures glyphs against the scroller's START edge (the unreachable side), D2i
+    // measures the WHOLE row — label and badge, both edges — against the tab's content box.
+    const lostText = dashM.filter((m) => m.found)
+      .flatMap((m) => m.tabs.filter((t) => t.clippedByStripStartPx > 0.5)
+        .map((t) => `w${m.width}/${m.scale} "${t.labelText}" -${t.clippedByStripStartPx}px past strip start`));
+    add("D2h", "No tab glyph is pushed past the strip's START edge — for LTR that is outside the scrollable region, so it is lost text with no ellipsis to signal it",
+      lostText.length === 0,
+      lostText.length === 0 ? `${dashM.filter((m) => m.found).length * 3} tabs, 0 clipped at the start edge` : lostText.join(" | "));
+
+    const rowSpill = dashM.filter((m) => m.found)
+      .flatMap((m) => m.tabs.filter((t) => t.rowOverflowPx > 0.5)
+        .map((t) => `w${m.width}/${m.scale} "${t.labelText}" +${t.rowOverflowPx}px`));
+    add("D2i", "Every tab's label + count badge fits inside its own tab content box, on BOTH edges — otherwise a glyph renders inside the neighbouring tab's hit target",
+      rowSpill.length === 0,
+      rowSpill.length === 0 ? `${dashM.filter((m) => m.found).length * 3} tabs, 0 row overflows` : rowSpill.join(" | "));
+
+    // D2j — equal thirds, stated separately from D2g because they are different claims and
+    // conflating them is how "the reviewed layout is unchanged" survived becoming false.
+    // 320/xxxLarge is a KNOWN, ACCEPTED exception (BLA-33 W1a): `minWidth: max-content` floors
+    // each tab at its own content, and at that one point "Properties" needs 1.98px more than
+    // a third, so the three go to 109/87/96. Unequal-but-legible beats a clipped word; the
+    // exception is whitelisted by name so that it stays a decision and never becomes a drift.
+    const THIRDS_EXCEPTIONS = new Set(["320/xxxLarge"]);
+    const unequal = dashM.filter((m) => m.found && ["L-default", "xxxLarge"].includes(m.scale))
+      .map((m) => {
+        const w = m.tabs.map((t) => t.tabWidthPx);
+        return { key: `${m.width}/${m.scale}`, spread: Math.round((Math.max(...w) - Math.min(...w)) * 1000) / 1000, w };
+      })
+      .filter((x) => x.spread > 0.5 && !THIRDS_EXCEPTIONS.has(x.key));
+    add("D2j", "At L-default and xxxLarge the three tabs are equal thirds, outside the one accepted exception (320/xxxLarge, where content-flooring trades 22px of spread for 1.98px of clipped word)",
+      unequal.length === 0,
+      unequal.length === 0
+        ? `equal thirds at every L-default/xxxLarge point bar the whitelisted ${[...THIRDS_EXCEPTIONS].join(", ")}`
+        : unequal.map((x) => `${x.key} spread ${x.spread}px (${x.w.map((v) => Math.round(v * 100) / 100).join("/")})`).join(" | "));
   }
 
   // Per-width scaling ceiling for D2 — a recorded number, not an unknown.
