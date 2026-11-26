@@ -153,6 +153,45 @@ print("edge is invisible — a border or a darker fill is the fix if the shape m
 
 print()
 print("=" * 86)
+print("SPEC GAP — §H1 says SEMANTIC is 'the same shape as the existing")
+print("LISTER_COLORS', but LISTER_COLORS has {bg,text,border} and SEMANTIC")
+print("has only {bg,text}. Proposed border values, verified vs the card:")
+print("=" * 86)
+# Light values are the 600-tier, NOT the 200-tier LISTER_COLORS uses: the
+# 200-tier reproduces LISTER_COLORS' own flat edge (owner.light.border
+# #A7F3D0 is 1.28:1 on white). The CEO copy mandate asks for "crisp numeric
+# pills", so the edge has to actually read -> 3:1 non-text minimum.
+BORDERS = {
+    "sale":     {"light": "#D97706", "dark": "#78500A"},
+    "rent":     {"light": "#3B82F6", "dark": "#1E40AF"},
+    "success":  {"light": "#059669", "dark": "#065F46"},
+    "pending":  {"light": "#D97706", "dark": "#78500A"},
+    "live":     {"light": "#16A34A", "dark": "#166534"},
+    "overflow": {"light": "#EA580C", "dark": "#9A3412"},
+    "whatsapp": {"light": "#0D9488", "dark": "#0B5F56"},
+}
+print(f"{'token':11} {'mode':6} {'border':9} {'vs card':>8}  req   verdict")
+print("-" * 86)
+border_low = []
+for name, modes in BORDERS.items():
+    for mode in ("light", "dark"):
+        r = ratio(hx(modes[mode]), CARD[mode])
+        ok = r >= FILL_REQ
+        if not ok:
+            border_low.append((name, mode, r))
+        print(f"{name:11} {mode:6} {modes[mode]:9} {r:8.2f}  {FILL_REQ:3.1f}  "
+              f"{'PASS' if ok else 'below — edge still flat'}")
+print("-" * 86)
+print(f"Light borders clear 3:1 on #FFFFFF. Dark borders sit at 2.0-2.45:1 on")
+print(f"#1A1A1A — short of 3:1, but that is exactly where the SHIPPED")
+print(f"LISTER_COLORS dark borders already sit, so matching them is a")
+print(f"consistency choice, not a new defect. {len(border_low)} below {FILL_REQ}:1.")
+print("DECISION FOR T4: adopt borders, or drop the 'same shape as LISTER_COLORS'")
+print("claim from §H1. Either is defensible; shipping the claim without the key")
+print("is not.")
+
+print()
+print("=" * 86)
 print("NON-COLOUR §H1 EXPORTS — no contrast surface, checked structurally")
 print("=" * 86)
 TYPE_ROLES = {

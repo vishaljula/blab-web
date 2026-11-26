@@ -64,6 +64,36 @@ failure for a decorative fill behind passing text, but it means the badge
 edge is invisible — a border or a darker fill is the fix if the shape must read.
 
 ======================================================================================
+SPEC GAP — §H1 says SEMANTIC is 'the same shape as the existing
+LISTER_COLORS', but LISTER_COLORS has {bg,text,border} and SEMANTIC
+has only {bg,text}. Proposed border values, verified vs the card:
+======================================================================================
+token       mode   border     vs card  req   verdict
+--------------------------------------------------------------------------------------
+sale        light  #D97706       3.19  3.0  PASS
+sale        dark   #78500A       2.45  3.0  below — edge still flat
+rent        light  #3B82F6       3.68  3.0  PASS
+rent        dark   #1E40AF       2.00  3.0  below — edge still flat
+success     light  #059669       3.77  3.0  PASS
+success     dark   #065F46       2.27  3.0  below — edge still flat
+pending     light  #D97706       3.19  3.0  PASS
+pending     dark   #78500A       2.45  3.0  below — edge still flat
+live        light  #16A34A       3.30  3.0  PASS
+live        dark   #166534       2.44  3.0  below — edge still flat
+overflow    light  #EA580C       3.56  3.0  PASS
+overflow    dark   #9A3412       2.38  3.0  below — edge still flat
+whatsapp    light  #0D9488       3.74  3.0  PASS
+whatsapp    dark   #0B5F56       2.31  3.0  below — edge still flat
+--------------------------------------------------------------------------------------
+Light borders clear 3:1 on #FFFFFF. Dark borders sit at 2.0-2.45:1 on
+#1A1A1A — short of 3:1, but that is exactly where the SHIPPED
+LISTER_COLORS dark borders already sit, so matching them is a
+consistency choice, not a new defect. 7 below 3.0:1.
+DECISION FOR T4: adopt borders, or drop the 'same shape as LISTER_COLORS'
+claim from §H1. Either is defensible; shipping the claim without the key
+is not.
+
+======================================================================================
 NON-COLOUR §H1 EXPORTS — no contrast surface, checked structurally
 ======================================================================================
 role        size  weight   lh  lh/size  checks
