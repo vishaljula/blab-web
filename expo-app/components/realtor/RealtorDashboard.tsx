@@ -186,10 +186,20 @@ function TabBar({ active, onSelect, counts, isDark }: {
   isDark: boolean;
 }) {
   const colors = isDark ? COLORS.dark : COLORS.light;
-  const tabs: { id: TabId; label: string; count: number; icon: string }[] = [
-    { id: "properties",    label: "My Properties",  count: counts.properties,    icon: "home-outline" },
-    { id: "siteVisits",    label: "Site Visits",    count: counts.siteVisits,    icon: "calendar-outline" },
-    { id: "buyerContacts", label: "Buyer Contacts", count: counts.buyerContacts, icon: "mail-outline" },
+  // CEO copy mandate: `label` is the full accessible name; `short` is what renders.
+  // "My Properties" / "Buyer Contacts" ellipsised to "My Prope…" / "Buyer C…" inside a
+  // 110pt third of a 360pt device — a one-word label is both legible and punchier.
+  //
+  // The 13px leading icon is dropped: at 320pt each tab is 97pt, and icon 13 + gap 4 +
+  // gap 4 + badge 20 + padding 8 left the label a 48pt box against the 60pt "Properties"
+  // needs — so `numberOfLines={1}` ellipsised it to "Propertie…" even after shortening.
+  // Reclaiming those 17pt gives the label 65pt and it renders whole. A 3-item text
+  // segmented control reads as label + count pill anyway; the icon carried no meaning
+  // the word did not already carry.
+  const tabs: { id: TabId; label: string; short: string; count: number }[] = [
+    { id: "properties",    label: "My Properties",  short: "Properties", count: counts.properties },
+    { id: "siteVisits",    label: "Site Visits",    short: "Visits",     count: counts.siteVisits },
+    { id: "buyerContacts", label: "Buyer Contacts", short: "Contacts",   count: counts.buyerContacts },
   ];
   return (
     // §H7: a real tablist, so a screen reader can report which tab is active instead of
@@ -209,17 +219,12 @@ function TabBar({ active, onSelect, counts, isDark }: {
               isActive && { borderBottomColor: colors.primary, borderBottomWidth: 2 },
             ]}
           >
-            <Ionicons
-              name={tab.icon as any}
-              size={13}
-              color={isActive ? colors.primary : colors.mutedForeground}
-            />
             {/* §H7: single line — the 11px label wrapped on 360pt devices. */}
             <Text
               numberOfLines={1}
               style={[s.tabLabel, { color: isActive ? colors.primary : colors.mutedForeground, fontWeight: isActive ? "700" : "500" }]}
             >
-              {tab.label}
+              {tab.short}
             </Text>
             {tab.count > 0 && (
               <View style={[s.tabBadge, { backgroundColor: isActive ? colors.primary : colors.muted }]}>

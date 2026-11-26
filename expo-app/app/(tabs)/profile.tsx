@@ -283,7 +283,7 @@ export default function ProfileScreen() {
               <Text style={{ fontSize: 13, fontWeight: "900", color: "#16A34A" }}>₹0 till Mar 31</Text>
             </View>
           </View>
-          <View style={{ flexDirection: "row", gap: 10 }}>
+          <View style={styles.fieldRow}>
             <A11yTextInput
               value={companyName}
               onChangeText={setCompanyName}
@@ -291,7 +291,7 @@ export default function ProfileScreen() {
               placeholderTextColor={colors.mutedForeground}
               // A placeholder is not an accessible name — it vanishes once text is entered.
               accessibilityLabel={`${activeRoleCard.label} agency or builder name`}
-              style={[styles.input, { flex: 1, color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]}
+              style={[styles.input, styles.fieldCell, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]}
             />
             <A11yTextInput
               value={reraNumber}
@@ -299,7 +299,7 @@ export default function ProfileScreen() {
               placeholder="RERA ID"
               placeholderTextColor={colors.mutedForeground}
               accessibilityLabel="RERA registration ID"
-              style={[styles.input, { flex: 1, color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]}
+              style={[styles.input, styles.fieldCell, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]}
             />
           </View>
           <A11yPressable
@@ -481,6 +481,13 @@ const styles = StyleSheet.create({
   promoRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   // height 40 -> minHeight HIT (§F2 + §F3).
   input: { minHeight: HIT, borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13 },
+  // CEO visual-bug fix: on web a TextInput is an <input>, whose `min-width: auto` is its
+  // intrinsic ~20-character width. Two of those side by side cannot shrink below ~400px,
+  // so the RERA field overflowed the card on a 360pt device. `minWidth: 0` lets them
+  // shrink; `flexBasis: 200` wraps them into a stack when 2 x 200 no longer fits, so the
+  // row stays side-by-side on desktop and becomes two full-width fields on a phone.
+  fieldRow:  { flexDirection: "row", flexWrap: "wrap", columnGap: 10, rowGap: 10 },
+  fieldCell: { flexGrow: 1, flexShrink: 1, flexBasis: 200, minWidth: 0 },
   // height 42 -> minHeight HIT.
   activateBtn: { minHeight: HIT, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, alignItems: "center", justifyContent: "center" },
   activateBtnText: { color: "#fff", fontSize: 13, fontWeight: "800", textAlign: "center" },

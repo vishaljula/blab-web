@@ -208,6 +208,13 @@ async function main() {
           // (RealtorDashboard.tsx TabBar) — use that to disambiguate, then click the
           // clickable ancestor rather than the bare text node.
           const clicked = await page.evaluate((label) => {
+            // The dashboard tab labels were shortened to "Properties" / "Visits" /
+            // "Contacts" (CEO copy mandate, 2026-11-26); the full name survives on
+            // `aria-label` as "<label>, N items". Match that first, and keep the legacy
+            // visible-text heuristic below so this still works on pre-rename builds.
+            const byAria = [...document.querySelectorAll('[role="tab"]')].find((el) =>
+              (el.getAttribute("aria-label") || "").startsWith(label));
+            if (byAria) { byAria.click(); return true; }
             const hit = [...document.querySelectorAll("div,span")].filter((el) => {
               const t = (el.innerText || "").trim();
               if (!t.startsWith(label) || t.length > label.length + 4) return false;

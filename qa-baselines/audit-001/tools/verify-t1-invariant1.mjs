@@ -186,6 +186,11 @@ async function main() {
     const clicked = await page.evaluate(() => {
       // The TabBar entry is the ~121x48 pressable whose text is the icon glyph
       // plus the label plus the count, e.g. " Buyer Contacts 2".
+      // Accessible name first — the visible label is now "Contacts" (CEO copy mandate,
+      // 2026-11-26). The geometric heuristic below stays as the pre-rename fallback.
+      const byAria = [...document.querySelectorAll('[role="tab"]')].find((el) =>
+        (el.getAttribute("aria-label") || "").startsWith("Buyer Contacts"));
+      if (byAria) { byAria.click(); return true; }
       const cands = [...document.querySelectorAll("div")].filter((el) => {
         const b = el.getBoundingClientRect();
         if (b.height < 40 || b.height > 60 || b.width < 60) return false;

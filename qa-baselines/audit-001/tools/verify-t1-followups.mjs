@@ -102,7 +102,10 @@ const MEASURE_PANEL = () => {
     );
   });
   const caption = nodes.find((el) => /\d+ of \d+ Active/.test((el.innerText || "").trim()) && el.children.length === 0);
-  const tab = nodes.find((el) => (el.innerText || "").trim().startsWith("My Properties"));
+  // Visible text is now "Properties" (CEO copy mandate, 2026-11-26); the accessible
+  // name still carries the full label, so prefer that and keep text as a fallback.
+  const tab = document.querySelector('[role="tab"][aria-label^="My Properties"]') ||
+    nodes.find((el) => (el.innerText || "").trim().startsWith("My Properties"));
   const r = (el) => (el ? { y: Math.round(el.getBoundingClientRect().top), h: Math.round(el.getBoundingClientRect().height) } : null);
   return {
     panel: r(panel),
@@ -185,9 +188,13 @@ async function main() {
     const clicked = await page.evaluate(() => {
       // The TabBar pressable is the LAST element whose trimmed text is exactly
       // the label plus an optional count, and which has cursor:pointer.
+      // Accessible name first — the visible label is now "Contacts" (CEO copy mandate).
+      const byAria = [...document.querySelectorAll('[role="tab"]')].find((el) =>
+        (el.getAttribute("aria-label") || "").startsWith("Buyer Contacts"));
+      if (byAria) { byAria.click(); return { ok: true, via: "aria-label" }; }
       const cands = [...document.querySelectorAll("div,span")].filter((el) => {
         const t = (el.innerText || "").trim();
-        if (!/^Buyer Contacts\s*\d*$/.test(t)) return false;
+        if (!/^(Buyer Contacts|Contacts)\s*\d*$/.test(t)) return false;
         let n = el;
         for (let i = 0; i < 5 && n; i++, n = n.parentElement)
           if (getComputedStyle(n).cursor === "pointer") return true;

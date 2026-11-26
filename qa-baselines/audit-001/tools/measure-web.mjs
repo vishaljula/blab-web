@@ -121,7 +121,10 @@ async function main() {
         .filter(e => (e.innerText||'').includes('Starter Tier (2 Active'))
         .sort((a,b)=>a.getBoundingClientRect().height-b.getBoundingClientRect().height)[0];
       // Dashboard content gutter reference points (H1).
-      const tabbar = [...document.querySelectorAll('div')]
+      // Visible labels are now 'Properties' / 'Visits' / 'Contacts' (CEO copy mandate,
+      // 2026-11-26); locate the tablist by role, falling back to the old text match.
+      const tabbar = document.querySelector('[role="tablist"]:has([role="tab"][aria-label^="Buyer Contacts"])')
+        || [...document.querySelectorAll('div')]
         .filter(e => (e.innerText||'').includes('Site Visits') && (e.innerText||'').includes('Buyer Contacts'))
         .sort((a,b)=>a.getBoundingClientRect().height-b.getBoundingClientRect().height)[0];
       return {
@@ -174,7 +177,8 @@ async function main() {
           return (e.innerText||'').includes('contact') && r.height > 60 && r.top > 150;
         });
         const c = cards.sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top)[0];
-        const tabbar = [...document.querySelectorAll('div')].find(e => (e.innerText||'').includes('Site Visits') && (e.innerText||'').includes('Buyer Contacts'));
+        const tabbar = document.querySelector('[role="tablist"]:has([role="tab"][aria-label^="Buyer Contacts"])')
+          || [...document.querySelectorAll('div')].find(e => (e.innerText||'').includes('Site Visits') && (e.innerText||'').includes('Buyer Contacts'));
         return {
           firstCardTopPx: c ? Math.round(c.getBoundingClientRect().top) : null,
           tabBarBottomPx: tabbar ? Math.round(tabbar.getBoundingClientRect().bottom) : null,
@@ -189,8 +193,15 @@ async function main() {
     async (p) => p.evaluate(`(() => {
       const out = {};
       for (const label of ['My Properties','Site Visits','Buyer Contacts']) {
+        // The tab's accessible name still carries the full label; its rendered text is
+        // now the short form, so measure the non-numeric text leaf inside the tab.
+        const tab = document.querySelector('[role="tab"][aria-label^="' + label + '"]');
+        const leaf = tab && [...tab.querySelectorAll('div,span')].find(n => {
+          const t = (n.innerText||'').trim();
+          return t.length > 0 && !/^\d+$/.test(t) && ![...n.children].some(k => (k.innerText||'').trim());
+        });
         const els = [...document.querySelectorAll('div,span')].filter(e => (e.innerText||'').trim() === label);
-        const el = els[els.length-1];
+        const el = leaf || els[els.length-1];
         if (!el) { out[label] = null; continue; }
         const cs = getComputedStyle(el), r = el.getBoundingClientRect();
         const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize)*1.2;

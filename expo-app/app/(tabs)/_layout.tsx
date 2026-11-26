@@ -41,19 +41,41 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.mutedForeground,
+        // BLA-19: the bar was 60pt tall with 8pt of padding at both ends, leaving a 44pt
+        // content box. react-navigation gives each item 5pt of its own padding, so the
+        // icon + label had 34pt to live in — the 24pt icon won and the label was squeezed
+        // to a 5pt line box, clipping the text at DEFAULT type size. Each item also
+        // measured 43x43, one point under the WCAG 2.2 §2.5.8 / HIG 44pt floor T3 set
+        // everywhere else in this flow.
+        //
+        // Height budget, outside in: 1 border + 6 top + 8 bottom bar padding, 5 + 5 item
+        // padding, then 28 icon box (the Post tab's icon is size + 4) + 1 + 14 label line
+        // = 43 of content. 68 - 1 - 14 - 10 = 43.
+        //
+        // Only the no-inset branch grows. A device with a home indicator already cleared
+        // the budget (56 + inset, half of it as bottom padding, leaves 50 + inset/2 = 67
+        // of content at inset 34), so its geometry is left as it was.
         tabBarStyle: isDesktop
           ? { display: "none" }
           : {
               backgroundColor: colors.card,
               borderTopColor: colors.border,
               borderTopWidth: 1,
-              height: insets.bottom > 0 ? 56 + insets.bottom : 60,
+              height: insets.bottom > 0 ? 56 + insets.bottom : 68,
               paddingBottom: insets.bottom > 0 ? insets.bottom / 2 : 8,
-              paddingTop: 8,
+              paddingTop: 6,
             },
+        tabBarItemStyle: { minHeight: 44 },
         tabBarLabelStyle: {
-          fontSize: 10,
+          // 10px was under the 11px floor T3 established (§F3); lineHeight is explicit so
+          // the label reserves a real line box instead of inheriting a collapsed one.
+          fontSize: 11,
+          lineHeight: 14,
           fontWeight: "600",
+          marginTop: 1,
+          // The label is the flex child react-navigation lets shrink; without this the
+          // icon box wins any shortfall and the text is silently clipped again.
+          flexShrink: 0,
         },
       }}
     >
