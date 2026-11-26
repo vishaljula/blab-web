@@ -1,0 +1,5078 @@
+{
+  "subject": "agent/uxd-audit @ 0cdada0 (BLA-24 §1/§2 + BLA-19)",
+  "layer": "Layer-2 independent QA (BLA-25)",
+  "web": "http://localhost:8081",
+  "widths": [
+    320,
+    360,
+    390,
+    1440
+  ],
+  "scales": [
+    "L-default",
+    "xxxLarge",
+    "AX3",
+    "AX5-max"
+  ],
+  "verdict": "FAIL",
+  "checks": [
+    {
+      "id": "L1a_dash_probe_resolved",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "3 tabs + label leaf resolved in all 24 dashboard measurements"
+    },
+    {
+      "id": "L1b_dash_default_not_truncated",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "w320/L-default: worst 0px | w360/L-default: worst 0px | w390/L-default: worst 0px"
+    },
+    {
+      "id": "L1c_dash_dynamic_type_ceiling_not_lowered",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "w320: after=L-default before=none | w360: after=xxxLarge before=none | w390: after=xxxLarge before=none"
+    },
+    {
+      "id": "L1d_dash_no_container_overflow_any_scale",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "the tablist and the page never overflow at any scale"
+    },
+    {
+      "id": "L1e_router_probe_resolved",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "router bar + label leaf resolved in all 12 measurements"
+    },
+    {
+      "id": "L1f_router_default_not_clipped_and_44pt",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "w320: Explore 80x53 clip0, Post 80x53 clip0, Dashboard 80x53 clip0, Profile 80x53 clip0 | w360: Explore 90x53 clip0, Post 90x53 clip0, Dashboard 90x53 clip0, Profile 90x53 clip0 | w390: Explore 97.5x53 clip0, Post 97.5x53 clip0, Dashboard 97.5x53 clip0, Profile 97.5x53 clip0"
+    },
+    {
+      "id": "L1g_router_label_linebox_not_self_clipped",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "the label's own line box is never self-clipped — it grows with the type size"
+    },
+    {
+      "id": "L1g2_router_bar_content_fits_any_scale",
+      "verdict": "FAIL",
+      "severity": "MEDIUM",
+      "detail": "w320/AX3: bar overflows +6px (fixed height 68px, label needs 33px) | w320/AX5-max: bar overflows +17px (fixed height 68px, label needs 44px) | w360/AX3: bar overflows +6px (fixed height 68px, label needs 33px) | w360/AX5-max: bar overflows +17px (fixed height 68px, label needs 44px) | w390/AX3: bar overflows +6px (fixed height 68px, label needs 33px) | w390/AX5-max: bar overflows +17px (fixed height 68px, label needs 44px)"
+    },
+    {
+      "id": "L5a_ios_inset_branch_budget_at_default",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "w320/L-default: needs 43 <= inset34 budget 66 -> true | w360/L-default: needs 43 <= inset34 budget 66 -> true | w390/L-default: needs 43 <= inset34 budget 66 -> true"
+    },
+    {
+      "id": "L5b_inset_branch_never_tighter_than_fixed_branch",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "the 56+inset branch is >= the 68pt branch at every scale (budgets 66 vs 53)"
+    },
+    {
+      "id": "L5c_inset_branch_ceiling_at_least_fixed_branch",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "Dynamic Type ceiling by branch @390pt — 68pt no-inset (CHANGED by 0cdada0): xxxLarge · 56+34 inset (UNCHANGED): AX3"
+    },
+    {
+      "id": "L1h_profile_probe_resolved",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "partner card resolved in all 16 measurements"
+    },
+    {
+      "id": "L1i_profile_fields_within_card_any_scale",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "no field escapes the partner card at any scale or width"
+    },
+    {
+      "id": "L1j_profile_no_page_overflow_any_scale",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "Profile never exceeds the viewport width at any scale"
+    },
+    {
+      "id": "L1k_profile_desktop_row_survives_scaling",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "L-default: one row | xxxLarge: one row | AX3: one row | AX5-max: one row"
+    },
+    {
+      "id": "L2a_light_tablist_and_three_tabs",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "3 tabs, tablist 362x45"
+    },
+    {
+      "id": "L2b_light_icon_actually_removed",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "no Ionicons glyph leaf in any tab (visual delta confirmed, not just copy)"
+    },
+    {
+      "id": "L2c_light_exactly_one_aria_selected",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "selectedCount=1; My Properties=true, Site Visits=false, Buyer Contacts=false"
+    },
+    {
+      "id": "L2d_light_active_underline_2px",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "active \"My Properties\" underline 2px rgb(139, 37, 0)"
+    },
+    {
+      "id": "L2e_light_inactive_have_no_underline",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "Site Visits 0px, Buyer Contacts 0px"
+    },
+    {
+      "id": "L2f_light_state_not_colour_only",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "active weight 700 vs inactive 500/500 + 2px underline -> survives grayscale"
+    },
+    {
+      "id": "L2g_light_selection_tracks_every_tab",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "My Properties -> My Properties, 5 items (n=1) | Site Visits -> Site Visits, 3 items (n=1) | Buyer Contacts -> Buyer Contacts, 2 items (n=1)"
+    },
+    {
+      "id": "L2a_dark_tablist_and_three_tabs",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "3 tabs, tablist 362x45"
+    },
+    {
+      "id": "L2b_dark_icon_actually_removed",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "no Ionicons glyph leaf in any tab (visual delta confirmed, not just copy)"
+    },
+    {
+      "id": "L2c_dark_exactly_one_aria_selected",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "selectedCount=1; My Properties=true, Site Visits=false, Buyer Contacts=false"
+    },
+    {
+      "id": "L2d_dark_active_underline_2px",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "active \"My Properties\" underline 2px rgb(196, 80, 26)"
+    },
+    {
+      "id": "L2e_dark_inactive_have_no_underline",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "Site Visits 0px, Buyer Contacts 0px"
+    },
+    {
+      "id": "L2f_dark_state_not_colour_only",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "active weight 700 vs inactive 500/500 + 2px underline -> survives grayscale"
+    },
+    {
+      "id": "L2g_dark_selection_tracks_every_tab",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "My Properties -> My Properties, 5 items (n=1) | Site Visits -> Site Visits, 3 items (n=1) | Buyer Contacts -> Buyer Contacts, 2 items (n=1)"
+    },
+    {
+      "id": "L3a_ax_dashboard_names_full",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "\"My Properties, 5 items\" | \"Site Visits, 3 items\" | \"Buyer Contacts, 2 items\""
+    },
+    {
+      "id": "L3b_ax_dashboard_short_label_not_the_name",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "no tab computes its accessible name from the shortened visible text"
+    },
+    {
+      "id": "L3c_ax_router_titles_present",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "\"  Explore\", \"  Post\", \"  Dashboard\", \"  Profile\""
+    },
+    {
+      "id": "L3e_ax_router_name_is_title_only",
+      "verdict": "FAIL",
+      "severity": "LOW",
+      "detail": "name computed from contents, icon glyph included: \"  Explore\", \"  Post\", \"  Dashboard\", \"  Profile\" (pre-existing — no accessibilityLabel on the router tabs)"
+    },
+    {
+      "id": "L3d_ax_selected_exposed",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "selected=true on \"  Dashboard\", \"My Properties, 5 items\""
+    },
+    {
+      "id": "L4a_resolves_on_subject_build",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "all 6 tool call sites resolve the tab on 0cdada0's DOM"
+    },
+    {
+      "id": "L4b_resolves_on_prerename_build",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "all 6 tool call sites resolve on the pre-rename (b40b742) DOM — the rewrite is additive"
+    },
+    {
+      "id": "L4c_legacy_branch_still_works_prerename",
+      "verdict": "PASS",
+      "severity": null,
+      "detail": "with the accessible name stripped, every legacy text/geometry branch still resolves on a pre-rename DOM — nothing was removed"
+    },
+    {
+      "id": "L4d_legacy_branch_alone_on_new_dom",
+      "verdict": "FAIL",
+      "severity": "LOW",
+      "detail": "capture-web/bla14x2_tabClick={\"My Properties\":true,\"Site Visits\":false,\"Buyer Contacts\":true} | measure-web_tablist=false | measure-web_labelLeaf={\"My Properties\":true,\"Site Visits\":false,\"Buyer Contacts\":true}"
+    }
+  ],
+  "ceilings": [
+    {
+      "width": 320,
+      "after": "L-default",
+      "before": null
+    },
+    {
+      "width": 360,
+      "after": "xxxLarge",
+      "before": null
+    },
+    {
+      "width": 390,
+      "after": "xxxLarge",
+      "before": null
+    }
+  ],
+  "routerCeiling": [
+    {
+      "width": 320,
+      "ceiling": "xxxLarge"
+    },
+    {
+      "width": 360,
+      "ceiling": "xxxLarge"
+    },
+    {
+      "width": 390,
+      "ceiling": "xxxLarge"
+    }
+  ],
+  "l5BudgetAnalysis": [
+    {
+      "key": "w320/L-default",
+      "scale": "L-default",
+      "width": 320,
+      "labelNeedsPx": 14,
+      "requiredPx": 43,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": true,
+      "inset34Fits": true
+    },
+    {
+      "key": "w320/xxxLarge",
+      "scale": "xxxLarge",
+      "width": 320,
+      "labelNeedsPx": 19,
+      "requiredPx": 48,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": true,
+      "inset34Fits": true
+    },
+    {
+      "key": "w320/AX3",
+      "scale": "AX3",
+      "width": 320,
+      "labelNeedsPx": 33,
+      "requiredPx": 62,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": false,
+      "inset34Fits": true
+    },
+    {
+      "key": "w320/AX5-max",
+      "scale": "AX5-max",
+      "width": 320,
+      "labelNeedsPx": 44,
+      "requiredPx": 73,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": false,
+      "inset34Fits": false
+    },
+    {
+      "key": "w360/L-default",
+      "scale": "L-default",
+      "width": 360,
+      "labelNeedsPx": 14,
+      "requiredPx": 43,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": true,
+      "inset34Fits": true
+    },
+    {
+      "key": "w360/xxxLarge",
+      "scale": "xxxLarge",
+      "width": 360,
+      "labelNeedsPx": 19,
+      "requiredPx": 48,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": true,
+      "inset34Fits": true
+    },
+    {
+      "key": "w360/AX3",
+      "scale": "AX3",
+      "width": 360,
+      "labelNeedsPx": 33,
+      "requiredPx": 62,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": false,
+      "inset34Fits": true
+    },
+    {
+      "key": "w360/AX5-max",
+      "scale": "AX5-max",
+      "width": 360,
+      "labelNeedsPx": 44,
+      "requiredPx": 73,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": false,
+      "inset34Fits": false
+    },
+    {
+      "key": "w390/L-default",
+      "scale": "L-default",
+      "width": 390,
+      "labelNeedsPx": 14,
+      "requiredPx": 43,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": true,
+      "inset34Fits": true
+    },
+    {
+      "key": "w390/xxxLarge",
+      "scale": "xxxLarge",
+      "width": 390,
+      "labelNeedsPx": 19,
+      "requiredPx": 48,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": true,
+      "inset34Fits": true
+    },
+    {
+      "key": "w390/AX3",
+      "scale": "AX3",
+      "width": 390,
+      "labelNeedsPx": 33,
+      "requiredPx": 62,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": false,
+      "inset34Fits": true
+    },
+    {
+      "key": "w390/AX5-max",
+      "scale": "AX5-max",
+      "width": 390,
+      "labelNeedsPx": 44,
+      "requiredPx": 73,
+      "noInsetBudgetPx": 53,
+      "inset34BudgetPx": 66,
+      "noInsetFits": false,
+      "inset34Fits": false
+    }
+  ],
+  "measurements": {
+    "dynamicType": {
+      "dashboard": [
+        {
+          "width": 320,
+          "variant": "after",
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                59.7,
+                13
+              ],
+              "scrollWidth": 60,
+              "clientWidth": 60,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                30.2,
+                13
+              ],
+              "scrollWidth": 30,
+              "clientWidth": 30,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                49.2,
+                13
+              ],
+              "scrollWidth": 49,
+              "clientWidth": 49,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "after",
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                65.3,
+                17
+              ],
+              "scrollWidth": 77,
+              "clientWidth": 65,
+              "truncatedPx": 12,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                38.8,
+                17
+              ],
+              "scrollWidth": 39,
+              "clientWidth": 39,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                63.8,
+                17
+              ],
+              "scrollWidth": 64,
+              "clientWidth": 64,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "after",
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                54
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                58.8,
+                30
+              ],
+              "scrollWidth": 127,
+              "clientWidth": 59,
+              "truncatedPx": 68,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                58.7,
+                30
+              ],
+              "scrollWidth": 64,
+              "clientWidth": 59,
+              "truncatedPx": 5,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                59.4,
+                30
+              ],
+              "scrollWidth": 105,
+              "clientWidth": 59,
+              "truncatedPx": 46,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            55
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "after",
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                64
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                53.5,
+                40
+              ],
+              "scrollWidth": 167,
+              "clientWidth": 54,
+              "truncatedPx": 113,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                53.3,
+                40
+              ],
+              "scrollWidth": 84,
+              "clientWidth": 53,
+              "truncatedPx": 31,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                54.3,
+                40
+              ],
+              "scrollWidth": 139,
+              "clientWidth": 54,
+              "truncatedPx": 85,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            65
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "before-sim",
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                44.3,
+                13
+              ],
+              "scrollWidth": 80,
+              "clientWidth": 44,
+              "truncatedPx": 36,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                44.3,
+                13
+              ],
+              "scrollWidth": 55,
+              "clientWidth": 44,
+              "truncatedPx": 11,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                44.3,
+                13
+              ],
+              "scrollWidth": 84,
+              "clientWidth": 44,
+              "truncatedPx": 40,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "before-sim",
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                44.3,
+                17
+              ],
+              "scrollWidth": 103,
+              "clientWidth": 44,
+              "truncatedPx": 59,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                44.3,
+                17
+              ],
+              "scrollWidth": 70,
+              "clientWidth": 44,
+              "truncatedPx": 26,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                44.3,
+                17
+              ],
+              "scrollWidth": 109,
+              "clientWidth": 44,
+              "truncatedPx": 65,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "before-sim",
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                54
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                37.8,
+                30
+              ],
+              "scrollWidth": 170,
+              "clientWidth": 38,
+              "truncatedPx": 132,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                37.7,
+                30
+              ],
+              "scrollWidth": 114,
+              "clientWidth": 38,
+              "truncatedPx": 76,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                38.4,
+                30
+              ],
+              "scrollWidth": 178,
+              "clientWidth": 38,
+              "truncatedPx": 140,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            55
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "variant": "before-sim",
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                97.3,
+                64
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                32.5,
+                40
+              ],
+              "scrollWidth": 224,
+              "clientWidth": 33,
+              "truncatedPx": 191,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                32.3,
+                40
+              ],
+              "scrollWidth": 150,
+              "clientWidth": 32,
+              "truncatedPx": 118,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                97.3,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                33.3,
+                40
+              ],
+              "scrollWidth": 234,
+              "clientWidth": 33,
+              "truncatedPx": 201,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            292,
+            65
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "after",
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                59.7,
+                13
+              ],
+              "scrollWidth": 60,
+              "clientWidth": 60,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                30.2,
+                13
+              ],
+              "scrollWidth": 30,
+              "clientWidth": 30,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                49.2,
+                13
+              ],
+              "scrollWidth": 49,
+              "clientWidth": 49,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "after",
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                77.3,
+                17
+              ],
+              "scrollWidth": 77,
+              "clientWidth": 77,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                38.8,
+                17
+              ],
+              "scrollWidth": 39,
+              "clientWidth": 39,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                63.8,
+                17
+              ],
+              "scrollWidth": 64,
+              "clientWidth": 64,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "after",
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                54
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                72.2,
+                30
+              ],
+              "scrollWidth": 127,
+              "clientWidth": 72,
+              "truncatedPx": 55,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                63.5,
+                30
+              ],
+              "scrollWidth": 64,
+              "clientWidth": 64,
+              "truncatedPx": 0,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                72.8,
+                30
+              ],
+              "scrollWidth": 105,
+              "clientWidth": 73,
+              "truncatedPx": 32,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            55
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "after",
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                64
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                66.8,
+                40
+              ],
+              "scrollWidth": 167,
+              "clientWidth": 67,
+              "truncatedPx": 100,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                66.7,
+                40
+              ],
+              "scrollWidth": 84,
+              "clientWidth": 67,
+              "truncatedPx": 17,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                67.6,
+                40
+              ],
+              "scrollWidth": 139,
+              "clientWidth": 68,
+              "truncatedPx": 71,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            65
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "before-sim",
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                57.7,
+                13
+              ],
+              "scrollWidth": 80,
+              "clientWidth": 58,
+              "truncatedPx": 22,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                54.6,
+                13
+              ],
+              "scrollWidth": 55,
+              "clientWidth": 55,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                57.7,
+                13
+              ],
+              "scrollWidth": 84,
+              "clientWidth": 58,
+              "truncatedPx": 26,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "before-sim",
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                57.7,
+                17
+              ],
+              "scrollWidth": 103,
+              "clientWidth": 58,
+              "truncatedPx": 45,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                57.7,
+                17
+              ],
+              "scrollWidth": 70,
+              "clientWidth": 58,
+              "truncatedPx": 12,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                57.7,
+                17
+              ],
+              "scrollWidth": 109,
+              "clientWidth": 58,
+              "truncatedPx": 51,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "before-sim",
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                54
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                51.2,
+                30
+              ],
+              "scrollWidth": 170,
+              "clientWidth": 51,
+              "truncatedPx": 119,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                51.1,
+                30
+              ],
+              "scrollWidth": 114,
+              "clientWidth": 51,
+              "truncatedPx": 63,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                51.8,
+                30
+              ],
+              "scrollWidth": 178,
+              "clientWidth": 52,
+              "truncatedPx": 126,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            55
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "variant": "before-sim",
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                110.7,
+                64
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                45.8,
+                40
+              ],
+              "scrollWidth": 224,
+              "clientWidth": 46,
+              "truncatedPx": 178,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                45.7,
+                40
+              ],
+              "scrollWidth": 150,
+              "clientWidth": 46,
+              "truncatedPx": 104,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                110.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                46.6,
+                40
+              ],
+              "scrollWidth": 234,
+              "clientWidth": 47,
+              "truncatedPx": 187,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            332,
+            65
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "after",
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                59.7,
+                13
+              ],
+              "scrollWidth": 60,
+              "clientWidth": 60,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                30.2,
+                13
+              ],
+              "scrollWidth": 30,
+              "clientWidth": 30,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                49.2,
+                13
+              ],
+              "scrollWidth": 49,
+              "clientWidth": 49,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "after",
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                77.3,
+                17
+              ],
+              "scrollWidth": 77,
+              "clientWidth": 77,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                38.8,
+                17
+              ],
+              "scrollWidth": 39,
+              "clientWidth": 39,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                63.8,
+                17
+              ],
+              "scrollWidth": 64,
+              "clientWidth": 64,
+              "truncatedPx": 0,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "after",
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                54
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                82.2,
+                30
+              ],
+              "scrollWidth": 127,
+              "clientWidth": 82,
+              "truncatedPx": 45,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                63.5,
+                30
+              ],
+              "scrollWidth": 64,
+              "clientWidth": 64,
+              "truncatedPx": 0,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                82.8,
+                30
+              ],
+              "scrollWidth": 105,
+              "clientWidth": 83,
+              "truncatedPx": 22,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            55
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "after",
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                64
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                76.8,
+                40
+              ],
+              "scrollWidth": 167,
+              "clientWidth": 77,
+              "truncatedPx": 90,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                76.7,
+                40
+              ],
+              "scrollWidth": 84,
+              "clientWidth": 77,
+              "truncatedPx": 7,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                77.6,
+                40
+              ],
+              "scrollWidth": 139,
+              "clientWidth": 78,
+              "truncatedPx": 61,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            65
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "before-sim",
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                67.7,
+                13
+              ],
+              "scrollWidth": 80,
+              "clientWidth": 68,
+              "truncatedPx": 12,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                54.6,
+                13
+              ],
+              "scrollWidth": 55,
+              "clientWidth": 55,
+              "truncatedPx": 0,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                67.7,
+                13
+              ],
+              "scrollWidth": 84,
+              "clientWidth": 68,
+              "truncatedPx": 16,
+              "labelScrollHeight": 13,
+              "labelClientHeight": 13,
+              "vClippedPx": 0,
+              "fontSizePx": 11,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "before-sim",
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                67.7,
+                17
+              ],
+              "scrollWidth": 103,
+              "clientWidth": 68,
+              "truncatedPx": 35,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                67.7,
+                17
+              ],
+              "scrollWidth": 70,
+              "clientWidth": 68,
+              "truncatedPx": 2,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                44
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                67.7,
+                17
+              ],
+              "scrollWidth": 109,
+              "clientWidth": 68,
+              "truncatedPx": 41,
+              "labelScrollHeight": 17,
+              "labelClientHeight": 17,
+              "vClippedPx": 0,
+              "fontSizePx": 14.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            45
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "before-sim",
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                54
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                61.2,
+                30
+              ],
+              "scrollWidth": 170,
+              "clientWidth": 61,
+              "truncatedPx": 109,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                61.1,
+                30
+              ],
+              "scrollWidth": 114,
+              "clientWidth": 61,
+              "truncatedPx": 53,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                54
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                61.8,
+                30
+              ],
+              "scrollWidth": 178,
+              "clientWidth": 62,
+              "truncatedPx": 116,
+              "labelScrollHeight": 30,
+              "labelClientHeight": 30,
+              "vClippedPx": 0,
+              "fontSizePx": 25.9,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            55
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "variant": "before-sim",
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "tabs": [
+            {
+              "ariaLabel": "My Properties, 5 items",
+              "ariaSelected": "true",
+              "tabBox": [
+                120.7,
+                64
+              ],
+              "underlinePx": 2,
+              "underlineColor": "rgb(139, 37, 0)",
+              "labelText": "My Properties",
+              "labelColor": "rgb(139, 37, 0)",
+              "labelFontWeight": "700",
+              "labelBox": [
+                55.8,
+                40
+              ],
+              "scrollWidth": 224,
+              "clientWidth": 56,
+              "truncatedPx": 168,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "5",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Site Visits, 3 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Site Visits",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                55.7,
+                40
+              ],
+              "scrollWidth": 150,
+              "clientWidth": 56,
+              "truncatedPx": 94,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "3",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            },
+            {
+              "ariaLabel": "Buyer Contacts, 2 items",
+              "ariaSelected": "false",
+              "tabBox": [
+                120.7,
+                64
+              ],
+              "underlinePx": 0,
+              "underlineColor": "rgb(0, 0, 0)",
+              "labelText": "Buyer Contacts",
+              "labelColor": "rgb(107, 107, 107)",
+              "labelFontWeight": "500",
+              "labelBox": [
+                56.6,
+                40
+              ],
+              "scrollWidth": 234,
+              "clientWidth": 57,
+              "truncatedPx": 177,
+              "labelScrollHeight": 40,
+              "labelClientHeight": 40,
+              "vClippedPx": 0,
+              "fontSizePx": 34.3,
+              "hasIconGlyph": false,
+              "badgeText": "2",
+              "badgeTruncPx": 0,
+              "overflowsTabPx": 0
+            }
+          ],
+          "tablistBox": [
+            362,
+            65
+          ],
+          "tablistOverflowPx": 0,
+          "selectedCount": 1,
+          "docOverflowPx": 0
+        }
+      ],
+      "router": [
+        {
+          "width": 320,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            320,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 0,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 320,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 8,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            320,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 0,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 320,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 18,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 59,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 6,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            320,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 6,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 320,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 46,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 101,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                80,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 30,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            320,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 17,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 360,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            360,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 0,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 360,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            360,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 0,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 360,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 8,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 49,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            360,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 6,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 360,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 36,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 91,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                90,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 20,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            360,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 17,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 390,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 14,
+              "labelScrollHeight": 14,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 11,
+              "lineHeightPx": 14,
+              "labelNeedsPx": 14,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            390,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 0,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 390,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 19,
+              "labelScrollHeight": 19,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 14.9,
+              "lineHeightPx": 18.9,
+              "labelNeedsPx": 19,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            390,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 0,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 390,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 41,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 33,
+              "labelScrollHeight": 33,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 25.9,
+              "lineHeightPx": 32.9,
+              "labelNeedsPx": 33,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            390,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 6,
+          "barCssHeightPx": "68px"
+        },
+        {
+          "width": 390,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "items": [
+            {
+              "text": "Explore",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 28,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Post",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 0,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Dashboard",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 83,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            },
+            {
+              "text": "Profile",
+              "box": [
+                97.5,
+                53
+              ],
+              "labelClientHeight": 44,
+              "labelScrollHeight": 44,
+              "clippedPx": 0,
+              "hTruncPx": 12,
+              "fontSizePx": 34.3,
+              "lineHeightPx": 43.6,
+              "labelNeedsPx": 44,
+              "escapesBarPx": 0,
+              "itemMinHeight": "0px"
+            }
+          ],
+          "barBox": [
+            390,
+            68
+          ],
+          "barPaddingTopPx": 6,
+          "barPaddingBottomPx": 8,
+          "barBorderTopPx": 1,
+          "contentBudgetNoInsetPx": 53,
+          "contentBudgetInset34Px": 66,
+          "barOverflowPx": 17,
+          "barCssHeightPx": "68px"
+        }
+      ],
+      "profile": [
+        {
+          "width": 320,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "cardBox": [
+            18,
+            460,
+            284,
+            240
+          ],
+          "contentWidth": 254,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                533,
+                254,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                587,
+                254,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "cardBox": [
+            18,
+            581,
+            284,
+            255
+          ],
+          "contentWidth": 254,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                669,
+                254,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                723,
+                254,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "cardBox": [
+            18,
+            1148,
+            284,
+            364
+          ],
+          "contentWidth": 254,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                1281,
+                254,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                1345,
+                254,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 49
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 320,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "cardBox": [
+            18,
+            1922,
+            284,
+            496
+          ],
+          "contentWidth": 254,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                2091,
+                254,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                2167,
+                254,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 138
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "cardBox": [
+            18,
+            440,
+            324,
+            224
+          ],
+          "contentWidth": 294,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                497,
+                294,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                551,
+                294,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "cardBox": [
+            18,
+            534,
+            324,
+            255
+          ],
+          "contentWidth": 294,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                622,
+                294,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                676,
+                294,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "cardBox": [
+            18,
+            991,
+            324,
+            364
+          ],
+          "contentWidth": 294,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                1124,
+                294,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                1188,
+                294,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 9
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 360,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "cardBox": [
+            18,
+            1580,
+            324,
+            496
+          ],
+          "contentWidth": 294,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                1749,
+                294,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                1825,
+                294,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 98
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "cardBox": [
+            18,
+            440,
+            354,
+            224
+          ],
+          "contentWidth": 324,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                497,
+                324,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                551,
+                324,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "cardBox": [
+            18,
+            515,
+            354,
+            255
+          ],
+          "contentWidth": 324,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                603,
+                324,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                657,
+                324,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "cardBox": [
+            18,
+            958,
+            354,
+            364
+          ],
+          "contentWidth": 324,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                1091,
+                324,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                1155,
+                324,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 390,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "cardBox": [
+            18,
+            1384,
+            354,
+            448
+          ],
+          "contentWidth": 324,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                1553,
+                324,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                33,
+                1629,
+                324,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 68
+            }
+          ],
+          "sameRow": false,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 1440,
+          "scale": "L-default",
+          "k": 1,
+          "found": true,
+          "cardBox": [
+            18,
+            427,
+            1404,
+            154
+          ],
+          "contentWidth": 1374,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                468,
+                682,
+                44
+              ],
+              "overflowRightPx": -692,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                725,
+                468,
+                682,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": -692,
+              "minWidth": "0px",
+              "fontSizePx": 13,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": true,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 1440,
+          "scale": "xxxLarge",
+          "k": 1.353,
+          "found": true,
+          "cardBox": [
+            18,
+            474,
+            1404,
+            159
+          ],
+          "contentWidth": 1374,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                520,
+                682,
+                44
+              ],
+              "overflowRightPx": -692,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                725,
+                520,
+                682,
+                44
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": -692,
+              "minWidth": "0px",
+              "fontSizePx": 17.6,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": true,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 1440,
+          "scale": "AX3",
+          "k": 2.353,
+          "found": true,
+          "cardBox": [
+            18,
+            661,
+            1404,
+            192
+          ],
+          "contentWidth": 1374,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                722,
+                682,
+                54
+              ],
+              "overflowRightPx": -692,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                725,
+                722,
+                682,
+                54
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": -692,
+              "minWidth": "0px",
+              "fontSizePx": 30.6,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": true,
+          "docOverflowPx": 0
+        },
+        {
+          "width": 1440,
+          "scale": "AX5-max",
+          "k": 3.118,
+          "found": true,
+          "cardBox": [
+            18,
+            801,
+            1404,
+            228
+          ],
+          "contentWidth": 1374,
+          "fields": [
+            {
+              "ariaLabel": "Realtor agency or builder name",
+              "value": "Sharma Infra",
+              "box": [
+                33,
+                874,
+                682,
+                66
+              ],
+              "overflowRightPx": -692,
+              "overflowLeftPx": 0,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 0
+            },
+            {
+              "ariaLabel": "RERA registration ID",
+              "value": "TSRERA/AGT/00045",
+              "box": [
+                725,
+                874,
+                682,
+                66
+              ],
+              "overflowRightPx": 0,
+              "overflowLeftPx": -692,
+              "minWidth": "0px",
+              "fontSizePx": 40.5,
+              "valueTruncPx": 0
+            }
+          ],
+          "sameRow": true,
+          "docOverflowPx": 0
+        }
+      ]
+    },
+    "darkMode": [
+      {
+        "scheme": "light",
+        "found": true,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "ariaSelected": "true",
+            "tabBox": [
+              120.7,
+              44
+            ],
+            "underlinePx": 2,
+            "underlineColor": "rgb(139, 37, 0)",
+            "labelText": "Properties",
+            "labelColor": "rgb(139, 37, 0)",
+            "labelFontWeight": "700",
+            "labelBox": [
+              59.7,
+              13
+            ],
+            "scrollWidth": 60,
+            "clientWidth": 60,
+            "truncatedPx": 0,
+            "labelScrollHeight": 13,
+            "labelClientHeight": 13,
+            "vClippedPx": 0,
+            "fontSizePx": 11,
+            "hasIconGlyph": false,
+            "badgeText": "5",
+            "badgeTruncPx": 0,
+            "overflowsTabPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "ariaSelected": "false",
+            "tabBox": [
+              120.7,
+              44
+            ],
+            "underlinePx": 0,
+            "underlineColor": "rgb(0, 0, 0)",
+            "labelText": "Visits",
+            "labelColor": "rgb(107, 107, 107)",
+            "labelFontWeight": "500",
+            "labelBox": [
+              30.2,
+              13
+            ],
+            "scrollWidth": 30,
+            "clientWidth": 30,
+            "truncatedPx": 0,
+            "labelScrollHeight": 13,
+            "labelClientHeight": 13,
+            "vClippedPx": 0,
+            "fontSizePx": 11,
+            "hasIconGlyph": false,
+            "badgeText": "3",
+            "badgeTruncPx": 0,
+            "overflowsTabPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "ariaSelected": "false",
+            "tabBox": [
+              120.7,
+              44
+            ],
+            "underlinePx": 0,
+            "underlineColor": "rgb(0, 0, 0)",
+            "labelText": "Contacts",
+            "labelColor": "rgb(107, 107, 107)",
+            "labelFontWeight": "500",
+            "labelBox": [
+              49.2,
+              13
+            ],
+            "scrollWidth": 49,
+            "clientWidth": 49,
+            "truncatedPx": 0,
+            "labelScrollHeight": 13,
+            "labelClientHeight": 13,
+            "vClippedPx": 0,
+            "fontSizePx": 11,
+            "hasIconGlyph": false,
+            "badgeText": "2",
+            "badgeTruncPx": 0,
+            "overflowsTabPx": 0
+          }
+        ],
+        "tablistBox": [
+          362,
+          45
+        ],
+        "tablistOverflowPx": 0,
+        "selectedCount": 1,
+        "docOverflowPx": 0,
+        "stateTracking": [
+          {
+            "clickedLabel": "My Properties",
+            "selectedCount": 1,
+            "selectedAria": "My Properties, 5 items",
+            "underlines": [
+              {
+                "aria": "My Properties",
+                "underlinePx": 2,
+                "color": "rgb(139, 37, 0)",
+                "weight": "700"
+              },
+              {
+                "aria": "Site Visits",
+                "underlinePx": 0,
+                "color": "rgb(107, 107, 107)",
+                "weight": "500"
+              },
+              {
+                "aria": "Buyer Contacts",
+                "underlinePx": 0,
+                "color": "rgb(107, 107, 107)",
+                "weight": "500"
+              }
+            ]
+          },
+          {
+            "clickedLabel": "Site Visits",
+            "selectedCount": 1,
+            "selectedAria": "Site Visits, 3 items",
+            "underlines": [
+              {
+                "aria": "My Properties",
+                "underlinePx": 0,
+                "color": "rgb(107, 107, 107)",
+                "weight": "500"
+              },
+              {
+                "aria": "Site Visits",
+                "underlinePx": 2,
+                "color": "rgb(139, 37, 0)",
+                "weight": "700"
+              },
+              {
+                "aria": "Buyer Contacts",
+                "underlinePx": 0,
+                "color": "rgb(107, 107, 107)",
+                "weight": "500"
+              }
+            ]
+          },
+          {
+            "clickedLabel": "Buyer Contacts",
+            "selectedCount": 1,
+            "selectedAria": "Buyer Contacts, 2 items",
+            "underlines": [
+              {
+                "aria": "My Properties",
+                "underlinePx": 0,
+                "color": "rgb(107, 107, 107)",
+                "weight": "500"
+              },
+              {
+                "aria": "Site Visits",
+                "underlinePx": 0,
+                "color": "rgb(107, 107, 107)",
+                "weight": "500"
+              },
+              {
+                "aria": "Buyer Contacts",
+                "underlinePx": 2,
+                "color": "rgb(139, 37, 0)",
+                "weight": "700"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scheme": "dark",
+        "found": true,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "ariaSelected": "true",
+            "tabBox": [
+              120.7,
+              44
+            ],
+            "underlinePx": 2,
+            "underlineColor": "rgb(196, 80, 26)",
+            "labelText": "Properties",
+            "labelColor": "rgb(196, 80, 26)",
+            "labelFontWeight": "700",
+            "labelBox": [
+              59.7,
+              13
+            ],
+            "scrollWidth": 60,
+            "clientWidth": 60,
+            "truncatedPx": 0,
+            "labelScrollHeight": 13,
+            "labelClientHeight": 13,
+            "vClippedPx": 0,
+            "fontSizePx": 11,
+            "hasIconGlyph": false,
+            "badgeText": "5",
+            "badgeTruncPx": 0,
+            "overflowsTabPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "ariaSelected": "false",
+            "tabBox": [
+              120.7,
+              44
+            ],
+            "underlinePx": 0,
+            "underlineColor": "rgb(0, 0, 0)",
+            "labelText": "Visits",
+            "labelColor": "rgb(160, 160, 160)",
+            "labelFontWeight": "500",
+            "labelBox": [
+              30.2,
+              13
+            ],
+            "scrollWidth": 30,
+            "clientWidth": 30,
+            "truncatedPx": 0,
+            "labelScrollHeight": 13,
+            "labelClientHeight": 13,
+            "vClippedPx": 0,
+            "fontSizePx": 11,
+            "hasIconGlyph": false,
+            "badgeText": "3",
+            "badgeTruncPx": 0,
+            "overflowsTabPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "ariaSelected": "false",
+            "tabBox": [
+              120.7,
+              44
+            ],
+            "underlinePx": 0,
+            "underlineColor": "rgb(0, 0, 0)",
+            "labelText": "Contacts",
+            "labelColor": "rgb(160, 160, 160)",
+            "labelFontWeight": "500",
+            "labelBox": [
+              49.2,
+              13
+            ],
+            "scrollWidth": 49,
+            "clientWidth": 49,
+            "truncatedPx": 0,
+            "labelScrollHeight": 13,
+            "labelClientHeight": 13,
+            "vClippedPx": 0,
+            "fontSizePx": 11,
+            "hasIconGlyph": false,
+            "badgeText": "2",
+            "badgeTruncPx": 0,
+            "overflowsTabPx": 0
+          }
+        ],
+        "tablistBox": [
+          362,
+          45
+        ],
+        "tablistOverflowPx": 0,
+        "selectedCount": 1,
+        "docOverflowPx": 0,
+        "stateTracking": [
+          {
+            "clickedLabel": "My Properties",
+            "selectedCount": 1,
+            "selectedAria": "My Properties, 5 items",
+            "underlines": [
+              {
+                "aria": "My Properties",
+                "underlinePx": 2,
+                "color": "rgb(196, 80, 26)",
+                "weight": "700"
+              },
+              {
+                "aria": "Site Visits",
+                "underlinePx": 0,
+                "color": "rgb(160, 160, 160)",
+                "weight": "500"
+              },
+              {
+                "aria": "Buyer Contacts",
+                "underlinePx": 0,
+                "color": "rgb(160, 160, 160)",
+                "weight": "500"
+              }
+            ]
+          },
+          {
+            "clickedLabel": "Site Visits",
+            "selectedCount": 1,
+            "selectedAria": "Site Visits, 3 items",
+            "underlines": [
+              {
+                "aria": "My Properties",
+                "underlinePx": 0,
+                "color": "rgb(160, 160, 160)",
+                "weight": "500"
+              },
+              {
+                "aria": "Site Visits",
+                "underlinePx": 2,
+                "color": "rgb(196, 80, 26)",
+                "weight": "700"
+              },
+              {
+                "aria": "Buyer Contacts",
+                "underlinePx": 0,
+                "color": "rgb(160, 160, 160)",
+                "weight": "500"
+              }
+            ]
+          },
+          {
+            "clickedLabel": "Buyer Contacts",
+            "selectedCount": 1,
+            "selectedAria": "Buyer Contacts, 2 items",
+            "underlines": [
+              {
+                "aria": "My Properties",
+                "underlinePx": 0,
+                "color": "rgb(160, 160, 160)",
+                "weight": "500"
+              },
+              {
+                "aria": "Site Visits",
+                "underlinePx": 0,
+                "color": "rgb(160, 160, 160)",
+                "weight": "500"
+              },
+              {
+                "aria": "Buyer Contacts",
+                "underlinePx": 2,
+                "color": "rgb(196, 80, 26)",
+                "weight": "700"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "axTree": [
+      {
+        "route": "/dashboard",
+        "width": 390,
+        "totalAxNodes": 367,
+        "tabs": [
+          {
+            "role": "tab",
+            "name": "  Explore",
+            "nameFrom": "contents",
+            "selected": false
+          },
+          {
+            "role": "tab",
+            "name": "  Post",
+            "nameFrom": "contents",
+            "selected": false
+          },
+          {
+            "role": "tab",
+            "name": "  Dashboard",
+            "nameFrom": "contents",
+            "selected": true
+          },
+          {
+            "role": "tab",
+            "name": "  Profile",
+            "nameFrom": "contents",
+            "selected": false
+          },
+          {
+            "role": "tab",
+            "name": "My Properties, 5 items",
+            "nameFrom": "attribute",
+            "selected": true
+          },
+          {
+            "role": "tab",
+            "name": "Site Visits, 3 items",
+            "nameFrom": "attribute",
+            "selected": false
+          },
+          {
+            "role": "tab",
+            "name": "Buyer Contacts, 2 items",
+            "nameFrom": "attribute",
+            "selected": false
+          }
+        ]
+      }
+    ],
+    "locators": [
+      {
+        "domShape": "post-rename",
+        "ariaState": "aria-present",
+        "result": {
+          "aria_startsWith": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "legacy_text_prefix": {
+            "My Properties": true,
+            "Site Visits": false,
+            "Buyer Contacts": true
+          },
+          "measure_tablist_has": true,
+          "measure_tablist_legacy": false,
+          "measure_leaf": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "followups_panel_tab": true,
+          "followups_click": true,
+          "invariant1_click": true
+        }
+      },
+      {
+        "domShape": "post-rename",
+        "ariaState": "aria-stripped",
+        "result": {
+          "aria_startsWith": {
+            "My Properties": false,
+            "Site Visits": false,
+            "Buyer Contacts": false
+          },
+          "legacy_text_prefix": {
+            "My Properties": true,
+            "Site Visits": false,
+            "Buyer Contacts": true
+          },
+          "measure_tablist_has": false,
+          "measure_tablist_legacy": false,
+          "measure_leaf": {
+            "My Properties": true,
+            "Site Visits": false,
+            "Buyer Contacts": true
+          },
+          "followups_panel_tab": true,
+          "followups_click": true,
+          "invariant1_click": true
+        }
+      },
+      {
+        "domShape": "pre-rename",
+        "ariaState": "aria-present",
+        "result": {
+          "aria_startsWith": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "legacy_text_prefix": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "measure_tablist_has": true,
+          "measure_tablist_legacy": true,
+          "measure_leaf": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "followups_panel_tab": true,
+          "followups_click": true,
+          "invariant1_click": true
+        }
+      },
+      {
+        "domShape": "pre-rename",
+        "ariaState": "aria-stripped",
+        "result": {
+          "aria_startsWith": {
+            "My Properties": false,
+            "Site Visits": false,
+            "Buyer Contacts": false
+          },
+          "legacy_text_prefix": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "measure_tablist_has": false,
+          "measure_tablist_legacy": true,
+          "measure_leaf": {
+            "My Properties": true,
+            "Site Visits": true,
+            "Buyer Contacts": true
+          },
+          "followups_panel_tab": true,
+          "followups_click": true,
+          "invariant1_click": true
+        }
+      }
+    ]
+  }
+}
