@@ -34,9 +34,29 @@ const FOUNDING_TOTAL_CAP = 500;
  * Coerce a server number, degrading to `fallback` on `null` / `undefined` /
  * `NaN` / non-finite / non-numeric input, so no cap bar can ever render
  * `NaN`, `undefined` or `Infinity`.
+ *
+ * Only two shapes are accepted as "a server number": a finite `number`, and a
+ * non-blank numeric `string` (Postgres `bigint` / `numeric` columns arrive as
+ * strings through node-postgres, so dropping string support would regress a
+ * real payload). **Everything else degrades**, deliberately including inputs
+ * that `Number()` would happily coerce to `0`:
+ *
+ *   `null` → 0, `""` → 0, `"   "` → 0, `false` → 0, `true` → 1, `[]` → 0
+ *
+ * Routing those through `Number()` is BLA-21: `null` is finite-after-coercion,
+ * so it slipped past the old `Number.isFinite` gate and reported a Starter
+ * entitlement of `Math.max(1, 0)` = **1** listing instead of 2 — a wrong
+ * Protected Surface #4 cap number, in the one module that exists to be the
+ * single auditable home for cap numbers.
+ *
+ * `null` is the case that matters: JSON cannot transmit `undefined`, so a field
+ * the server omits or nulls arrives here as `null`, never as `undefined`.
  */
 export function num(value: unknown, fallback: number): number {
-  const n = typeof value === "number" ? value : Number(value);
+  const n =
+    typeof value === "number" ? value
+    : typeof value === "string" && value.trim() !== "" ? Number(value)
+    : NaN;
   return Number.isFinite(n) ? n : fallback;
 }
 
