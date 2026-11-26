@@ -204,7 +204,21 @@ function TabBar({ active, onSelect, counts, isDark }: {
   return (
     // §H7: a real tablist, so a screen reader can report which tab is active instead of
     // leaving that to a 2px underline and a colour shift.
-    <View style={[s.tabBar, { borderBottomColor: colors.border }]} accessibilityRole="tablist">
+    // The shortened words fit a 110pt third at DEFAULT type, but they are single
+    // unbreakable tokens at a fixed 11px, so above xxxLarge they cannot fit a fixed third
+    // and `numberOfLines={1}` turned that into an ellipsis ("Propertie…" at 320pt/xxxLarge,
+    // all three tabs at AX3/AX5). Losing the word is worse than scrolling for it — WCAG
+    // 1.4.4 prefers reflow over truncation — so the strip now sizes each tab to its content
+    // and scrolls horizontally once the three no longer fit. `flexGrow` on both the content
+    // container and the tab keeps the equal-thirds layout whenever they do fit, so nothing
+    // changes at default type.
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={[s.tabBar, { borderBottomColor: colors.border }]}
+      contentContainerStyle={s.tabBarContent}
+      accessibilityRole="tablist"
+    >
       {tabs.map((tab) => {
         const isActive = tab.id === active;
         return (
@@ -219,9 +233,10 @@ function TabBar({ active, onSelect, counts, isDark }: {
               isActive && { borderBottomColor: colors.primary, borderBottomWidth: 2 },
             ]}
           >
-            {/* §H7: single line — the 11px label wrapped on 360pt devices. */}
+            {/* §H7 set numberOfLines={1} to stop the old two-word labels wrapping; the
+                one-word labels no longer wrap at any scale, so the clamp only cost the
+                word its tail. Dropped — the tab is content-sized now. */}
             <Text
-              numberOfLines={1}
               style={[s.tabLabel, { color: isActive ? colors.primary : colors.mutedForeground, fontWeight: isActive ? "700" : "500" }]}
             >
               {tab.short}
@@ -234,7 +249,7 @@ function TabBar({ active, onSelect, counts, isDark }: {
           </A11yPressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -1221,12 +1236,23 @@ const s = StyleSheet.create({
   proBadge:      { fontSize: 11, fontWeight: "700", flexShrink: 1 },
 
   // Tab bar — §H7: was ~33pt tall (paddingVertical 10 + 13px icon).
-  tabBar: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth, marginTop: 4, marginHorizontal: 14 },
+  // `flexGrow` on the strip's content keeps the three tabs filling the full width whenever
+  // they fit; above xxxLarge their content widths exceed it and the strip scrolls instead
+  // of ellipsising. `flexGrow: 0` on the ScrollView itself stops it claiming vertical space.
+  tabBar: { flexGrow: 0, borderBottomWidth: StyleSheet.hairlineWidth, marginTop: 4, marginHorizontal: 14 },
+  tabBarContent: { flexGrow: 1 },
+  // flexBasis: 0 (not "auto") — "auto" distributes only the SURPLUS on top of each label's
+  // intrinsic width, which made the three tabs unequal at default type (111/81/100 at
+  // 320pt instead of 97/97/97). From a 0 basis the whole width is shared equally, so the
+  // equal thirds are preserved whenever the labels fit.
   tabBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    flexGrow: 1, flexShrink: 0, flexBasis: 0,
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 4, paddingVertical: 10, paddingHorizontal: 4, minHeight: HIT,
   },
-  tabLabel: { fontSize: 11, letterSpacing: 0.1, flexShrink: 1 },
+  // flexShrink: 0 — the label must contribute its full intrinsic width to the tab rather
+  // than compress, otherwise the tab never grows and the word clips again.
+  tabLabel: { fontSize: 11, letterSpacing: 0.1, flexShrink: 0 },
   // 10px -> 11px floor (§F3); minWidth raised to keep the pill circular at 11px.
   tabBadge: { paddingHorizontal: 5, paddingVertical: 1, borderRadius: 9, minWidth: 20, alignItems: "center" },
   tabBadgeText: { fontSize: 11, fontWeight: "700" },
