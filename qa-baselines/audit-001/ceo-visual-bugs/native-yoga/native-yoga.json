@@ -1,0 +1,1562 @@
+{
+  "tool": "verify-ceo-visual-native-yoga.mjs",
+  "subject": {
+    "post": "0cdada0",
+    "pre": "b40b742"
+  },
+  "engine": "yoga-layout (standalone build of React Native's native layout engine)",
+  "note": "Measures the native layout algorithm directly. Not a Chromium/react-native-web run.",
+  "widths": [
+    {
+      "device": 320,
+      "content": 254,
+      "webSameRow": false
+    },
+    {
+      "device": 360,
+      "content": 294,
+      "webSameRow": false
+    },
+    {
+      "device": 390,
+      "content": 324,
+      "webSameRow": false
+    },
+    {
+      "device": 1440,
+      "content": 1374,
+      "webSameRow": true
+    }
+  ],
+  "scales": [
+    "L-default",
+    "xxxLarge",
+    "AX3",
+    "AX5-max"
+  ],
+  "styles": {
+    "pre": {
+      "flexGrow": 1,
+      "flexShrink": 1,
+      "flexBasis": 0
+    },
+    "post": {
+      "flexGrow": 1,
+      "flexShrink": 1,
+      "flexBasis": 200,
+      "minWidth": 0
+    }
+  },
+  "verdict": "ALL_PASS",
+  "summary": {
+    "total": 5,
+    "pass": 5,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "N1_post_no_overflow_native",
+      "desc": "0cdada0 fieldRow/fieldCell: no cell overflows the card content box on Yoga, 4 widths x 4 scales",
+      "pass": true,
+      "detail": "16/16 clean (max overflow 0px; cells are flex-sized, so the 13pt text scaling to AX5 cannot widen the box)"
+    },
+    {
+      "id": "N2_pre_also_clean_native_web_only_bug",
+      "desc": "b40b742 flex:1 row: ALSO no overflow on Yoga -> defect 1 was web-only, native never shipped it",
+      "pass": true,
+      "detail": "16/16 clean; Yoga's default minWidth is undefined and a flexBasis-sized node never measures content width, so there is no intrinsic floor to overflow"
+    },
+    {
+      "id": "W4_control_css_minwidth_reproduces_bug",
+      "desc": "control: pre-fix styles + emulated CSS min-width:auto overflow on phone widths (validates the engine model)",
+      "pass": true,
+      "detail": "12/12 phone cases overflow once the intrinsic floor is restored (e.g. 320pt/L-default: floor 165px/cell vs 254px box -> +86px)"
+    },
+    {
+      "id": "C3_wrap_parity_web_vs_native",
+      "desc": "post-fix wrap decision is identical on Yoga and on react-native-web at every width",
+      "pass": true,
+      "detail": "320pt: 1->2 line(s), 360pt: 1->2 line(s), 390pt: 1->2 line(s), 1440pt: 1->1 line(s) — matches web sameRow exactly, so the two platforms stack and unstack together"
+    },
+    {
+      "id": "C3b_native_layout_delta_is_a_visual_change",
+      "desc": "the native delta is reported, not silently passed: cells that were side-by-side now stack below 410px of content box",
+      "pass": true,
+      "detail": "320pt (254px box < 410px), 360pt (294px box < 410px), 390pt (324px box < 410px) stack on native where they previously sat side-by-side; 1440pt (1374px box) is unchanged at 1 line. Native had no overflow to fix, so this is a pure visual change there — intentional and consistent with web, but it is a native-visible delta the web-only harness could not see."
+    }
+  ],
+  "runs": [
+    {
+      "device": 320,
+      "content": 254,
+      "webSameRow": false,
+      "scale": "L-default",
+      "k": 1,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 254,
+            "height": 44,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 54,
+            "width": 254,
+            "height": 44,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 98
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 122,
+            "height": 44,
+            "right": 122,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 132,
+            "top": 0,
+            "width": 122,
+            "height": 44,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 165,
+            "height": 44,
+            "right": 165,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 175,
+            "top": 0,
+            "width": 165,
+            "height": 44,
+            "right": 340,
+            "overflowRightPx": 86,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "intrinsicFloorPx": 165
+    },
+    {
+      "device": 320,
+      "content": 254,
+      "webSameRow": false,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 254,
+            "height": 60,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 70,
+            "width": 254,
+            "height": 60,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 130
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 122,
+            "height": 60,
+            "right": 122,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 132,
+            "top": 0,
+            "width": 122,
+            "height": 60,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 215,
+            "height": 60,
+            "right": 215,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 225,
+            "top": 0,
+            "width": 215,
+            "height": 60,
+            "right": 440,
+            "overflowRightPx": 186,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "intrinsicFloorPx": 215
+    },
+    {
+      "device": 320,
+      "content": 254,
+      "webSameRow": false,
+      "scale": "AX3",
+      "k": 2.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 254,
+            "height": 104,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 114,
+            "width": 254,
+            "height": 104,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 218
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 122,
+            "height": 104,
+            "right": 122,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 132,
+            "top": 0,
+            "width": 122,
+            "height": 104,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 358,
+            "height": 104,
+            "right": 358,
+            "overflowRightPx": 104,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 368,
+            "top": 0,
+            "width": 358,
+            "height": 104,
+            "right": 726,
+            "overflowRightPx": 472,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "intrinsicFloorPx": 358
+    },
+    {
+      "device": 320,
+      "content": 254,
+      "webSameRow": false,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 254,
+            "height": 137,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 147,
+            "width": 254,
+            "height": 137,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 284
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 122,
+            "height": 137,
+            "right": 122,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 132,
+            "top": 0,
+            "width": 122,
+            "height": 137,
+            "right": 254,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 468,
+            "height": 137,
+            "right": 468,
+            "overflowRightPx": 214,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 478,
+            "top": 0,
+            "width": 468,
+            "height": 137,
+            "right": 946,
+            "overflowRightPx": 692,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "intrinsicFloorPx": 468
+    },
+    {
+      "device": 360,
+      "content": 294,
+      "webSameRow": false,
+      "scale": "L-default",
+      "k": 1,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 294,
+            "height": 44,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 54,
+            "width": 294,
+            "height": 44,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 98
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 142,
+            "height": 44,
+            "right": 142,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 152,
+            "top": 0,
+            "width": 142,
+            "height": 44,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 165,
+            "height": 44,
+            "right": 165,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 175,
+            "top": 0,
+            "width": 165,
+            "height": 44,
+            "right": 340,
+            "overflowRightPx": 46,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "intrinsicFloorPx": 165
+    },
+    {
+      "device": 360,
+      "content": 294,
+      "webSameRow": false,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 294,
+            "height": 60,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 70,
+            "width": 294,
+            "height": 60,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 130
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 142,
+            "height": 60,
+            "right": 142,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 152,
+            "top": 0,
+            "width": 142,
+            "height": 60,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 215,
+            "height": 60,
+            "right": 215,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 225,
+            "top": 0,
+            "width": 215,
+            "height": 60,
+            "right": 440,
+            "overflowRightPx": 146,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "intrinsicFloorPx": 215
+    },
+    {
+      "device": 360,
+      "content": 294,
+      "webSameRow": false,
+      "scale": "AX3",
+      "k": 2.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 294,
+            "height": 104,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 114,
+            "width": 294,
+            "height": 104,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 218
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 142,
+            "height": 104,
+            "right": 142,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 152,
+            "top": 0,
+            "width": 142,
+            "height": 104,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 358,
+            "height": 104,
+            "right": 358,
+            "overflowRightPx": 64,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 368,
+            "top": 0,
+            "width": 358,
+            "height": 104,
+            "right": 726,
+            "overflowRightPx": 432,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "intrinsicFloorPx": 358
+    },
+    {
+      "device": 360,
+      "content": 294,
+      "webSameRow": false,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 294,
+            "height": 137,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 147,
+            "width": 294,
+            "height": 137,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 284
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 142,
+            "height": 137,
+            "right": 142,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 152,
+            "top": 0,
+            "width": 142,
+            "height": 137,
+            "right": 294,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 468,
+            "height": 137,
+            "right": 468,
+            "overflowRightPx": 174,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 478,
+            "top": 0,
+            "width": 468,
+            "height": 137,
+            "right": 946,
+            "overflowRightPx": 652,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "intrinsicFloorPx": 468
+    },
+    {
+      "device": 390,
+      "content": 324,
+      "webSameRow": false,
+      "scale": "L-default",
+      "k": 1,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 324,
+            "height": 44,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 54,
+            "width": 324,
+            "height": 44,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 98
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 157,
+            "height": 44,
+            "right": 157,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 167,
+            "top": 0,
+            "width": 157,
+            "height": 44,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 165,
+            "height": 44,
+            "right": 165,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 175,
+            "top": 0,
+            "width": 165,
+            "height": 44,
+            "right": 340,
+            "overflowRightPx": 16,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "intrinsicFloorPx": 165
+    },
+    {
+      "device": 390,
+      "content": 324,
+      "webSameRow": false,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 324,
+            "height": 60,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 70,
+            "width": 324,
+            "height": 60,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 130
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 157,
+            "height": 60,
+            "right": 157,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 167,
+            "top": 0,
+            "width": 157,
+            "height": 60,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 215,
+            "height": 60,
+            "right": 215,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 225,
+            "top": 0,
+            "width": 215,
+            "height": 60,
+            "right": 440,
+            "overflowRightPx": 116,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "intrinsicFloorPx": 215
+    },
+    {
+      "device": 390,
+      "content": 324,
+      "webSameRow": false,
+      "scale": "AX3",
+      "k": 2.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 324,
+            "height": 104,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 114,
+            "width": 324,
+            "height": 104,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 218
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 157,
+            "height": 104,
+            "right": 157,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 167,
+            "top": 0,
+            "width": 157,
+            "height": 104,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 358,
+            "height": 104,
+            "right": 358,
+            "overflowRightPx": 34,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 368,
+            "top": 0,
+            "width": 358,
+            "height": 104,
+            "right": 726,
+            "overflowRightPx": 402,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "intrinsicFloorPx": 358
+    },
+    {
+      "device": 390,
+      "content": 324,
+      "webSameRow": false,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 324,
+            "height": 137,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 0,
+            "top": 147,
+            "width": 324,
+            "height": 137,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 2,
+        "rowHeight": 284
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 157,
+            "height": 137,
+            "right": 157,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 167,
+            "top": 0,
+            "width": 157,
+            "height": 137,
+            "right": 324,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 468,
+            "height": 137,
+            "right": 468,
+            "overflowRightPx": 144,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 478,
+            "top": 0,
+            "width": 468,
+            "height": 137,
+            "right": 946,
+            "overflowRightPx": 622,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "intrinsicFloorPx": 468
+    },
+    {
+      "device": 1440,
+      "content": 1374,
+      "webSameRow": true,
+      "scale": "L-default",
+      "k": 1,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 44,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 44,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 44,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 44,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 44,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 86
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 44,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 114
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 44
+      },
+      "intrinsicFloorPx": 165
+    },
+    {
+      "device": 1440,
+      "content": 1374,
+      "webSameRow": true,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 60,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 60,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 60,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 60,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 60,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 116
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 60,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 155
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 60
+      },
+      "intrinsicFloorPx": 215
+    },
+    {
+      "device": 1440,
+      "content": 1374,
+      "webSameRow": true,
+      "scale": "AX3",
+      "k": 2.353,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 104,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 104,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 104,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 104,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 104,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 202
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 104,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 269
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 104
+      },
+      "intrinsicFloorPx": 358
+    },
+    {
+      "device": 1440,
+      "content": 1374,
+      "webSameRow": true,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "post": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 137,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 137,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "pre": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 137,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 137,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "webEmulated": {
+        "boxes": [
+          {
+            "value": "Sharma Infra",
+            "left": 0,
+            "top": 0,
+            "width": 682,
+            "height": 137,
+            "right": 682,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 267
+          },
+          {
+            "value": "TSRERA/AGT/00045",
+            "left": 692,
+            "top": 0,
+            "width": 682,
+            "height": 137,
+            "right": 1374,
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "glyphWidth": 357
+          }
+        ],
+        "lines": 1,
+        "rowHeight": 137
+      },
+      "intrinsicFloorPx": 468
+    }
+  ]
+}
