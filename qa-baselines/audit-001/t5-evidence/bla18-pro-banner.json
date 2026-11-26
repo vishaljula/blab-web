@@ -1,0 +1,1219 @@
+{
+  "issue": "BLA-18",
+  "web": "http://localhost:8081",
+  "widths": [
+    320,
+    360,
+    390,
+    1440
+  ],
+  "scales": [
+    "L-default",
+    "xxxLarge",
+    "AX3",
+    "AX5-max"
+  ],
+  "verdict": "FAIL",
+  "checks": [
+    {
+      "id": "B0_banner_rendered",
+      "verdict": "PASS",
+      "detail": "measured at 16 width x scale combinations"
+    },
+    {
+      "id": "B1_text_within_banner_content_box",
+      "verdict": "PASS",
+      "detail": "every banner text leaf fits its card's content box"
+    },
+    {
+      "id": "B2_no_text_cropped_by_ancestor",
+      "verdict": "FAIL",
+      "detail": "w320/AX3: \"👑\" cut 79.8px by <div 320x732 ovf=hidden/hidden h=732px> | w320/AX3: \"Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)\" cut 141.8px by <div 320x732 ovf=hidden/hidden h=732px> | w320/AX3: \"Unlimited Listings & Handoffs\" cut 205.8px by <div 320x732 ovf=hidden/hidden h=732px> | w320/AX5-max: \"👑\" cut 450px by <div 320x732 ovf=hidden/hidden h=732px> | w320/AX5-max: \"Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)\" cut 577px by <div 320x732 ovf=hidden/hidden h=732px> | w320/AX5-max: \"Unlimited Listings & Handoffs\" cut 701px by <div 320x732 ovf=hidden/hidden h=732px> | w360/AX3: \"👑\" cut 6.2px by <div 360x732 ovf=hidden/hidden h=732px> | w360/AX3: \"Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)\" cut 68.2px by <div 360x732 ovf=hidden/hidden h=732px> | w360/AX3: \"Unlimited Listings & Handoffs\" cut 132.2px by <div 360x732 ovf=hidden/hidden h=732px> | w360/AX5-max: \"👑\" cut 378.1px by <div 360x732 ovf=hidden/hidden h=732px> | w360/AX5-max: \"Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)\" cut 483.1px by <div 360x732 ovf=hidden/hidden h=732px> | w360/AX5-max: \"Unlimited Listings & Handoffs\" cut 567.1px by <div 360x732 ovf=hidden/hidden h=732px> | w390/AX5-max: \"👑\" cut 306.3px by <div 390x732 ovf=hidden/hidden h=732px> | w390/AX5-max: \"Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)\" cut 389.3px by <div 390x732 ovf=hidden/hidden h=732px> | w390/AX5-max: \"Unlimited Listings & Handoffs\" cut 473.3px by <div 390x732 ovf=hidden/hidden h=732px>"
+    },
+    {
+      "id": "B3_no_horizontal_page_overflow",
+      "verdict": "PASS",
+      "detail": "document never exceeds the viewport width"
+    },
+    {
+      "id": "B4_no_banner_text_overlap",
+      "verdict": "PASS",
+      "detail": "no overlapping banner text boxes"
+    },
+    {
+      "id": "B5_desktop_row_preserved",
+      "verdict": "PASS",
+      "detail": "1440pt L-default: title and badge share one row (intended design intact)"
+    }
+  ],
+  "measurements": [
+    {
+      "width": 320,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "bannerBox": [
+        27,
+        261,
+        266,
+        47
+      ],
+      "contentWidth": 266,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            266,
+            16,
+            21
+          ],
+          "overflowRightPx": -250,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 13
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            49,
+            261,
+            244,
+            30
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -22,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 12
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            295,
+            167,
+            13
+          ],
+          "overflowRightPx": -99.2,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 11
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 320,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        326,
+        266,
+        78
+      ],
+      "contentWidth": 266,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            341,
+            21,
+            27
+          ],
+          "overflowRightPx": -245,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 17.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            54,
+            326,
+            239,
+            57
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -27,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 16.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            387,
+            217,
+            17
+          ],
+          "overflowRightPx": -49.4,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 14.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 320,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        709,
+        266,
+        229
+      ],
+      "contentWidth": 266,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            771,
+            31,
+            41
+          ],
+          "overflowRightPx": -235,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 79.8,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 79.8,
+          "cropper": "div 320x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 30.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            64,
+            709,
+            229,
+            165
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -37,
+          "ellipsised": false,
+          "cropCutPx": 141.8,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 141.8,
+          "cropper": "div 320x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 28.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            878,
+            266,
+            60
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 205.8,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 205.8,
+          "cropper": "div 320x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 25.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 320,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "bannerBox": [
+        27,
+        1001,
+        266,
+        432
+      ],
+      "contentWidth": 266,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            1128,
+            41,
+            54
+          ],
+          "overflowRightPx": -225,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 450,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 450,
+          "cropper": "div 320x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 40.5
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            74,
+            1001,
+            219,
+            308
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -47,
+          "ellipsised": false,
+          "cropCutPx": 577,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 577,
+          "cropper": "div 320x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 37.4
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            1313,
+            266,
+            120
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 701,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 701,
+          "cropper": "div 320x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 34.3
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 360,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "bannerBox": [
+        27,
+        261,
+        306,
+        47
+      ],
+      "contentWidth": 306,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            266,
+            16,
+            21
+          ],
+          "overflowRightPx": -290,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 13
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            49,
+            261,
+            284,
+            30
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -22,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 12
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            295,
+            167,
+            13
+          ],
+          "overflowRightPx": -139.2,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 11
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 360,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        304,
+        306,
+        78
+      ],
+      "contentWidth": 306,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            319,
+            21,
+            27
+          ],
+          "overflowRightPx": -285,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 17.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            54,
+            304,
+            279,
+            57
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -27,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 16.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            365,
+            217,
+            17
+          ],
+          "overflowRightPx": -89.4,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 14.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 360,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        635,
+        306,
+        229
+      ],
+      "contentWidth": 306,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            697,
+            31,
+            41
+          ],
+          "overflowRightPx": -275,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 6.2,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 6.2,
+          "cropper": "div 360x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 30.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            64,
+            635,
+            269,
+            165
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -37,
+          "ellipsised": false,
+          "cropCutPx": 68.2,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 68.2,
+          "cropper": "div 360x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 28.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            804,
+            306,
+            60
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 132.2,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 132.2,
+          "cropper": "div 360x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 25.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 360,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "bannerBox": [
+        27,
+        951,
+        306,
+        348
+      ],
+      "contentWidth": 306,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            1056,
+            41,
+            54
+          ],
+          "overflowRightPx": -265,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 378.1,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 378.1,
+          "cropper": "div 360x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 40.5
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            74,
+            951,
+            259,
+            264
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -47,
+          "ellipsised": false,
+          "cropCutPx": 483.1,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 483.1,
+          "cropper": "div 360x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 37.4
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            1219,
+            306,
+            80
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 567.1,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 567.1,
+          "cropper": "div 360x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 34.3
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 390,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "bannerBox": [
+        27,
+        245,
+        336,
+        47
+      ],
+      "contentWidth": 336,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            250,
+            16,
+            21
+          ],
+          "overflowRightPx": -320,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 13
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            49,
+            245,
+            314,
+            30
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -22,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 12
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            279,
+            167,
+            13
+          ],
+          "overflowRightPx": -169.2,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 11
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 390,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        304,
+        336,
+        59
+      ],
+      "contentWidth": 336,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            309,
+            21,
+            27
+          ],
+          "overflowRightPx": -315,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 17.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            54,
+            304,
+            309,
+            38
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -27,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 16.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            346,
+            217,
+            17
+          ],
+          "overflowRightPx": -119.4,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 14.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 390,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        485,
+        336,
+        196
+      ],
+      "contentWidth": 336,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            530,
+            31,
+            41
+          ],
+          "overflowRightPx": -305,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 30.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            64,
+            485,
+            299,
+            132
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -37,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 28.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            621,
+            336,
+            60
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 25.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 390,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "bannerBox": [
+        27,
+        901,
+        336,
+        304
+      ],
+      "contentWidth": 336,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            984,
+            41,
+            54
+          ],
+          "overflowRightPx": -295,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 306.3,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 306.3,
+          "cropper": "div 390x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 40.5
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            74,
+            901,
+            289,
+            220
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -47,
+          "ellipsised": false,
+          "cropCutPx": 389.3,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 389.3,
+          "cropper": "div 390x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 37.4
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            1125,
+            336,
+            80
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 473.3,
+          "cropAxis": "vertical",
+          "cropOutX": -27,
+          "cropOutY": 473.3,
+          "cropper": "div 390x732 ovf=hidden/hidden h=732px",
+          "fontSizePx": 34.3
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 1440,
+      "scale": "L-default",
+      "k": 1,
+      "found": true,
+      "bannerBox": [
+        27,
+        229,
+        1386,
+        21
+      ],
+      "contentWidth": 1386,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            229,
+            16,
+            21
+          ],
+          "overflowRightPx": -1370,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 13
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            49,
+            232,
+            411,
+            15
+          ],
+          "overflowRightPx": -953,
+          "overflowLeftPx": -22,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 12
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            1246,
+            233,
+            167,
+            13
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -1219.2,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 11
+        }
+      ],
+      "overlaps": [],
+      "sameRow": true,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 1440,
+      "scale": "xxxLarge",
+      "k": 1.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        261,
+        1386,
+        27
+      ],
+      "contentWidth": 1386,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            261,
+            21,
+            27
+          ],
+          "overflowRightPx": -1365,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 17.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            54,
+            265,
+            534,
+            19
+          ],
+          "overflowRightPx": -825.2,
+          "overflowLeftPx": -27,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 16.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            1196,
+            266,
+            217,
+            17
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -1169.4,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 14.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": true,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 1440,
+      "scale": "AX3",
+      "k": 2.353,
+      "found": true,
+      "bannerBox": [
+        27,
+        372,
+        1386,
+        41
+      ],
+      "contentWidth": 1386,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            372,
+            31,
+            41
+          ],
+          "overflowRightPx": -1355,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 30.6
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            64,
+            376,
+            902,
+            33
+          ],
+          "overflowRightPx": -447.3,
+          "overflowLeftPx": -37,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 28.2
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            1054,
+            377,
+            359,
+            30
+          ],
+          "overflowRightPx": 0,
+          "overflowLeftPx": -1027.4,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 25.9
+        }
+      ],
+      "overlaps": [],
+      "sameRow": true,
+      "docOverflowPx": 0
+    },
+    {
+      "width": 1440,
+      "scale": "AX5-max",
+      "k": 3.118,
+      "found": true,
+      "bannerBox": [
+        27,
+        458,
+        1386,
+        98
+      ],
+      "contentWidth": 1386,
+      "flexWrap": "wrap",
+      "texts": [
+        {
+          "text": "👑",
+          "box": [
+            27,
+            458,
+            41,
+            54
+          ],
+          "overflowRightPx": -1345,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 40.5
+        },
+        {
+          "text": "Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)",
+          "box": [
+            74,
+            463,
+            1186,
+            44
+          ],
+          "overflowRightPx": -153.1,
+          "overflowLeftPx": -47,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 37.4
+        },
+        {
+          "text": "Unlimited Listings & Handoffs",
+          "box": [
+            27,
+            516,
+            473,
+            40
+          ],
+          "overflowRightPx": -912.5,
+          "overflowLeftPx": 0,
+          "ellipsised": false,
+          "cropCutPx": 0,
+          "cropAxis": null,
+          "cropOutX": 0,
+          "cropOutY": 0,
+          "cropper": null,
+          "fontSizePx": 34.3
+        }
+      ],
+      "overlaps": [],
+      "sameRow": false,
+      "docOverflowPx": 0
+    }
+  ]
+}

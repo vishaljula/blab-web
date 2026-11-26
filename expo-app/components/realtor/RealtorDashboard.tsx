@@ -941,14 +941,17 @@ export default function RealtorDashboard({ token }: Props) {
         /* Reachable only for `pro` / `pro_plus` (999/999 server capacity).
            "Unlimited" may never be asserted for free_trial or soft_cap — CEO D1. */
         <View style={[s.trialRow, { borderColor: "#065F46", backgroundColor: "#064E3B", paddingVertical: 10 }]}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Text style={{ fontSize: 13 }}>👑</Text>
-              <Text style={{ fontSize: 12, fontWeight: "800", color: "#ECFDF5" }}>
+          {/* BLA-18: the entitlement line and the "Unlimited" badge together measure ~2x the
+              card's content box on a 360pt device, so this row wraps instead of overflowing.
+              Both children shrink, so the title also wraps within its own line. */}
+          <View style={s.proRow}>
+            <View style={s.proTitleGroup}>
+              <Text style={s.proCrown}>👑</Text>
+              <Text style={[s.proTitle, { color: "#ECFDF5" }]}>
                 Founding 500 Pro Active · Free through Mar 31 (₹10,000/yr locked)
               </Text>
             </View>
-            <Text style={{ fontSize: 11, fontWeight: "700", color: "#A7F3D0" }}>
+            <Text style={[s.proBadge, { color: "#A7F3D0" }]}>
               Unlimited Listings & Handoffs
             </Text>
           </View>
@@ -983,7 +986,7 @@ export default function RealtorDashboard({ token }: Props) {
                 <Ionicons name="home-outline" size={40} color={colors.mutedForeground} />
                 <Text style={[s.emptyTitle, { color: colors.foreground }]}>No properties yet</Text>
                 <Text style={[s.emptySub, { color: colors.mutedForeground }]}>
-                  When a seller assigns you to their listing, it will appear here.
+                  Seller-assigned listings land here.
                 </Text>
               </View>
             ) : (
@@ -1008,7 +1011,7 @@ export default function RealtorDashboard({ token }: Props) {
                 <Ionicons name="calendar-outline" size={40} color={colors.mutedForeground} />
                 <Text style={[s.emptyTitle, { color: colors.foreground }]}>No site visits</Text>
                 <Text style={[s.emptySub, { color: colors.mutedForeground }]}>
-                  Scheduled property visits from buyers will appear here.
+                  Buyer-scheduled visits land here.
                 </Text>
               </View>
             ) : (
@@ -1047,7 +1050,7 @@ export default function RealtorDashboard({ token }: Props) {
                 <Ionicons name="mail-outline" size={40} color={colors.mutedForeground} />
                 <Text style={[s.emptyTitle, { color: colors.foreground }]}>No buyer contacts</Text>
                 <Text style={[s.emptySub, { color: colors.mutedForeground }]}>
-                  When buyers enquire about your properties, they'll appear here.
+                  Buyer enquiries land here.
                 </Text>
               </View>
             ) : (
@@ -1207,6 +1210,15 @@ const s = StyleSheet.create({
   trialBarTrack: { height: 6, borderRadius: 3, overflow: "hidden" },
   trialBarFill:  { height: 6, borderRadius: 3 },
   trialBarCount: { fontSize: 11, lineHeight: 15, fontWeight: "600" },
+
+  // Founding 500 Pro banner — §BLA-18. Wraps on narrow widths; on a wide viewport both
+  // children still fit one line, so the intended side-by-side desktop row is preserved.
+  proRow:        { flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+                   flexWrap: "wrap", columnGap: 8, rowGap: 4 },
+  proTitleGroup: { flexDirection: "row", alignItems: "center", gap: 6, flexGrow: 1, flexShrink: 1 },
+  proCrown:      { fontSize: 13 },
+  proTitle:      { fontSize: 12, fontWeight: "800", flexShrink: 1 },
+  proBadge:      { fontSize: 11, fontWeight: "700", flexShrink: 1 },
 
   // Tab bar — §H7: was ~33pt tall (paddingVertical 10 + 13px icon).
   tabBar: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth, marginTop: 4, marginHorizontal: 14 },
