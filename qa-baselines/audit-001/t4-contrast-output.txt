@@ -1,0 +1,97 @@
+======================================================================================
+T4 / BLA-7 — §H1 SEMANTIC token pairs, machine-verified (WCAG 2.1)
+======================================================================================
+
+token       mode   text      on fill     ratio  req   verdict
+--------------------------------------------------------------------------------------
+sale        light  #92400E   #FEF3C7      6.37  4.5  PASS
+sale        dark   #FCD34D   #3A2A08      9.62  4.5  PASS
+
+rent        light  #1D4ED8   #EFF6FF      6.16  4.5  PASS
+rent        dark   #93C5FD   #172554      8.15  4.5  PASS
+
+success     light  #065F46   #D1FAE5      6.78  4.5  PASS
+success     dark   #6EE7B7   #064E3B      6.38  4.5  PASS
+
+pending     light  #92400E   #FEF3C7      6.37  4.5  PASS
+pending     dark   #FCD34D   #3A2A08      9.62  4.5  PASS
+
+live        light  #15803D   #DCFCE7      4.57  4.5  PASS
+live        dark   #4ADE80   #052E16      8.55  4.5  PASS
+
+overflow    light  #C2410C   #FFEDD5      4.52  4.5  PASS
+overflow    dark   #FDBA74   #431407      9.28  4.5  PASS
+
+whatsapp    light  #128C7E   #F0FFF4      4.00  4.5  FAIL
+whatsapp    dark   #25D366   #052E1A      7.50  4.5  PASS
+
+--------------------------------------------------------------------------------------
+TEXT-ON-FILL (as specified in §H1): 13/14 pass AA 4.5:1 — 1 FAIL
+  - FAIL  whatsapp.light  #128C7E on #F0FFF4  = 4.00  (need 4.5)
+
+======================================================================================
+CORRECTIONS — every FAIL above, fixed and re-verified (not noted-and-shipped)
+======================================================================================
+whatsapp.light
+  before  #128C7E on #F0FFF4  = 4.00  FAIL
+  after   #075E54 on #F0FFF4  = 7.42  PASS
+  why     #128C7E (WhatsApp brand primary teal) is 4.00:1 on the §H1 mint — short of AA 4.5. #075E54 is WhatsApp's own official dark teal (brand secondary, used in their app chrome), so brand fidelity holds while the pair clears AA with margin.
+--------------------------------------------------------------------------------------
+SHIPPING SET: 14/14 pairs pass AA 4.5:1 after corrections
+
+======================================================================================
+INFO — fill vs parent card (non-text boundary, §H1 specifies no border)
+======================================================================================
+token       mode   fill      card        ratio  req   note
+--------------------------------------------------------------------------------------
+sale        light  #FEF3C7   #FFFFFF      1.11  3.0  low-contrast fill
+sale        dark   #3A2A08   #1A1A1A      1.26  3.0  low-contrast fill
+rent        light  #EFF6FF   #FFFFFF      1.09  3.0  low-contrast fill
+rent        dark   #172554   #1A1A1A      1.18  3.0  low-contrast fill
+success     light  #D1FAE5   #FFFFFF      1.13  3.0  low-contrast fill
+success     dark   #064E3B   #1A1A1A      1.79  3.0  low-contrast fill
+pending     light  #FEF3C7   #FFFFFF      1.11  3.0  low-contrast fill
+pending     dark   #3A2A08   #1A1A1A      1.26  3.0  low-contrast fill
+live        light  #DCFCE7   #FFFFFF      1.10  3.0  low-contrast fill
+live        dark   #052E16   #1A1A1A      1.17  3.0  low-contrast fill
+overflow    light  #FFEDD5   #FFFFFF      1.15  3.0  low-contrast fill
+overflow    dark   #431407   #1A1A1A      1.11  3.0  low-contrast fill
+whatsapp    light  #F0FFF4   #FFFFFF      1.03  3.0  low-contrast fill
+whatsapp    dark   #052E1A   #1A1A1A      1.17  3.0  low-contrast fill
+--------------------------------------------------------------------------------------
+14 fill(s) below 3.0:1 against their card. Not an AA
+failure for a decorative fill behind passing text, but it means the badge
+edge is invisible — a border or a darker fill is the fix if the shape must read.
+
+======================================================================================
+NON-COLOUR §H1 EXPORTS — no contrast surface, checked structurally
+======================================================================================
+role        size  weight   lh  lh/size  checks
+--------------------------------------------------------------------------------------
+display       26     700   31     1.19  INFO: tight lh 1.19x — intentional on display type, must still not drive a fixed container height
+stat          24     700   28     1.17  INFO: tight lh 1.17x — intentional on display type, must still not drive a fixed container height
+title         16     600   21     1.31  ok
+heading       14     600   19     1.36  ok
+body          13     400   19     1.46  ok
+bodyBold      13     600   19     1.46  ok
+caption       12     400   17     1.42  ok
+label         11     600   14     1.27  ok
+tag           11     600   14     1.27  ok
+--------------------------------------------------------------------------------------
+TYPE hard checks: 9/9 roles pass, 0 FAIL
+  - INFO display: tight lh 1.19x — intentional on display type, must still not drive a fixed container height
+  - INFO stat: tight lh 1.17x — intentional on display type, must still not drive a fixed container height
+
+All 9 roles carry an explicit lineHeight — which is the structural fix for
+BLA-18 (banner clips at DEFAULT type) and BLA-19 (tab label clipped to 5px):
+components stop deriving container heights from fontSize alone.
+
+HIT = 44        -> meets WCAG 2.2 §2.5.8 / HIG 44pt floor: ok
+SPACE 4/8/12/16/24/32 -> 4pt grid, monotonic: ok
+RADIUS 6/10/14/16/999 -> monotonic, pill sentinel: ok
+GUTTER = SPACE.lg = 16 -> single gutter replaces 18pt/14pt split (H1 defect): ok
+
+======================================================================================
+T4 HARD GATE: CLEAR — every new pair machine-verified AA in both modes,
+              1 spec FAIL(s) corrected and re-verified above.
+======================================================================================
