@@ -1,0 +1,813 @@
+{
+  "source": "CEO wake comment on BLA-6 (2026-11-26) — visual bugs in the T3 Layer-2 frames",
+  "web": "http://localhost:8081",
+  "widths": [
+    320,
+    360,
+    390,
+    1440
+  ],
+  "verdict": "ALL_PASS",
+  "checks": [
+    {
+      "id": "V1a_profile_fields_rendered",
+      "verdict": "PASS",
+      "detail": "both fields measured at 4 widths"
+    },
+    {
+      "id": "V1b_fields_within_card_content_box",
+      "verdict": "PASS",
+      "detail": "no field extends past the partner card's content box"
+    },
+    {
+      "id": "V1c_no_horizontal_page_overflow",
+      "verdict": "PASS",
+      "detail": "Profile never exceeds the viewport width"
+    },
+    {
+      "id": "V1d_desktop_row_preserved",
+      "verdict": "PASS",
+      "detail": "1440pt: fields share one row (intended design intact)"
+    },
+    {
+      "id": "V2a_dashboard_tabs_rendered",
+      "verdict": "PASS",
+      "detail": "3 tabs measured at 4 widths"
+    },
+    {
+      "id": "V2a2_label_leaf_resolved",
+      "verdict": "PASS",
+      "detail": "the text label leaf resolved for every tab at every width"
+    },
+    {
+      "id": "V2b_no_tab_label_truncated",
+      "verdict": "PASS",
+      "detail": "no segmented tab label is ellipsised at any width"
+    },
+    {
+      "id": "V2c_full_accessible_names_kept",
+      "verdict": "PASS",
+      "detail": "every tab still announces its full name + count"
+    },
+    {
+      "id": "V2d_label_font_at_or_above_11px",
+      "verdict": "PASS",
+      "detail": "every segmented tab label is >= the 11px §F3 floor"
+    },
+    {
+      "id": "V3a_router_tabs_rendered",
+      "verdict": "PASS",
+      "detail": "router tab bar measured 6 times"
+    },
+    {
+      "id": "V3b_router_tabs_44pt",
+      "verdict": "PASS",
+      "detail": "every router tab meets the 44x44 WCAG 2.2 §2.5.8 floor"
+    },
+    {
+      "id": "V3a2_router_label_leaf_resolved",
+      "verdict": "PASS",
+      "detail": "the text label leaf resolved for every router tab"
+    },
+    {
+      "id": "V3c_router_labels_not_clipped",
+      "verdict": "PASS",
+      "detail": "no router tab label is vertically clipped at DEFAULT type size"
+    },
+    {
+      "id": "V3d_router_label_font_at_or_above_11px",
+      "verdict": "PASS",
+      "detail": "every router tab label is >= the 11px §F3 floor"
+    }
+  ],
+  "measurements": {
+    "profile": [
+      {
+        "width": 320,
+        "found": true,
+        "cardBox": [
+          18,
+          460,
+          284,
+          240
+        ],
+        "contentWidth": 254,
+        "fields": [
+          {
+            "ariaLabel": "Realtor agency or builder name",
+            "value": "Sharma Infra",
+            "box": [
+              33,
+              533,
+              254,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          },
+          {
+            "ariaLabel": "RERA registration ID",
+            "value": "TSRERA/AGT/00045",
+            "box": [
+              33,
+              587,
+              254,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          }
+        ],
+        "sameRow": false,
+        "docOverflowPx": 0
+      },
+      {
+        "width": 360,
+        "found": true,
+        "cardBox": [
+          18,
+          440,
+          324,
+          224
+        ],
+        "contentWidth": 294,
+        "fields": [
+          {
+            "ariaLabel": "Realtor agency or builder name",
+            "value": "Sharma Infra",
+            "box": [
+              33,
+              497,
+              294,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          },
+          {
+            "ariaLabel": "RERA registration ID",
+            "value": "TSRERA/AGT/00045",
+            "box": [
+              33,
+              551,
+              294,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          }
+        ],
+        "sameRow": false,
+        "docOverflowPx": 0
+      },
+      {
+        "width": 390,
+        "found": true,
+        "cardBox": [
+          18,
+          440,
+          354,
+          224
+        ],
+        "contentWidth": 324,
+        "fields": [
+          {
+            "ariaLabel": "Realtor agency or builder name",
+            "value": "Sharma Infra",
+            "box": [
+              33,
+              497,
+              324,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          },
+          {
+            "ariaLabel": "RERA registration ID",
+            "value": "TSRERA/AGT/00045",
+            "box": [
+              33,
+              551,
+              324,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          }
+        ],
+        "sameRow": false,
+        "docOverflowPx": 0
+      },
+      {
+        "width": 1440,
+        "found": true,
+        "cardBox": [
+          18,
+          427,
+          1404,
+          154
+        ],
+        "contentWidth": 1374,
+        "fields": [
+          {
+            "ariaLabel": "Realtor agency or builder name",
+            "value": "Sharma Infra",
+            "box": [
+              33,
+              468,
+              682,
+              44
+            ],
+            "overflowRightPx": -692,
+            "overflowLeftPx": 0,
+            "minWidth": "0px"
+          },
+          {
+            "ariaLabel": "RERA registration ID",
+            "value": "TSRERA/AGT/00045",
+            "box": [
+              725,
+              468,
+              682,
+              44
+            ],
+            "overflowRightPx": 0,
+            "overflowLeftPx": -692,
+            "minWidth": "0px"
+          }
+        ],
+        "sameRow": true,
+        "docOverflowPx": 0
+      }
+    ],
+    "dashboardTabs": [
+      {
+        "width": 320,
+        "found": true,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "tabBox": [
+              97,
+              44
+            ],
+            "labelText": "Properties",
+            "labelBox": [
+              60,
+              13
+            ],
+            "scrollWidth": 60,
+            "clientWidth": 60,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "tabBox": [
+              97,
+              44
+            ],
+            "labelText": "Visits",
+            "labelBox": [
+              30,
+              13
+            ],
+            "scrollWidth": 30,
+            "clientWidth": 30,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "tabBox": [
+              97,
+              44
+            ],
+            "labelText": "Contacts",
+            "labelBox": [
+              49,
+              13
+            ],
+            "scrollWidth": 49,
+            "clientWidth": 49,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          }
+        ]
+      },
+      {
+        "width": 360,
+        "found": true,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "tabBox": [
+              111,
+              44
+            ],
+            "labelText": "Properties",
+            "labelBox": [
+              60,
+              13
+            ],
+            "scrollWidth": 60,
+            "clientWidth": 60,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "tabBox": [
+              111,
+              44
+            ],
+            "labelText": "Visits",
+            "labelBox": [
+              30,
+              13
+            ],
+            "scrollWidth": 30,
+            "clientWidth": 30,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "tabBox": [
+              111,
+              44
+            ],
+            "labelText": "Contacts",
+            "labelBox": [
+              49,
+              13
+            ],
+            "scrollWidth": 49,
+            "clientWidth": 49,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "found": true,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "tabBox": [
+              121,
+              44
+            ],
+            "labelText": "Properties",
+            "labelBox": [
+              60,
+              13
+            ],
+            "scrollWidth": 60,
+            "clientWidth": 60,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "tabBox": [
+              121,
+              44
+            ],
+            "labelText": "Visits",
+            "labelBox": [
+              30,
+              13
+            ],
+            "scrollWidth": 30,
+            "clientWidth": 30,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "tabBox": [
+              121,
+              44
+            ],
+            "labelText": "Contacts",
+            "labelBox": [
+              49,
+              13
+            ],
+            "scrollWidth": 49,
+            "clientWidth": 49,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          }
+        ]
+      },
+      {
+        "width": 1440,
+        "found": true,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "tabBox": [
+              471,
+              44
+            ],
+            "labelText": "Properties",
+            "labelBox": [
+              60,
+              13
+            ],
+            "scrollWidth": 60,
+            "clientWidth": 60,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "tabBox": [
+              471,
+              44
+            ],
+            "labelText": "Visits",
+            "labelBox": [
+              30,
+              13
+            ],
+            "scrollWidth": 30,
+            "clientWidth": 30,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "tabBox": [
+              471,
+              44
+            ],
+            "labelText": "Contacts",
+            "labelBox": [
+              49,
+              13
+            ],
+            "scrollWidth": 49,
+            "clientWidth": 49,
+            "truncatedPx": 0,
+            "fontSizePx": 11,
+            "overflowsTab": 0
+          }
+        ]
+      }
+    ],
+    "routerTabs": [
+      {
+        "width": 320,
+        "route": "/profile",
+        "found": true,
+        "items": [
+          {
+            "text": "Explore",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Post",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Dashboard",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Profile",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          }
+        ]
+      },
+      {
+        "width": 320,
+        "route": "/dashboard",
+        "found": true,
+        "items": [
+          {
+            "text": "Explore",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Post",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Dashboard",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Profile",
+            "box": [
+              80,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          }
+        ]
+      },
+      {
+        "width": 360,
+        "route": "/profile",
+        "found": true,
+        "items": [
+          {
+            "text": "Explore",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Post",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Dashboard",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Profile",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          }
+        ]
+      },
+      {
+        "width": 360,
+        "route": "/dashboard",
+        "found": true,
+        "items": [
+          {
+            "text": "Explore",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Post",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Dashboard",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Profile",
+            "box": [
+              90,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "route": "/profile",
+        "found": true,
+        "items": [
+          {
+            "text": "Explore",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Post",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Dashboard",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Profile",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "route": "/dashboard",
+        "found": true,
+        "items": [
+          {
+            "text": "Explore",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Post",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Dashboard",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          },
+          {
+            "text": "Profile",
+            "box": [
+              97.5,
+              53
+            ],
+            "labelClientHeight": 14,
+            "labelScrollHeight": 14,
+            "clippedPx": 0,
+            "fontSizePx": 11,
+            "lineHeight": "14px"
+          }
+        ]
+      }
+    ]
+  }
+}
