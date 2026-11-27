@@ -1,0 +1,1943 @@
+{
+  "generatedFor": "BLA-33 — native (Yoga) side of the dashboard tab-strip fix @ 5173092",
+  "engine": "yoga-layout 3.2.1 (npm) — same Yoga 3.x generation RN 0.83.6 bundles in ReactCommon/yoga",
+  "rnVersion": "0.83.6",
+  "sourceOfTruth": [
+    "react-native/Libraries/Components/ScrollView/ScrollView.js styles.baseHorizontal / contentContainerHorizontal",
+    "react-native/ReactCommon/yoga/yoga/algorithm/CalculateLayout.cpp:159-166 (overflow:scroll main-axis sizing)",
+    "react-native/ReactCommon/react/renderer/components/scrollview/ScrollViewShadowNode.cpp updateStateIfNeeded()",
+    "expo-app/components/a11y/AccessiblePressable.tsx withHitFloor()"
+  ],
+  "labelMetricsFrom": "5173092:qa-baselines/audit-001/ceo-visual-bugs/dyntype/ceo-visual-dyntype.json",
+  "verdict": "ALL_PASS",
+  "checks": [
+    {
+      "id": "NP0",
+      "what": "Engine parity: this Yoga build lets a horizontal overflow:scroll node measure content wider than its viewport (CalculateLayout.cpp:159 path is live)",
+      "verdict": "PASS",
+      "detail": "viewport 292px, content 900px — content exceeds viewport, scroll path live"
+    },
+    {
+      "id": "NP1",
+      "what": "Calibration: the PRE-FIX tree (View parent + flexBasis 0) reproduces Layer-1's measured web equal thirds at every width x scale",
+      "verdict": "PASS",
+      "detail": "16/16 equal thirds, matching web within 2px (97/111/121/471) — label metrics and tree are calibrated"
+    },
+    {
+      "id": "NP2",
+      "what": "The shipped strip becomes scrollable on NATIVE wherever D2e measured it scrollable on web",
+      "verdict": "PASS",
+      "detail": "6/6 scroll on native"
+    },
+    {
+      "id": "NP3",
+      "what": "No tab's content overflows its tab box on native (iOS overflow:visible would overlap neighbours; Android overflow:hidden would clip with no ellipsis)",
+      "verdict": "PASS",
+      "detail": "0 overflows"
+    },
+    {
+      "id": "NP4",
+      "what": "Native regression guard, post-F4: at L-default/xxxLarge the shipped strip holds the content-proportional geometry that was ACCEPTED (not the web-only equal thirds the fix withdraws), and still offers no scroll there",
+      "verdict": "PASS",
+      "detail": "8/8 at the accepted native widths within 1px (111/81/100 at 320 up to 484/455/473 at 1440), 0 early scroll"
+    },
+    {
+      "id": "NP5",
+      "what": "Documented mechanism holds: `flexBasis: 0` on s.tabBtn is INERT on native — indistinguishable from `flexBasis: \"auto\"` — because a horizontal ScrollView leaves its content's main-axis size undefined (CalculateLayout.cpp:97 + :159), which is what makes the equal-thirds claim web-only",
+      "verdict": "PASS",
+      "detail": "identical at all 16 width x scale, so the tab falls through to the MaxContent branch and is content-sized either way — on native exactly the 111/81/100 the old comment attributed to \"auto\""
+    }
+  ],
+  "nativeShippedLayout": [
+    {
+      "at": "w320/L-default",
+      "scrollableBy": 0,
+      "tabs": [
+        111,
+        81,
+        100
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w320/xxxLarge",
+      "scrollableBy": 0,
+      "tabs": [
+        114,
+        77,
+        101
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w320/AX3",
+      "scrollableBy": 112,
+      "tabs": [
+        163,
+        100,
+        141
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w320/AX5-max",
+      "scrollableBy": 221,
+      "tabs": [
+        208,
+        125,
+        180
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w360/L-default",
+      "scrollableBy": 0,
+      "tabs": [
+        124,
+        95,
+        113
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w360/xxxLarge",
+      "scrollableBy": 0,
+      "tabs": [
+        128,
+        89,
+        115
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w360/AX3",
+      "scrollableBy": 72,
+      "tabs": [
+        163,
+        100,
+        141
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w360/AX5-max",
+      "scrollableBy": 181,
+      "tabs": [
+        208,
+        125,
+        180
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w390/L-default",
+      "scrollableBy": 0,
+      "tabs": [
+        134,
+        105,
+        123
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w390/xxxLarge",
+      "scrollableBy": 0,
+      "tabs": [
+        138,
+        99,
+        125
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w390/AX3",
+      "scrollableBy": 42,
+      "tabs": [
+        163,
+        100,
+        141
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w390/AX5-max",
+      "scrollableBy": 151,
+      "tabs": [
+        208,
+        125,
+        180
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w1440/L-default",
+      "scrollableBy": 0,
+      "tabs": [
+        484,
+        455,
+        473
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w1440/xxxLarge",
+      "scrollableBy": 0,
+      "tabs": [
+        488,
+        449,
+        475
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w1440/AX3",
+      "scrollableBy": 0,
+      "tabs": [
+        499,
+        436,
+        477
+      ],
+      "equalThirds": false
+    },
+    {
+      "at": "w1440/AX5-max",
+      "scrollableBy": 0,
+      "tabs": [
+        508,
+        424,
+        480
+      ],
+      "equalThirds": false
+    }
+  ],
+  "raw": [
+    {
+      "deviceWidth": 320,
+      "scale": "L-default",
+      "variant": "shipped",
+      "fontSizePx": 11,
+      "viewportWidth": 292,
+      "contentWidth": 292,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 111,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 81,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 100,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "L-default",
+      "variant": "shippedAuto",
+      "fontSizePx": 11,
+      "viewportWidth": 292,
+      "contentWidth": 292,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 111,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 81,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 100,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "L-default",
+      "variant": "preFixView",
+      "fontSizePx": 11,
+      "viewportWidth": 292,
+      "contentWidth": 306,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 97,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 98,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 97,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "xxxLarge",
+      "variant": "shipped",
+      "fontSizePx": 14.9,
+      "viewportWidth": 292,
+      "contentWidth": 292,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 114,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 77,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 101,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "xxxLarge",
+      "variant": "shippedAuto",
+      "fontSizePx": 14.9,
+      "viewportWidth": 292,
+      "contentWidth": 292,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 114,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 77,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 101,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "xxxLarge",
+      "variant": "preFixView",
+      "fontSizePx": 14.9,
+      "viewportWidth": 292,
+      "contentWidth": 306,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 97,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 12
+        },
+        {
+          "text": "Visits",
+          "width": 98,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 97,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "AX3",
+      "variant": "shipped",
+      "fontSizePx": 25.9,
+      "viewportWidth": 292,
+      "contentWidth": 404,
+      "scrollableBy": 112,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 163,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 100,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 141,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "AX3",
+      "variant": "shippedAuto",
+      "fontSizePx": 25.9,
+      "viewportWidth": 292,
+      "contentWidth": 404,
+      "scrollableBy": 112,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 163,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 100,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 141,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "AX3",
+      "variant": "preFixView",
+      "fontSizePx": 25.9,
+      "viewportWidth": 292,
+      "contentWidth": 306,
+      "scrollableBy": 14,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 97,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 66
+        },
+        {
+          "text": "Visits",
+          "width": 98,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 2
+        },
+        {
+          "text": "Contacts",
+          "width": 97,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 44
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "AX5-max",
+      "variant": "shipped",
+      "fontSizePx": 34.3,
+      "viewportWidth": 292,
+      "contentWidth": 513,
+      "scrollableBy": 221,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 208,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 125,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 180,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "AX5-max",
+      "variant": "shippedAuto",
+      "fontSizePx": 34.3,
+      "viewportWidth": 292,
+      "contentWidth": 513,
+      "scrollableBy": 221,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 208,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 125,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 180,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 320,
+      "scale": "AX5-max",
+      "variant": "preFixView",
+      "fontSizePx": 34.3,
+      "viewportWidth": 292,
+      "contentWidth": 306,
+      "scrollableBy": 14,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 97,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 111
+        },
+        {
+          "text": "Visits",
+          "width": 98,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 27
+        },
+        {
+          "text": "Contacts",
+          "width": 97,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 83
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "L-default",
+      "variant": "shipped",
+      "fontSizePx": 11,
+      "viewportWidth": 332,
+      "contentWidth": 332,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 124,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 95,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 113,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "L-default",
+      "variant": "shippedAuto",
+      "fontSizePx": 11,
+      "viewportWidth": 332,
+      "contentWidth": 332,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 124,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 95,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 113,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "L-default",
+      "variant": "preFixView",
+      "fontSizePx": 11,
+      "viewportWidth": 332,
+      "contentWidth": 346,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 111,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 110,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 111,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "xxxLarge",
+      "variant": "shipped",
+      "fontSizePx": 14.9,
+      "viewportWidth": 332,
+      "contentWidth": 332,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 128,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 89,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 115,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "xxxLarge",
+      "variant": "shippedAuto",
+      "fontSizePx": 14.9,
+      "viewportWidth": 332,
+      "contentWidth": 332,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 128,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 89,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 115,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "xxxLarge",
+      "variant": "preFixView",
+      "fontSizePx": 14.9,
+      "viewportWidth": 332,
+      "contentWidth": 346,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 111,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 110,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 111,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "AX3",
+      "variant": "shipped",
+      "fontSizePx": 25.9,
+      "viewportWidth": 332,
+      "contentWidth": 404,
+      "scrollableBy": 72,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 163,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 100,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 141,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "AX3",
+      "variant": "shippedAuto",
+      "fontSizePx": 25.9,
+      "viewportWidth": 332,
+      "contentWidth": 404,
+      "scrollableBy": 72,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 163,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 100,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 141,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "AX3",
+      "variant": "preFixView",
+      "fontSizePx": 25.9,
+      "viewportWidth": 332,
+      "contentWidth": 346,
+      "scrollableBy": 14,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 111,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 52
+        },
+        {
+          "text": "Visits",
+          "width": 110,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 111,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 30
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "AX5-max",
+      "variant": "shipped",
+      "fontSizePx": 34.3,
+      "viewportWidth": 332,
+      "contentWidth": 513,
+      "scrollableBy": 181,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 208,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 125,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 180,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "AX5-max",
+      "variant": "shippedAuto",
+      "fontSizePx": 34.3,
+      "viewportWidth": 332,
+      "contentWidth": 513,
+      "scrollableBy": 181,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 208,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 125,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 180,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 360,
+      "scale": "AX5-max",
+      "variant": "preFixView",
+      "fontSizePx": 34.3,
+      "viewportWidth": 332,
+      "contentWidth": 346,
+      "scrollableBy": 14,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 111,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 97
+        },
+        {
+          "text": "Visits",
+          "width": 110,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 15
+        },
+        {
+          "text": "Contacts",
+          "width": 111,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 69
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "L-default",
+      "variant": "shipped",
+      "fontSizePx": 11,
+      "viewportWidth": 362,
+      "contentWidth": 362,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 134,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 105,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 123,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "L-default",
+      "variant": "shippedAuto",
+      "fontSizePx": 11,
+      "viewportWidth": 362,
+      "contentWidth": 362,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 134,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 105,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 123,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "L-default",
+      "variant": "preFixView",
+      "fontSizePx": 11,
+      "viewportWidth": 362,
+      "contentWidth": 376,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 121,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 120,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 121,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "xxxLarge",
+      "variant": "shipped",
+      "fontSizePx": 14.9,
+      "viewportWidth": 362,
+      "contentWidth": 362,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 138,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 99,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 125,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "xxxLarge",
+      "variant": "shippedAuto",
+      "fontSizePx": 14.9,
+      "viewportWidth": 362,
+      "contentWidth": 362,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 138,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 99,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 125,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "xxxLarge",
+      "variant": "preFixView",
+      "fontSizePx": 14.9,
+      "viewportWidth": 362,
+      "contentWidth": 376,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 121,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 120,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 121,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "AX3",
+      "variant": "shipped",
+      "fontSizePx": 25.9,
+      "viewportWidth": 362,
+      "contentWidth": 404,
+      "scrollableBy": 42,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 163,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 100,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 141,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "AX3",
+      "variant": "shippedAuto",
+      "fontSizePx": 25.9,
+      "viewportWidth": 362,
+      "contentWidth": 404,
+      "scrollableBy": 42,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 163,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 100,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 141,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "AX3",
+      "variant": "preFixView",
+      "fontSizePx": 25.9,
+      "viewportWidth": 362,
+      "contentWidth": 376,
+      "scrollableBy": 14,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 121,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 42
+        },
+        {
+          "text": "Visits",
+          "width": 120,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 121,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 20
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "AX5-max",
+      "variant": "shipped",
+      "fontSizePx": 34.3,
+      "viewportWidth": 362,
+      "contentWidth": 513,
+      "scrollableBy": 151,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 208,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 125,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 180,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "AX5-max",
+      "variant": "shippedAuto",
+      "fontSizePx": 34.3,
+      "viewportWidth": 362,
+      "contentWidth": 513,
+      "scrollableBy": 151,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 208,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 125,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 180,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 390,
+      "scale": "AX5-max",
+      "variant": "preFixView",
+      "fontSizePx": 34.3,
+      "viewportWidth": 362,
+      "contentWidth": 376,
+      "scrollableBy": 14,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 121,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 87
+        },
+        {
+          "text": "Visits",
+          "width": 120,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 5
+        },
+        {
+          "text": "Contacts",
+          "width": 121,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 59
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "L-default",
+      "variant": "shipped",
+      "fontSizePx": 11,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 484,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 455,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 473,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "L-default",
+      "variant": "shippedAuto",
+      "fontSizePx": 11,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 484,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 455,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 473,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "L-default",
+      "variant": "preFixView",
+      "fontSizePx": 11,
+      "viewportWidth": 1412,
+      "contentWidth": 1426,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 471,
+          "labelW": 60,
+          "badgeW": 20,
+          "neededW": 92,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 470,
+          "labelW": 30,
+          "badgeW": 20,
+          "neededW": 62,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 471,
+          "labelW": 49,
+          "badgeW": 20,
+          "neededW": 81,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "xxxLarge",
+      "variant": "shipped",
+      "fontSizePx": 14.9,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 488,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 449,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 475,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "xxxLarge",
+      "variant": "shippedAuto",
+      "fontSizePx": 14.9,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 488,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 449,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 475,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "xxxLarge",
+      "variant": "preFixView",
+      "fontSizePx": 14.9,
+      "viewportWidth": 1412,
+      "contentWidth": 1426,
+      "scrollableBy": 14,
+      "stripHeight": 45,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 471,
+          "labelW": 77,
+          "badgeW": 20,
+          "neededW": 109,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 470,
+          "labelW": 39,
+          "badgeW": 20,
+          "neededW": 71,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 471,
+          "labelW": 64,
+          "badgeW": 20,
+          "neededW": 96,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "AX3",
+      "variant": "shipped",
+      "fontSizePx": 25.9,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 499,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 436,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 477,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "AX3",
+      "variant": "shippedAuto",
+      "fontSizePx": 25.9,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 499,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 436,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 477,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "AX3",
+      "variant": "preFixView",
+      "fontSizePx": 25.9,
+      "viewportWidth": 1412,
+      "contentWidth": 1426,
+      "scrollableBy": 14,
+      "stripHeight": 56,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 471,
+          "labelW": 127,
+          "badgeW": 24,
+          "neededW": 163,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 470,
+          "labelW": 64,
+          "badgeW": 24,
+          "neededW": 100,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 471,
+          "labelW": 105,
+          "badgeW": 24,
+          "neededW": 141,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "AX5-max",
+      "variant": "shipped",
+      "fontSizePx": 34.3,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 508,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 424,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 480,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "AX5-max",
+      "variant": "shippedAuto",
+      "fontSizePx": 34.3,
+      "viewportWidth": 1412,
+      "contentWidth": 1412,
+      "scrollableBy": 0,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 508,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 424,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 480,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    },
+    {
+      "deviceWidth": 1440,
+      "scale": "AX5-max",
+      "variant": "preFixView",
+      "fontSizePx": 34.3,
+      "viewportWidth": 1412,
+      "contentWidth": 1426,
+      "scrollableBy": 14,
+      "stripHeight": 66,
+      "tabs": [
+        {
+          "text": "Properties",
+          "width": 471,
+          "labelW": 167,
+          "badgeW": 29,
+          "neededW": 208,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Visits",
+          "width": 470,
+          "labelW": 84,
+          "badgeW": 29,
+          "neededW": 125,
+          "contentOverflowPx": 0
+        },
+        {
+          "text": "Contacts",
+          "width": 471,
+          "labelW": 139,
+          "badgeW": 29,
+          "neededW": 180,
+          "contentOverflowPx": 0
+        }
+      ]
+    }
+  ]
+}

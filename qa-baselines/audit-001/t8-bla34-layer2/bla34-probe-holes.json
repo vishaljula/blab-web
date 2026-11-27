@@ -1,0 +1,3159 @@
+{
+  "tool": "verify-bla34-probe-holes.mjs",
+  "generatedFor": "BLA-34 ask #3 — are D2h/D2i/D2j the right shape, or is the false-green still open?",
+  "subject": "expo-app/components/realtor/RealtorDashboard.tsx",
+  "layer1Probe": "qa-baselines/audit-001/tools/verify-ceo-visual-dyntype.mjs",
+  "pinBefore": {
+    "head": "9776b65e64ea89536c95bbe85563ada90391f78b",
+    "subjectBlob": "b3d02577b92a8d5edaf5552fdc985dedb6b0dd82",
+    "probeBlob": "13d957d6915e7b4657e3b0aebadc049592bb9e20",
+    "subjectDirty": false,
+    "probeDirty": false
+  },
+  "pinAfter": {
+    "head": "9776b65e64ea89536c95bbe85563ada90391f78b",
+    "subjectBlob": "b3d02577b92a8d5edaf5552fdc985dedb6b0dd82",
+    "probeBlob": "13d957d6915e7b4657e3b0aebadc049592bb9e20",
+    "subjectDirty": false,
+    "probeDirty": false
+  },
+  "web": "http://localhost:8081",
+  "fixture": "+919100000045",
+  "verdict": "FAIL",
+  "passed": 3,
+  "total": 5,
+  "checks": [
+    {
+      "id": "H0",
+      "claim": "PIN: the subject and the Layer-1 probe are byte-stable across the run and the fix was neutralised in the DOM only, never on disk",
+      "pass": true,
+      "detail": "subject b3d0257 stable, probe 13d957d stable, dirty false; 9/9 measured"
+    },
+    {
+      "id": "H1",
+      "claim": "D2h's reference edge is the real clip edge: the element carrying role=tablist IS the scroll container, with no border-left or padding-left to put its border box and its padding box apart",
+      "pass": true,
+      "detail": "9/9 — role on the scroller itself, border-left 0, padding-left 0, role box left == clip left to 0.01px"
+    },
+    {
+      "id": "H2",
+      "claim": "D2i has no residual blind spot: measuring text LEAVES reports the same intrusion as measuring the child BOXES, so the count badge's painted pill cannot cross into the next tab's hit target while the digit inside it still measures clean",
+      "pass": false,
+      "detail": "worst leaf-vs-box underread 5px — w320/xxxLarge intoNext leaf 0 vs box 2 (blind 2), row leaf 5.98 vs box 6 (blind 0.02) | w320/AX3 intoNext leaf 5.28 vs box 10.28 (blind 5), row leaf 14.28 vs box 14.28 (blind 0) | w320/AX5-max intoNext leaf 9.81 vs box 14.81 (blind 5), row leaf 18.8 vs box 18.81 (blind 0.01) | w360/xxxLarge intoNext leaf 0 vs box 0 (blind 0), row leaf 0 vs box 0 (blind 0) | w360/AX3 intoNext leaf 5.28 vs box 10.28 (blind 5), row leaf 14.28 vs box 14.28 (blind 0) | w360/AX5-max intoNext leaf 9.81 vs box 14.81 (blind 5), row leaf 18.8 vs box 18.81 (blind 0.01) | w390/xxxLarge intoNext leaf 0 vs box 0 (blind 0), row leaf 0 vs box 0 (blind 0) | w390/AX3 intoNext leaf 5.28 vs box 10.28 (blind 5), row leaf 14.28 vs box 14.28 (blind 0) | w390/AX5-max intoNext leaf 9.81 vs box 14.81 (blind 5), row leaf 18.8 vs box 18.81 (blind 0.01)"
+    },
+    {
+      "id": "H3",
+      "claim": "D2h is genuinely load-bearing: computed from the SAME leaves the probe uses, the clip is 0 as shipped and returns to the independently measured -1.98 / -10.28 / -14.80px the moment the min-width is neutralised — and the start edge stays unreachable (scrollLeft clamps at 0), so it is lost text either way",
+      "pass": true,
+      "detail": "w320/xxxLarge 0 -> -1.98px (expected -1.98) | w320/AX3 0 -> -10.28px (expected -10.28) | w320/AX5-max 0 -> -14.8px (expected -14.8) | w360/xxxLarge 0 -> -0px (expected -0) | w360/AX3 0 -> -10.28px (expected -10.28) | w360/AX5-max 0 -> -14.8px (expected -14.8) | w390/xxxLarge 0 -> -0px (expected -0) | w390/AX3 0 -> -10.28px (expected -10.28) | w390/AX5-max 0 -> -14.8px (expected -14.8)"
+    },
+    {
+      "id": "H4",
+      "claim": "D2j pins the accepted exception to the geometry that was accepted, rather than exempting the measurement point outright — otherwise any future layout at 320/xxxLarge passes unseen",
+      "pass": false,
+      "detail": "the accepted 109.31/86.89/95.8 passes D2j (true); so does the absurd 200/40/52 (true) — the exception is keyed on the POINT, not on the widths. Pin to 109.31/86.89/95.8 +/- 1px instead."
+    }
+  ],
+  "blindSpot": [
+    {
+      "key": "w320/xxxLarge",
+      "leafIntoNext": 0,
+      "boxIntoNext": 2,
+      "leafRow": 5.98,
+      "boxRow": 6,
+      "intoNextBlindPx": 2,
+      "rowBlindPx": 0.02
+    },
+    {
+      "key": "w320/AX3",
+      "leafIntoNext": 5.28,
+      "boxIntoNext": 10.28,
+      "leafRow": 14.28,
+      "boxRow": 14.28,
+      "intoNextBlindPx": 5,
+      "rowBlindPx": 0
+    },
+    {
+      "key": "w320/AX5-max",
+      "leafIntoNext": 9.81,
+      "boxIntoNext": 14.81,
+      "leafRow": 18.8,
+      "boxRow": 18.81,
+      "intoNextBlindPx": 5,
+      "rowBlindPx": 0.01
+    },
+    {
+      "key": "w360/xxxLarge",
+      "leafIntoNext": 0,
+      "boxIntoNext": 0,
+      "leafRow": 0,
+      "boxRow": 0,
+      "intoNextBlindPx": 0,
+      "rowBlindPx": 0
+    },
+    {
+      "key": "w360/AX3",
+      "leafIntoNext": 5.28,
+      "boxIntoNext": 10.28,
+      "leafRow": 14.28,
+      "boxRow": 14.28,
+      "intoNextBlindPx": 5,
+      "rowBlindPx": 0
+    },
+    {
+      "key": "w360/AX5-max",
+      "leafIntoNext": 9.81,
+      "boxIntoNext": 14.81,
+      "leafRow": 18.8,
+      "boxRow": 18.81,
+      "intoNextBlindPx": 5,
+      "rowBlindPx": 0.01
+    },
+    {
+      "key": "w390/xxxLarge",
+      "leafIntoNext": 0,
+      "boxIntoNext": 0,
+      "leafRow": 0,
+      "boxRow": 0,
+      "intoNextBlindPx": 0,
+      "rowBlindPx": 0
+    },
+    {
+      "key": "w390/AX3",
+      "leafIntoNext": 5.28,
+      "boxIntoNext": 10.28,
+      "leafRow": 14.28,
+      "boxRow": 14.28,
+      "intoNextBlindPx": 5,
+      "rowBlindPx": 0
+    },
+    {
+      "key": "w390/AX5-max",
+      "leafIntoNext": 9.81,
+      "boxIntoNext": 14.81,
+      "leafRow": 18.8,
+      "boxRow": 18.81,
+      "intoNextBlindPx": 5,
+      "rowBlindPx": 0.01
+    }
+  ],
+  "redTest": [
+    {
+      "key": "w320/xxxLarge",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 1.98,
+      "expected": 1.98,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w320/AX3",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 10.28,
+      "expected": 10.28,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w320/AX5-max",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 14.8,
+      "expected": 14.8,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w360/xxxLarge",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 0,
+      "expected": 0,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w360/AX3",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 10.28,
+      "expected": 10.28,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w360/AX5-max",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 14.8,
+      "expected": 14.8,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w390/xxxLarge",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 0,
+      "expected": 0,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w390/AX3",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 10.28,
+      "expected": 10.28,
+      "canScrollLeft": false
+    },
+    {
+      "key": "w390/AX5-max",
+      "shippedStartClip": 0,
+      "neutralisedStartClip": 14.8,
+      "expected": 14.8,
+      "canScrollLeft": false
+    }
+  ],
+  "raw": [
+    {
+      "width": 320,
+      "scale": "xxxLarge",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 0,
+        "tabWidthsPx": [
+          109.31,
+          86.89,
+          95.8
+        ],
+        "tabWidthSpreadPx": 22.42,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 109.31,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 9.66,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 86.89,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 9.73,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 95.8,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 9.36,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 0,
+        "tabWidthsPx": [
+          97.33,
+          97.34,
+          97.33
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 97.33,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 5.98,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 1.98,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 9.66,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0.83,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 5.98,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 1.98,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 6,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 2
+              }
+            ],
+            "leafStartClipPx": 1.98,
+            "leafRowOverflowPx": 5.98,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 1.98,
+            "boxRowOverflowPx": 6,
+            "boxIntoNextHitPx": 2
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 97.34,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 9.73,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 97.33,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 9.36,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "scale": "AX3",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 119,
+        "tabWidthsPx": [
+          165.44,
+          102.11,
+          143.09
+        ],
+        "tabWidthSpreadPx": 63.33,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 165.44,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 16.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 26.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 102.11,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 16.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 26.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 143.09,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 15.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 25.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 119,
+        "tabWidthsPx": [
+          136.88,
+          136.89,
+          136.88
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 136.88,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 14.28,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 10.28,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 16.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 9.28,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 5.28
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 14.28,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 10.28,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 26.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 14.28,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 10.28
+              }
+            ],
+            "leafStartClipPx": 10.28,
+            "leafRowOverflowPx": 14.28,
+            "leafIntoNextHitPx": 5.28,
+            "boxStartClipPx": 10.28,
+            "boxRowOverflowPx": 14.28,
+            "boxIntoNextHitPx": 10.28
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 136.89,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 16.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 26.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 136.88,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 3.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 15.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 3.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 25.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 3.11,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 3.11,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 3.11,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "scale": "AX5-max",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 228,
+        "tabWidthsPx": [
+          211.06,
+          127.61,
+          181.69
+        ],
+        "tabWidthSpreadPx": 83.45,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 211.06,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 21.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 31.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 127.61,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 22,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 32,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 181.69,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 21.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 31.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 228,
+        "tabWidthsPx": [
+          173.45,
+          173.45,
+          173.45
+        ],
+        "tabWidthSpreadPx": 0,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 18.8,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 14.8,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 21.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 13.81,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 9.81
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 18.8,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 14.8,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 31.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 18.81,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 14.81
+              }
+            ],
+            "leafStartClipPx": 14.8,
+            "leafRowOverflowPx": 18.8,
+            "leafIntoNextHitPx": 9.81,
+            "boxStartClipPx": 14.8,
+            "boxRowOverflowPx": 18.81,
+            "boxIntoNextHitPx": 14.81
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 22,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 32,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 4.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 21.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 4.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 31.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 4.13,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 4.11,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 4.13,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 360,
+      "scale": "xxxLarge",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 0,
+        "tabWidthsPx": [
+          110.66,
+          110.67,
+          110.67
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 110.66,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 9.66,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 110.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 9.73,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 110.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 9.36,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 0,
+        "tabWidthsPx": [
+          110.66,
+          110.67,
+          110.67
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 110.66,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 9.66,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 110.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 9.73,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 110.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 9.36,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 360,
+      "scale": "AX3",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 79,
+        "tabWidthsPx": [
+          165.44,
+          102.11,
+          143.09
+        ],
+        "tabWidthSpreadPx": 63.33,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 165.44,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 16.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 26.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 102.11,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 16.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 26.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 143.09,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 15.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 25.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 79,
+        "tabWidthsPx": [
+          136.88,
+          136.89,
+          136.88
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 136.88,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 14.28,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 10.28,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 16.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 9.28,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 5.28
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 14.28,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 10.28,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 26.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 14.28,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 10.28
+              }
+            ],
+            "leafStartClipPx": 10.28,
+            "leafRowOverflowPx": 14.28,
+            "leafIntoNextHitPx": 5.28,
+            "boxStartClipPx": 10.28,
+            "boxRowOverflowPx": 14.28,
+            "boxIntoNextHitPx": 10.28
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 136.89,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 16.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 26.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 136.88,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 3.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 15.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 3.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 25.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 3.11,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 3.11,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 3.11,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 360,
+      "scale": "AX5-max",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 188,
+        "tabWidthsPx": [
+          211.06,
+          127.61,
+          181.69
+        ],
+        "tabWidthSpreadPx": 83.45,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 211.06,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 21.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 31.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 127.61,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 22,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 32,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 181.69,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 21.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 31.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 188,
+        "tabWidthsPx": [
+          173.45,
+          173.45,
+          173.45
+        ],
+        "tabWidthSpreadPx": 0,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 18.8,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 14.8,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 21.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 13.81,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 9.81
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 18.8,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 14.8,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 31.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 18.81,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 14.81
+              }
+            ],
+            "leafStartClipPx": 14.8,
+            "leafRowOverflowPx": 18.8,
+            "leafIntoNextHitPx": 9.81,
+            "boxStartClipPx": 14.8,
+            "boxRowOverflowPx": 18.81,
+            "boxIntoNextHitPx": 14.81
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 22,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 32,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 4.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 21.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 4.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 31.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 4.13,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 4.11,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 4.13,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 390,
+      "scale": "xxxLarge",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 0,
+        "tabWidthsPx": [
+          120.66,
+          120.67,
+          120.67
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 120.66,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 9.66,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 120.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 9.73,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 120.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 9.36,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 0,
+        "tabWidthsPx": [
+          120.66,
+          120.67,
+          120.67
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 120.66,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 9.66,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 77.31,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 120.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 9.73,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 38.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 120.67,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 9.36,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 63.8,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 20,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 390,
+      "scale": "AX3",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 49,
+        "tabWidthsPx": [
+          165.44,
+          102.11,
+          143.09
+        ],
+        "tabWidthSpreadPx": 63.33,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 165.44,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 16.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 26.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 102.11,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 16.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 26.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 143.09,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 15.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 25.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 49,
+        "tabWidthsPx": [
+          136.88,
+          136.89,
+          136.88
+        ],
+        "tabWidthSpreadPx": 0.01,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 136.88,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 14.28,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 10.28,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 16.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 9.28,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 5.28
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 126.95,
+                "pastContentLeftPx": 14.28,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 10.28,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 26.48,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 14.28,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 10.28
+              }
+            ],
+            "leafStartClipPx": 10.28,
+            "leafRowOverflowPx": 14.28,
+            "leafIntoNextHitPx": 5.28,
+            "boxStartClipPx": 10.28,
+            "boxRowOverflowPx": 14.28,
+            "boxIntoNextHitPx": 10.28
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 136.89,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 16.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 63.5,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 26.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 136.88,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 3.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 15.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 105.17,
+                "pastContentLeftPx": 3.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 25.92,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 3.11,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 3.11,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 3.11,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    },
+    {
+      "width": 390,
+      "scale": "AX5-max",
+      "shipped": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 158,
+        "tabWidthsPx": [
+          211.06,
+          127.61,
+          181.69
+        ],
+        "tabWidthSpreadPx": 83.45,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 211.06,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 21.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 31.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 127.61,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 22,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 32,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 181.69,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 21.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 31.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      },
+      "neutralised": {
+        "found": true,
+        "roleIsScroller": true,
+        "roleStripTag": "DIV",
+        "scrollerBorderLeftPx": 0,
+        "scrollerPaddingLeftPx": 0,
+        "roleLeftMinusClipLeftPx": 0,
+        "canScrollLeft": false,
+        "scrollableByPx": 158,
+        "tabWidthsPx": [
+          173.45,
+          173.45,
+          173.45
+        ],
+        "tabWidthSpreadPx": 0,
+        "tabs": [
+          {
+            "ariaLabel": "My Properties, 5 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 18.8,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 14.8,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 21.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 13.81,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 9.81
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Properties",
+                "widthPx": 167.23,
+                "pastContentLeftPx": 18.8,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 14.8,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "5",
+                "widthPx": 31.83,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 18.81,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 14.81
+              }
+            ],
+            "leafStartClipPx": 14.8,
+            "leafRowOverflowPx": 18.8,
+            "leafIntoNextHitPx": 9.81,
+            "boxStartClipPx": 14.8,
+            "boxRowOverflowPx": 18.81,
+            "boxIntoNextHitPx": 14.81
+          },
+          {
+            "ariaLabel": "Site Visits, 3 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 22,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Visits",
+                "widthPx": 83.61,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "3",
+                "widthPx": 32,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 0,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 0,
+            "boxIntoNextHitPx": 0
+          },
+          {
+            "ariaLabel": "Buyer Contacts, 2 items",
+            "widthPx": 173.45,
+            "leafCount": 2,
+            "boxCount": 2,
+            "leaves": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 4.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 21.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "boxes": [
+              {
+                "text": "Contacts",
+                "widthPx": 138.61,
+                "pastContentLeftPx": 4.11,
+                "pastContentRightPx": 0,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              },
+              {
+                "text": "2",
+                "widthPx": 31.08,
+                "pastContentLeftPx": 0,
+                "pastContentRightPx": 4.13,
+                "clippedByStripStartPx": 0,
+                "intoNextTabHitPx": 0
+              }
+            ],
+            "leafStartClipPx": 0,
+            "leafRowOverflowPx": 4.11,
+            "leafIntoNextHitPx": 0,
+            "boxStartClipPx": 0,
+            "boxRowOverflowPx": 4.13,
+            "boxIntoNextHitPx": 0
+          }
+        ]
+      }
+    }
+  ]
+}

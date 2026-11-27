@@ -58,11 +58,15 @@
  *   NP3  Shipped styles, native engine: does any tab's content overflow its tab box?
  *        On iOS (overflow visible) that renders as labels overlapping their neighbours; on
  *        Android (overflow hidden) as a hard clip with no ellipsis.
- *   NP4  REGRESSION GUARD. Shipped styles at L-default/xxxLarge on native must still be the
- *        reviewed equal thirds (the native analogue of Layer-1's D2g).
- *   NP5  CANDIDATE. `flexBasis: "auto"` instead of 0 — does that reflow on native, and what
- *        does it cost at default type? Reported to give the implementer a measured direction,
- *        not asserted as a verdict.
+ *   NP4  REGRESSION GUARD, re-pointed at BLA-34 once `af90ed5` withdrew the equal-thirds
+ *        claim on native and scoped it to web: the shipped strip must hold the
+ *        content-proportional geometry that was ACCEPTED, and still not scroll at the
+ *        reviewed sizes. (It previously asserted the equal thirds, which is how it delivered
+ *        the F4 finding; the original numbers are in `t6-bla33-layer2/`.)
+ *   NP5  MECHANISM, likewise re-pointed: `flexBasis: 0` must be INERT on native —
+ *        indistinguishable from `"auto"` — which is what makes the equal thirds a web-only
+ *        claim. Fires if an RN/Yoga upgrade ever makes it live and the `tabBtn` comment goes
+ *        stale.
  *
  * Label metrics are lifted from the COMMITTED Layer-1 run at 5173092 via `git show`, not
  * retyped and not re-measured, so web and native are laid out from identical glyph advances
@@ -84,8 +88,19 @@ import { execFileSync } from "node:child_process";
  */
 const Yoga = (await import(process.env.YOGA_LAYOUT_PATH || "yoga-layout")).default;
 
-const SHA = "5173092";
-const OUT = "qa-baselines/audit-001/t6-bla33-layer2";
+/**
+ * Both pinnable, because a re-review is a second run against a DIFFERENT commit and the first
+ * run's committed evidence must survive it (BLA-34 ask #4 — the implementer had to copy their
+ * output out of `t6-` and restore it from git to avoid overwriting the verdict frames).
+ *
+ *   QA_SHA  the commit this run attributes its numbers to. Also the commit the Layer-1 label
+ *           metrics are lifted from, so the glyph advances always come from the same tree as
+ *           the subject rather than from whatever the default happens to be.
+ *   QA_OUT  where the JSON lands. Defaults to the BLA-33 directory for reproducibility of the
+ *           original verdict; a re-review should always set it.
+ */
+const SHA = process.env.QA_SHA || "5173092";
+const OUT = process.env.QA_OUT || "qa-baselines/audit-001/t6-bla33-layer2";
 
 const {
   FLEX_DIRECTION_ROW,
@@ -445,25 +460,45 @@ const add = (id, what, pass, detail) =>
   );
 }
 
-// NP4 — native regression guard at the reviewed sizes.
+/**
+ * NP4 — RE-POINTED AT BLA-34. It used to assert the equal thirds, which is how it delivered
+ * the F4 finding; `af90ed5` WITHDRAWS that claim and scopes it to web, so left as it was this
+ * check asserts something the code no longer claims and fails forever. A permanently-red gate
+ * is not a gate — the next reader cannot tell a withdrawn claim from a live defect. So it now
+ * guards the state that was actually accepted: native is CONTENT-PROPORTIONAL at the reviewed
+ * sizes, pinned to the exact geometry BLA-33 F4 measured, and still offers no scroll there.
+ * If a future change moves native tab widths at default type, this fires; the original FAIL
+ * and its numbers remain in `t6-bla33-layer2/bla33-native-tabstrip.json`.
+ */
 {
+  // Accepted native geometry, from the F4 table (verdict @ f91c1ca) and re-measured identical
+  // at af90ed5 — the commit touches no native-reachable style, so these must not move.
+  const ACCEPTED = {
+    "320/L-default": [111, 81, 100], "320/xxxLarge": [114, 77, 101],
+    "360/L-default": [124, 95, 113], "360/xxxLarge": [128, 89, 115],
+    "390/L-default": [134, 105, 123], "390/xxxLarge": [138, 99, 125],
+    "1440/L-default": [484, 455, 473], "1440/xxxLarge": [488, 449, 475],
+  };
   const bad = [];
   for (const deviceWidth of WIDTHS) {
     for (const scale of ["L-default", "xxxLarge"]) {
+      const key = `${deviceWidth}/${scale}`;
       const r = pick("shipped", deviceWidth, scale);
-      const ws = new Set(r.tabs.map((t) => t.width));
-      const web = webTabs(deviceWidth, scale);
-      if (ws.size !== 1) bad.push(`w${deviceWidth}/${scale} unequal ${r.tabs.map((t) => t.width).join("/")}`);
-      else if (web[0] && Math.abs(r.tabs[0].width - web[0].tabBox[0]) > 2)
-        bad.push(`w${deviceWidth}/${scale} ${r.tabs[0].width} vs web ${web[0].tabBox[0]}`);
-      if (r.scrollableBy > 0.5) bad.push(`w${deviceWidth}/${scale} scrolls on native +${r.scrollableBy}px`);
+      const got = r.tabs.map((t) => t.width);
+      const want = ACCEPTED[key];
+      if (!want) { bad.push(`${key} has no accepted geometry on record`); continue; }
+      if (got.some((w, i) => Math.abs(w - want[i]) > 1))
+        bad.push(`${key} ${got.join("/")} vs accepted ${want.join("/")}`);
+      if (r.scrollableBy > 0.5) bad.push(`${key} scrolls on native +${r.scrollableBy}px`);
     }
   }
   add(
     "NP4",
-    "Native regression guard: at L-default/xxxLarge the shipped strip is still the reviewed equal thirds and offers no scroll (native analogue of D2g)",
+    "Native regression guard, post-F4: at L-default/xxxLarge the shipped strip holds the content-proportional geometry that was ACCEPTED (not the web-only equal thirds the fix withdraws), and still offers no scroll there",
     bad.length === 0,
-    bad.length === 0 ? "8/8 equal thirds matching web, 0 early scroll" : bad.join(" | "),
+    bad.length === 0
+      ? "8/8 at the accepted native widths within 1px (111/81/100 at 320 up to 484/455/473 at 1440), 0 early scroll"
+      : bad.join(" | "),
   );
 }
 
@@ -484,16 +519,20 @@ const add = (id, what, pass, detail) =>
           differs.push(`w${deviceWidth}/${scale} "${a.tabs[i].text}" basis0 ${a.tabs[i].width} vs auto ${b.tabs[i].width}`);
     }
   }
+  // RE-POINTED AT BLA-34, same reason as NP4 and in the same direction. The original asserted
+  // that `flexBasis: 0` DOES something on native, because the fix's comment said so; af90ed5
+  // now documents the opposite — the line is inert inside a horizontal ScrollView — so the
+  // check asserts the documented mechanism instead of the withdrawn one. It fires if an RN or
+  // Yoga upgrade ever makes `flexBasis` live inside a scroll node, which is exactly when the
+  // `tabBtn` comment would go stale and native would silently change shape.
   add(
     "NP5",
-    'Mechanism: `flexBasis: 0` on s.tabBtn actually does something on native — i.e. it lays out DIFFERENTLY from the `flexBasis: "auto"` the fix\'s comment rejects',
-    differs.length > 0,
-    differs.length > 0
-      ? `differs at ${differs.length} tab x width x scale: ` + differs.slice(0, 4).join(" | ")
-      : 'IDENTICAL at all 16 width x scale. `flexBasis: 0` is INERT inside the horizontal ScrollView: ' +
-        "CalculateLayout.cpp:97 honours flexBasis only `&& yoga::isDefined(mainAxisSize)`, and :159 leaves a " +
-        "scroll node's main-axis size undefined for its content, so the tab falls through to the MaxContent " +
-        'branch and is content-sized either way — producing on native exactly the 111/81/100 the comment attributes to "auto"',
+    'Documented mechanism holds: `flexBasis: 0` on s.tabBtn is INERT on native — indistinguishable from `flexBasis: "auto"` — because a horizontal ScrollView leaves its content\'s main-axis size undefined (CalculateLayout.cpp:97 + :159), which is what makes the equal-thirds claim web-only',
+    differs.length === 0,
+    differs.length === 0
+      ? 'identical at all 16 width x scale, so the tab falls through to the MaxContent branch and is content-sized either way — on native exactly the 111/81/100 the old comment attributed to "auto"'
+      : `NO LONGER INERT — differs at ${differs.length} tab x width x scale, so the tabBtn comment's web-only scoping is now wrong: ` +
+        differs.slice(0, 4).join(" | "),
   );
 }
 const np5 = runs
